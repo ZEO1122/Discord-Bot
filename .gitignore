@@ -1,0 +1,11 @@
+# 대용량 데이터/산출물 무시
+OIBC_2025_DATA/*.csv
+comparison_output/*.csv
+submission*.csv
+*.parquet
+*.feather
+
+# 일반 파생/캐시
+.DS_Store
+__pycache__/
+*.ipynb_checkpoints/
