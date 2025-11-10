@@ -24,8 +24,8 @@ np.random.seed(SEED)
 # === Ablation switches (restore baseline, then add features stepwise) ===
 USE_SOLAR = True              # 태양 위치 파생 사용 여부
 USE_INTERACTIONS = False      # 상호작용 파생 사용 여부
-USE_DAYLIGHT_WEIGHTS = False  # 낮/밤 가중치 (기본 OFF로 베이스라인 복구)
-USE_MONOTONE = False          # 단조 제약 (기본 OFF)
+USE_DAYLIGHT_WEIGHTS = True   # 낮/밤 가중치 ON: 낮(태양고도>0) 가중치 적용
+USE_MONOTONE = True           # 단조 제약 ON
 
 # 시간에 따라 연속적으로 변하는 값
 LINEAR_COLS = [ 
@@ -65,7 +65,7 @@ def upsample_hourly_to_5min(df, cols_linear, cols_step):
         inter_lin = [c for c in cols_linear if c in g.columns]
         inter_stp = [c for c in cols_step   if c in g.columns]
         if inter_lin:
-            g[inter_lin] = g[inter_lin].interpolate(method="time", limit=12, limit_direction="both")
+            g[inter_lin] = g[inter_lin].interpolate(method="time", limit=6, limit_direction="both")
         if inter_stp:
             g[inter_stp] = g[inter_stp].ffill().bfill()
         g["pv_id"] = pid
@@ -191,7 +191,7 @@ def make_feature_matrix(df, is_train=True):
         def _fill_group(g):
             gi = g.set_index("time").sort_index()
             if inter_lin:
-                gi[inter_lin] = gi[inter_lin].interpolate("time", limit=12, limit_direction="both").ffill().bfill()
+                gi[inter_lin] = gi[inter_lin].interpolate("time", limit=6, limit_direction="both").ffill().bfill()
             if inter_stp:
                 gi[inter_stp] = gi[inter_stp].ffill().bfill()
             gi = gi.reset_index()
@@ -316,8 +316,13 @@ def train_and_predict():
     # 낮/밤 가중치 (옵션)
     if USE_DAYLIGHT_WEIGHTS:
         def _weights(xdf):
+            # 연속 가중치: 1 + 2*solar_cos_zen_pos  (야간=1, 정오 근처≈3)
+            if "solar_cos_zen_pos" in xdf.columns:
+                w = 1.0 + 2.0 * np.clip(pd.to_numeric(xdf["solar_cos_zen_pos"], errors="coerce").fillna(0.0), 0.0, 1.0)
+                return w.astype(float)
+            # fallback: daylight_flag 이진 가중치
             if "daylight_flag" in xdf.columns:
-                return np.where(xdf["daylight_flag"] == 1, 3.0, 1.0)
+                return np.where(xdf["daylight_flag"] == 1, 3.0, 1.0).astype(float)
             return np.ones(len(xdf), dtype=float)
         w_tr = _weights(X_tr)
     else:
@@ -325,13 +330,13 @@ def train_and_predict():
 
     # Step-decay learning rate (remedy #4)
     def _lr(cur_iter: int) -> float:
-        base = 0.015
-        if cur_iter < 1500:
+        base = 0.01
+        if cur_iter < 800:
             return base
-        elif cur_iter < 3000:
+        elif cur_iter < 2000:
             return base * 0.67
         else:
-            return base * 0.5
+            return base * 0.4
 
     if USE_MONOTONE:
         mono_map = {
@@ -350,14 +355,14 @@ def train_and_predict():
         mono_list = None
 
     model = LGBMRegressor(
-        n_estimators=4000,
-        learning_rate=0.015,
+        n_estimators=6000,
+        learning_rate=0.01,
         max_depth=6,
         num_leaves=63,
-        min_child_samples=150,
+        min_child_samples=120,
         subsample=0.7, subsample_freq=1,
-        colsample_bytree=0.6,
-        lambda_l1=1.0, lambda_l2=8.0,
+        colsample_bytree=0.7,
+        lambda_l1=1.0, lambda_l2=6.0,
         objective="regression_l1",
         random_state=SEED, n_jobs=-1,
         verbosity=-1,
@@ -369,7 +374,7 @@ def train_and_predict():
         eval_set=[(X_va, y_va)],
         eval_metric="mae",
         callbacks=[
-            early_stopping(stopping_rounds=300),
+            early_stopping(stopping_rounds=500),
             log_evaluation(period=100),
             reset_parameter(learning_rate=_lr),
         ],
@@ -379,6 +384,7 @@ def train_and_predict():
     model.fit(**fit_kwargs)
 
     _best_it = getattr(model, "best_iteration_", None)
+    print(f"[LGBM] best_iteration_: {_best_it}")
     va_pred = model.predict(X_va, num_iteration=_best_it) if _best_it else model.predict(X_va)
     # ---- Compute & print metrics (Train / Validation) ----
     tr_pred = model.predict(X_tr, num_iteration=_best_it) if _best_it else model.predict(X_tr)
