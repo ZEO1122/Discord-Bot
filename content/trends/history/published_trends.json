@@ -42,5 +42,28 @@
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T12:10:48.784987+00:00"
     }
+  ],
+  "1487039321058971668:vision-language": [
+    {
+      "title": "비전-언어와 행동 정렬의 진화: RefAlign, Vega, Drive My Way 동시 브리핑",
+      "source_title": "RefAlign: Representation Alignment for Reference-to-Video Generation",
+      "url": "https://arxiv.org/abs/2603.25743",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:25:52.689296+00:00"
+    },
+    {
+      "title": "비전-언어와 행동 정렬의 진화: RefAlign, Vega, Drive My Way 동시 브리핑",
+      "source_title": "Vega: Learning to Drive with Natural Language Instructions",
+      "url": "https://arxiv.org/abs/2603.25741",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:25:52.689296+00:00"
+    },
+    {
+      "title": "비전-언어와 행동 정렬의 진화: RefAlign, Vega, Drive My Way 동시 브리핑",
+      "source_title": "Drive My Way: Preference Alignment of Vision-Language-Action Model for Personalized Driving",
+      "url": "https://arxiv.org/abs/2603.25740",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:25:52.689296+00:00"
+    }
   ]
 }
