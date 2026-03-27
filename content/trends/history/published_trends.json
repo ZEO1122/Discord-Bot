@@ -1,1 +1,39 @@
-{}
+{
+  "cv": [
+    {
+      "title": "ShotStream: 대화형 스토리텔링을 위한 다중 샷 비디오 스트리밍 생성",
+      "source_title": "ShotStream: Streaming Multi-Shot Video Generation for Interactive Storytelling",
+      "url": "https://arxiv.org/abs/2603.25746",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:21:52.045700+00:00"
+    },
+    {
+      "title": "ShotStream: 대화형 스토리텔링을 위한 다중 샷 비디오 스트리밍 생성",
+      "source_title": "Less Gaussians, Texture More: 4K Feed-Forward Textured Splatting",
+      "url": "https://arxiv.org/abs/2603.25745",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:21:52.045700+00:00"
+    },
+    {
+      "title": "ShotStream: 대화형 스토리텔링을 위한 다중 샷 비디오 스트리밍 생성",
+      "source_title": "MuRF: Unlocking the Multi-Scale Potential of Vision Foundation Models",
+      "url": "https://arxiv.org/abs/2603.25744",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:21:52.045700+00:00"
+    },
+    {
+      "title": "ShotStream: 대화형 스토리텔링을 위한 다중 샷 비디오 스트리밍 생성",
+      "source_title": "RefAlign: Representation Alignment for Reference-to-Video Generation",
+      "url": "https://arxiv.org/abs/2603.25743",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:21:52.045700+00:00"
+    },
+    {
+      "title": "ShotStream: 대화형 스토리텔링을 위한 다중 샷 비디오 스트리밍 생성",
+      "source_title": "Vega: Learning to Drive with Natural Language Instructions",
+      "url": "https://arxiv.org/abs/2603.25741",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:21:52.045700+00:00"
+    }
+  ]
+}
