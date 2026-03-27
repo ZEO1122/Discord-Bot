@@ -20,6 +20,27 @@
       "url": "https://arxiv.org/abs/2603.25737",
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T12:48:53.724358+00:00"
+    },
+    {
+      "title": "LLM 기반 영상·음성·에이전트 최신 연구 브리핑",
+      "source_title": "PackForcing: Short Video Training Suffices for Long Video Sampling and Long Context Inference",
+      "url": "https://arxiv.org/abs/2603.25730",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:55:39.812539+00:00"
+    },
+    {
+      "title": "LLM 기반 영상·음성·에이전트 최신 연구 브리핑",
+      "source_title": "Back to Basics: Revisiting ASR in the Age of Voice Agents",
+      "url": "https://arxiv.org/abs/2603.25727",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:55:39.812539+00:00"
+    },
+    {
+      "title": "LLM 기반 영상·음성·에이전트 최신 연구 브리핑",
+      "source_title": "Natural-Language Agent Harnesses",
+      "url": "https://arxiv.org/abs/2603.25723",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:55:39.812539+00:00"
     }
   ]
 }
