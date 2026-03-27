@@ -57,6 +57,27 @@
       "url": "https://arxiv.org/abs/2603.25737",
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T04:23:06.689217+00:00"
+    },
+    {
+      "title": "음성 인식과 자연어 에이전트, 멀티모달 추론의 최신 연구 동향",
+      "source_title": "Back to Basics: Revisiting ASR in the Age of Voice Agents",
+      "url": "https://arxiv.org/abs/2603.25727",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:25:49.096617+00:00"
+    },
+    {
+      "title": "음성 인식과 자연어 에이전트, 멀티모달 추론의 최신 연구 동향",
+      "source_title": "Natural-Language Agent Harnesses",
+      "url": "https://arxiv.org/abs/2603.25723",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:25:49.096617+00:00"
+    },
+    {
+      "title": "음성 인식과 자연어 에이전트, 멀티모달 추론의 최신 연구 동향",
+      "source_title": "R-C2: Cycle-Consistent Reinforcement Learning Improves Multimodal Reasoning",
+      "url": "https://arxiv.org/abs/2603.25720",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:25:49.096617+00:00"
     }
   ]
 }
