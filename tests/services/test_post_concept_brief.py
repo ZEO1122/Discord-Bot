@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.post_concept_brief import load_markdown_body, parse_brief, split_discord_messages
+from scripts.post_concept_brief import build_full_embed, load_markdown_body, parse_body_sections, parse_brief
 
 
 def test_parse_brief_supports_generated_concept_format(tmp_path: Path) -> None:
@@ -130,11 +130,36 @@ one_line: 샘플 요약
     assert "briefing_key" not in body
 
 
-def test_split_discord_messages_preserves_section_order() -> None:
-    body = "\n\n".join(
-        [f"## 섹션 {index}\n" + ("내용 " * 250) for index in range(1, 5)]
-    )
-    chunks = split_discord_messages(body, limit=300)
-    assert len(chunks) > 1
-    assert chunks[0].startswith("## 섹션 1")
-    assert any("## 섹션 4" in chunk for chunk in chunks)
+def test_parse_body_sections_preserves_section_order() -> None:
+    body = """## 오늘의 개념
+- A
+
+## 핵심 요약
+- B
+
+## 왜 중요한가
+- C
+"""
+    sections = parse_body_sections(body)
+    assert sections[0][0] == "오늘의 개념"
+    assert sections[1][0] == "핵심 요약"
+    assert sections[2][0] == "왜 중요한가"
+
+
+def test_build_full_embed_adds_all_markdown_sections() -> None:
+    brief = parse_brief(Path("content/concepts/dl-basics/dl-concept-001-perceptron.md"))
+    body = load_markdown_body(Path("content/concepts/dl-basics/dl-concept-001-perceptron.md"))
+    embed = build_full_embed(brief, body)
+    field_names = [field.name for field in embed.fields]
+    assert embed.title == "퍼셉트론"
+    assert embed.description == brief.one_line
+    assert "핵심 요약" in field_names
+    assert "왜 중요한가" in field_names
+    assert "실무 포인트" in field_names
+    assert "예시" in field_names
+    assert "용어 빠르게 이해하기" in field_names
+    assert "자주 하는 실수" in field_names
+    assert "셀프 체크" in field_names
+    assert "토론 거리" in field_names
+    assert "출처" in field_names
+    assert "주의" in field_names

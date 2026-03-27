@@ -17,9 +17,9 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 try:
-    from scripts.post_concept_brief import ParsedBrief, load_markdown_body, parse_brief, post_markdown_messages, split_discord_messages
+    from scripts.post_concept_brief import ParsedBrief, build_full_embed, load_markdown_body, parse_brief, post_embed
 except ImportError:
-    from post_concept_brief import ParsedBrief, load_markdown_body, parse_brief, post_markdown_messages, split_discord_messages
+    from post_concept_brief import ParsedBrief, build_full_embed, load_markdown_body, parse_brief, post_embed
 
 
 def parse_args() -> argparse.Namespace:
@@ -105,22 +105,18 @@ def main() -> None:
 
     brief = parse_brief(Path(selected_path))
     body = load_markdown_body(Path(selected_path))
-    message_chunks = split_discord_messages(body)
+    embed = build_full_embed(brief, body)
     if args.dry_run:
-        print(
-            f"publish_status=dry_run briefing_key={brief.briefing_key} path={selected_path} message_count={len(message_chunks)}"
-        )
+        print(f"publish_status=dry_run briefing_key={brief.briefing_key} path={selected_path} field_count={len(embed.fields)}")
         return
 
     if not settings.discord_webhook_url:
         raise RuntimeError("DISCORD_WEBHOOK_URL is required.")
 
-    message_ids = post_markdown_messages(settings.discord_webhook_url, body)
+    message_id = post_embed(settings.discord_webhook_url, embed)
     if selected_index is not None:
         update_progress(progress_path, selected_index, selected_path, brief)
-    print(
-        f"publish_status=success first_message_id={message_ids[0]} message_count={len(message_ids)} briefing_key={brief.briefing_key}"
-    )
+    print(f"publish_status=success discord_message_id={message_id} briefing_key={brief.briefing_key}")
 
 
 if __name__ == "__main__":

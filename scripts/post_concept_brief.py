@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
-import re
 import sys
 from typing import Any
 
@@ -39,6 +38,10 @@ class ParsedBrief:
 
 
 DISCORD_MESSAGE_LIMIT = 1900
+DISCORD_EMBED_TOTAL_LIMIT = 6000
+DISCORD_EMBED_FIELD_LIMIT = 25
+DISCORD_EMBED_FIELD_VALUE_LIMIT = 1024
+DISCORD_EMBED_FIELD_NAME_LIMIT = 256
 
 
 def split_frontmatter(text: str) -> tuple[str, str]:
@@ -106,88 +109,23 @@ def parse_sources(meta: dict[str, Any], body: str) -> list[dict[str, str]]:
     return sources
 
 
-def split_discord_messages(text: str, limit: int = DISCORD_MESSAGE_LIMIT) -> list[str]:
-    stripped = text.strip()
-    if not stripped:
-        return []
-    if len(stripped) <= limit:
-        return [stripped]
+def parse_body_sections(body: str) -> list[tuple[str, str]]:
+    sections: list[tuple[str, str]] = []
+    current_heading: str | None = None
+    current_lines: list[str] = []
 
-    sections = [section.strip() for section in re.split(r"(?=^##\s)", stripped, flags=re.MULTILINE) if section.strip()]
-    if not sections:
-        sections = [stripped]
-
-    chunks: list[str] = []
-    current = ""
-    for section in sections:
-        if len(section) > limit:
-            if current:
-                chunks.append(current.strip())
-                current = ""
-            chunks.extend(_split_long_section(section, limit))
+    for line in body.splitlines():
+        if line.startswith("## "):
+            if current_heading is not None:
+                sections.append((current_heading, "\n".join(current_lines).strip()))
+            current_heading = line[3:].strip()
+            current_lines = []
             continue
+        current_lines.append(line)
 
-        candidate = f"{current}\n\n{section}".strip() if current else section
-        if len(candidate) <= limit:
-            current = candidate
-        else:
-            chunks.append(current.strip())
-            current = section
-
-    if current:
-        chunks.append(current.strip())
-    return chunks
-
-
-def _split_long_section(section: str, limit: int) -> list[str]:
-    paragraphs = [paragraph.strip() for paragraph in section.split("\n\n") if paragraph.strip()]
-    chunks: list[str] = []
-    current = ""
-    for paragraph in paragraphs:
-        if len(paragraph) > limit:
-            if current:
-                chunks.append(current.strip())
-                current = ""
-            chunks.extend(_split_paragraph(paragraph, limit))
-            continue
-
-        candidate = f"{current}\n\n{paragraph}".strip() if current else paragraph
-        if len(candidate) <= limit:
-            current = candidate
-        else:
-            chunks.append(current.strip())
-            current = paragraph
-
-    if current:
-        chunks.append(current.strip())
-    return chunks
-
-
-def _split_paragraph(paragraph: str, limit: int) -> list[str]:
-    lines = paragraph.splitlines()
-    chunks: list[str] = []
-    current = ""
-    for line in lines:
-        candidate = f"{current}\n{line}".strip() if current else line
-        if len(candidate) <= limit:
-            current = candidate
-            continue
-
-        if current:
-            chunks.append(current.strip())
-        if len(line) <= limit:
-            current = line
-            continue
-
-        start = 0
-        while start < len(line):
-            chunks.append(line[start : start + limit].strip())
-            start += limit
-        current = ""
-
-    if current:
-        chunks.append(current.strip())
-    return chunks
+    if current_heading is not None:
+        sections.append((current_heading, "\n".join(current_lines).strip()))
+    return [(heading, value) for heading, value in sections if value]
 
 
 def parse_brief(path: Path) -> ParsedBrief:
@@ -238,19 +176,36 @@ def build_embed(brief: ParsedBrief) -> discord.Embed:
     return embed
 
 
-def post_markdown_messages(webhook_url: str, body: str) -> list[str]:
+def build_full_embed(brief: ParsedBrief, body: str) -> discord.Embed:
+    embed = discord.Embed(title=brief.title, description=brief.one_line, color=discord.Color.blue())
+    sections = parse_body_sections(body)
+    if len(sections) > DISCORD_EMBED_FIELD_LIMIT:
+        raise ValueError("Concept markdown contains more than 25 sections and cannot fit in one embed.")
+
+    for heading, value in sections:
+        field_name = "출처" if heading.lower() == "source" else heading
+        if len(field_name) > DISCORD_EMBED_FIELD_NAME_LIMIT:
+            raise ValueError(f"Section heading too long for embed field: {field_name}")
+        if len(value) > DISCORD_EMBED_FIELD_VALUE_LIMIT:
+            raise ValueError(f"Section '{field_name}' exceeds Discord embed field limit.")
+        embed.add_field(name=field_name, value=value, inline=False)
+
+    if len(embed) > DISCORD_EMBED_TOTAL_LIMIT:
+        raise ValueError("Concept embed exceeds Discord total embed length limit.")
+    return embed
+
+
+def post_embed(webhook_url: str, embed: discord.Embed) -> str:
     webhook = discord.SyncWebhook.from_url(webhook_url)
-    message_ids: list[str] = []
-    for chunk in split_discord_messages(body):
-        message = webhook.send(content=chunk, wait=True)
-        message_ids.append(str(message.id))
-    return message_ids
+    message = webhook.send(embed=embed, wait=True)
+    return str(message.id)
 
 
 def main() -> None:
     args = parse_args()
     brief = parse_brief(Path(args.brief_path))
-    embed = build_embed(brief)
+    body = load_markdown_body(Path(args.brief_path))
+    embed = build_full_embed(brief, body)
     if args.dry_run:
         print(f"dry_run briefing_key={brief.briefing_key} title={brief.title}")
         return
@@ -261,9 +216,8 @@ def main() -> None:
     settings = get_settings()
     if not settings.discord_webhook_url:
         raise RuntimeError("DISCORD_WEBHOOK_URL is required.")
-    webhook = discord.SyncWebhook.from_url(settings.discord_webhook_url)
-    message = webhook.send(content=f"오늘의 브리핑 - {brief.track}", embed=embed, wait=True)
-    print(f"publish_status=success discord_message_id={message.id} briefing_key={brief.briefing_key}")
+    message_id = post_embed(settings.discord_webhook_url, embed)
+    print(f"publish_status=success discord_message_id={message_id} briefing_key={brief.briefing_key}")
 
 
 if __name__ == "__main__":
