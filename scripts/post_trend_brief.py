@@ -122,8 +122,9 @@ def build_prompt(track: str, sources: list[dict[str, str]]) -> str:
 
 
 def generate_with_openai(prompt: str, api_key: str) -> dict[str, str]:
+    model = __import__("os").getenv("OPENAI_MODEL", "gpt-5.1")
     payload = {
-        "model": "gpt-4.1-mini",
+        "model": model,
         "input": prompt,
         "text": {"format": {"type": "json_object"}},
     }
