@@ -10,17 +10,30 @@ from pathlib import Path
 
 import discord
 
-from scripts.post_trend_brief import (
-    TREND_CAUTION_MESSAGE,
-    TrendBrief,
-    build_prompt,
-    generate_with_openai,
-    load_history,
-    select_fresh_sources,
-    update_history,
-    validate_brief,
-)
-from scripts.fetch_trend_sources import fetch_trend_sources
+try:
+    from scripts.post_trend_brief import (
+        TREND_CAUTION_MESSAGE,
+        TrendBrief,
+        build_prompt,
+        generate_with_openai,
+        load_history,
+        select_fresh_sources,
+        update_history,
+        validate_brief,
+    )
+    from scripts.fetch_trend_sources import fetch_trend_sources
+except ImportError:
+    from post_trend_brief import (
+        TREND_CAUTION_MESSAGE,
+        TrendBrief,
+        build_prompt,
+        generate_with_openai,
+        load_history,
+        select_fresh_sources,
+        update_history,
+        validate_brief,
+    )
+    from fetch_trend_sources import fetch_trend_sources
 
 
 @dataclass(slots=True)

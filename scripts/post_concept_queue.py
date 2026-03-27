@@ -6,10 +6,14 @@ import argparse
 from datetime import UTC, datetime
 import json
 from pathlib import Path
+from typing import Any, cast
 
 import discord
 
-from scripts.post_concept_brief import ParsedBrief, build_embed, parse_brief
+try:
+    from scripts.post_concept_brief import ParsedBrief, build_embed, parse_brief
+except ImportError:
+    from post_concept_brief import ParsedBrief, build_embed, parse_brief
 
 
 def parse_args() -> argparse.Namespace:
@@ -21,13 +25,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_json(path: Path, default: dict[str, object]) -> dict[str, object]:
+def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
     if not path.exists():
         return default
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def load_manifest(path: Path) -> dict[str, object]:
+def load_manifest(path: Path) -> dict[str, Any]:
     data = load_json(path, default={"order": []})
     order = data.get("order", [])
     if not isinstance(order, list) or not order:
@@ -35,7 +39,7 @@ def load_manifest(path: Path) -> dict[str, object]:
     return data
 
 
-def load_progress(path: Path) -> dict[str, object]:
+def load_progress(path: Path) -> dict[str, Any]:
     return load_json(
         path,
         default={
@@ -48,10 +52,9 @@ def load_progress(path: Path) -> dict[str, object]:
     )
 
 
-def select_next_brief_path(manifest: dict[str, object], progress: dict[str, object]) -> tuple[int, str] | None:
-    order = manifest["order"]
-    assert isinstance(order, list)
-    last_index = int(progress.get("last_index", -1))
+def select_next_brief_path(manifest: dict[str, Any], progress: dict[str, Any]) -> tuple[int, str] | None:
+    order = cast(list[Any], manifest["order"])
+    last_index = int(cast(int | str, progress.get("last_index", -1)))
     next_index = last_index + 1
     if next_index >= len(order):
         return None
