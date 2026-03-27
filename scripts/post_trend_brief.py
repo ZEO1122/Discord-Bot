@@ -48,9 +48,9 @@ def bootstrap_pythonpath() -> None:
 @dataclass(slots=True)
 class TrendBrief:
     title: str
-    one_line: str
-    what_happened: str
+    core_explanation: str
     why_it_matters: str
+    quick_terms: str
     discussion_prompt: str
     sources: list[dict[str, str]]
 
@@ -116,10 +116,17 @@ def build_prompt(track: str, sources: list[dict[str, str]]) -> str:
         f"트랙: {track}\n"
         "아래 출처만 근거로 한국어 브리핑을 작성하라.\n"
         "반드시 JSON으로만 답하라.\n"
-        "필수 키: title, one_line, what_happened, why_it_matters, discussion_prompt\n"
+        "필수 키: title, core_explanation, why_it_matters, quick_terms, discussion_prompt\n"
         "키 이름은 반드시 영어 snake_case 그대로 사용하라.\n"
+        "과장된 일반론, 뜬금없는 응용 시사점, 출처에 없는 주장, 모호한 미래 예측을 쓰지 마라.\n"
+        "각 필드는 짧고 읽기 쉽게 작성하라.\n"
+        "title: 40자 이내\n"
+        "core_explanation: 2~3문장, 350자 이내\n"
+        "why_it_matters: 2~3문장, 350자 이내\n"
+        "quick_terms: 2~3개 bullet, 총 220자 이내\n"
+        "discussion_prompt: 1문장, 80자 이내\n"
         "반드시 아래 JSON 형식을 정확히 지켜라.\n"
-        '{"title":"...","one_line":"...","what_happened":"...","why_it_matters":"...","discussion_prompt":"..."}\n'
+        '{"title":"...","core_explanation":"...","why_it_matters":"...","quick_terms":"- 용어: 설명\\n- 용어: 설명","discussion_prompt":"..."}\n'
         "출처를 바꾸거나 추가하지 마라.\n\n"
         f"출처 목록:\n{source_lines}\n"
     )
@@ -154,15 +161,20 @@ def generate_with_openai(prompt: str, api_key: str) -> dict[str, str]:
 def normalize_generated_brief(data: dict[str, Any]) -> dict[str, str]:
     alias_groups = {
         "title": ["title", "제목"],
-        "one_line": ["one_line", "oneLine", "summary", "한줄요약", "한 줄 요약"],
-        "what_happened": [
+        "core_explanation": [
+            "core_explanation",
+            "coreExplanation",
             "what_happened",
             "whatHappened",
             "summary_detail",
+            "summary",
+            "one_line",
+            "oneLine",
             "무슨_내용인가",
             "무슨 내용인가",
             "핵심요약",
             "핵심 요약",
+            "핵심 설명",
         ],
         "why_it_matters": [
             "why_it_matters",
@@ -172,6 +184,14 @@ def normalize_generated_brief(data: dict[str, Any]) -> dict[str, str]:
             "왜_중요한가",
             "왜 중요한가",
             "의미",
+        ],
+        "quick_terms": [
+            "quick_terms",
+            "quickTerms",
+            "terms",
+            "용어",
+            "용어 빠르게 이해하기",
+            "핵심 용어",
         ],
         "discussion_prompt": [
             "discussion_prompt",
@@ -195,24 +215,28 @@ def normalize_generated_brief(data: dict[str, Any]) -> dict[str, str]:
                 break
         normalized[target] = value
 
-    if not normalized["why_it_matters"] and normalized["what_happened"]:
+    if not normalized["why_it_matters"] and normalized["core_explanation"]:
         normalized["why_it_matters"] = "이 동향이 실제 모델 설계와 응용 방향에 어떤 영향을 주는지 추가 확인이 필요합니다."
+    if not normalized["quick_terms"]:
+        normalized["quick_terms"] = "- 핵심 용어: 원문 출처를 함께 확인하세요."
     if not normalized["discussion_prompt"] and normalized["title"]:
         normalized["discussion_prompt"] = f"{normalized['title']}가 실제 적용에 미칠 영향은 무엇일까?"
     return normalized
 
 
 def validate_brief(data: dict[str, str]) -> None:
-    required = ["title", "one_line", "what_happened", "why_it_matters", "discussion_prompt"]
+    required = ["title", "core_explanation", "why_it_matters", "quick_terms", "discussion_prompt"]
     for field in required:
         if not data.get(field):
             raise ValueError(f"Missing generated field: {field}")
 
 
 def build_embed(brief: TrendBrief, track: str) -> discord.Embed:
-    embed = discord.Embed(title=brief.title, description=brief.one_line, color=discord.Color.green())
-    embed.add_field(name="무슨 내용인가", value=brief.what_happened, inline=False)
+    embed = discord.Embed(title=brief.title, color=discord.Color.green())
+    embed.add_field(name="주제", value=brief.title, inline=False)
+    embed.add_field(name="핵심 설명", value=brief.core_explanation, inline=False)
     embed.add_field(name="왜 중요한가", value=brief.why_it_matters, inline=False)
+    embed.add_field(name="용어 빠르게 이해하기", value=brief.quick_terms, inline=False)
     embed.add_field(name="생각해볼 질문", value=brief.discussion_prompt, inline=False)
     embed.add_field(
         name="출처",
@@ -258,9 +282,9 @@ def main() -> None:
     validate_brief(generated)
     brief = TrendBrief(
         title=generated["title"],
-        one_line=generated["one_line"],
-        what_happened=generated["what_happened"],
+        core_explanation=generated["core_explanation"],
         why_it_matters=generated["why_it_matters"],
+        quick_terms=generated["quick_terms"],
         discussion_prompt=generated["discussion_prompt"],
         sources=sources,
     )

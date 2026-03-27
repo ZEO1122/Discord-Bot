@@ -14,8 +14,10 @@ import yaml
 
 
 DISCORD_EMBED_FIELD_VALUE_LIMIT = 1024
-DISCORD_SUMMARY_FIELD_LIMIT = 700
-DISCORD_REASON_FIELD_LIMIT = 1000
+DISCORD_TOPIC_FIELD_LIMIT = 220
+DISCORD_CORE_FIELD_LIMIT = 700
+DISCORD_REASON_FIELD_LIMIT = 700
+DISCORD_TERMS_FIELD_LIMIT = 320
 DISCORD_SOURCE_FIELD_LIMIT = 500
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -126,18 +128,29 @@ def build_channel_embed(channel: ChannelConfig, sections: list[InterestSection])
     )
     for section in sections:
         source_lines = [f"- {source['title']}: {source['url']}" for source in section.brief.sources[:2]]
-        summary_value = format_summary_value(
-            title=section.brief.title,
-            one_line=section.brief.one_line,
+        embed.add_field(
+            name=f"{section.interest.upper()} | 주제",
+            value=safe_truncate_text(section.brief.title, DISCORD_TOPIC_FIELD_LIMIT),
+            inline=False,
         )
         embed.add_field(
-            name=section.interest.upper(),
-            value=summary_value,
+            name=f"{section.interest.upper()} | 핵심 설명",
+            value=safe_truncate_text(section.brief.core_explanation, DISCORD_CORE_FIELD_LIMIT),
             inline=False,
         )
         embed.add_field(
             name=f"{section.interest.upper()} | 왜 중요한가",
             value=safe_truncate_text(section.brief.why_it_matters, DISCORD_REASON_FIELD_LIMIT),
+            inline=False,
+        )
+        embed.add_field(
+            name=f"{section.interest.upper()} | 용어 빠르게 이해하기",
+            value=safe_truncate_text(section.brief.quick_terms, DISCORD_TERMS_FIELD_LIMIT),
+            inline=False,
+        )
+        embed.add_field(
+            name=f"{section.interest.upper()} | 생각해볼 질문",
+            value=safe_truncate_text(section.brief.discussion_prompt, 120),
             inline=False,
         )
         embed.add_field(
@@ -173,16 +186,6 @@ def safe_truncate_text(text: str, limit: int) -> str:
     return truncate_text(candidate, limit)
 
 
-def format_summary_value(title: str, one_line: str) -> str:
-    value = "\n".join(
-        [
-            f"제목: {title.strip()}",
-            f"한 줄 요약: {one_line.strip()}",
-        ]
-    )
-    return safe_truncate_text(value, DISCORD_SUMMARY_FIELD_LIMIT)
-
-
 def format_source_value(source_lines: list[str]) -> str:
     if not source_lines:
         return "출처 없음"
@@ -201,9 +204,9 @@ def build_interest_brief(track: str, sources: list[dict[str, str]], api_key: str
     validate_brief(generated)
     return TrendBrief(
         title=generated["title"],
-        one_line=generated["one_line"],
-        what_happened=generated["what_happened"],
+        core_explanation=generated["core_explanation"],
         why_it_matters=generated["why_it_matters"],
+        quick_terms=generated["quick_terms"],
         discussion_prompt=generated["discussion_prompt"],
         sources=sources,
     )
@@ -274,9 +277,9 @@ def main() -> None:
             if args.dry_run:
                 brief = TrendBrief(
                     title=f"{interest.upper()} 최신 동향",
-                    one_line="dry-run 요약입니다.",
-                    what_happened="최신 source를 수집해 브리핑 초안을 만들 수 있습니다.",
+                    core_explanation="최신 source를 수집해 브리핑 초안을 만들 수 있습니다.",
                     why_it_matters="운영 전 채널별 묶음 포맷을 검증하기 위함입니다.",
+                    quick_terms="- dry-run: 실제 GPT 호출 없이 포맷만 검증합니다.",
                     discussion_prompt="이 분야에서 이번 주 가장 주목할 점은 무엇일까?",
                     sources=fresh_sources,
                 )

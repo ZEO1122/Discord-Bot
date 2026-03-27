@@ -6,13 +6,14 @@ from typing import cast
 
 from scripts.post_weekly_trends import (
     DISCORD_EMBED_FIELD_VALUE_LIMIT,
+    DISCORD_CORE_FIELD_LIMIT,
     DISCORD_REASON_FIELD_LIMIT,
     DISCORD_SOURCE_FIELD_LIMIT,
-    DISCORD_SUMMARY_FIELD_LIMIT,
+    DISCORD_TERMS_FIELD_LIMIT,
+    DISCORD_TOPIC_FIELD_LIMIT,
     InterestSection,
     build_channel_embed,
     format_source_value,
-    format_summary_value,
     history_key,
     load_channel_map,
     load_webhook_map,
@@ -77,9 +78,9 @@ def test_build_channel_embed_bundles_interest_sections() -> None:
             interest="nlp",
             brief=TrendBrief(
                 title="NLP 동향",
-                one_line="LLM 추론 논문이 증가하고 있다.",
-                what_happened="최근 논문이 증가했다.",
+                core_explanation="최근 논문이 증가했다.",
                 why_it_matters="응용이 늘어난다.",
+                quick_terms="- 추론: 모델이 답을 도출하는 과정",
                 discussion_prompt="이번 주 핵심은?",
                 sources=[{"title": "Paper", "url": "https://arxiv.org/abs/1234.5678"}],
             ),
@@ -137,14 +138,9 @@ def test_no_fresh_error_message_shape() -> None:
     assert "No fresh trend sources available" in str(error)
 
 
-def test_format_summary_value_truncates_to_summary_limit() -> None:
-    value = format_summary_value(
-        title="긴 제목 " * 30,
-        one_line="긴 요약 " * 80,
-    )
-    assert len(value) <= DISCORD_SUMMARY_FIELD_LIMIT
-    assert "제목:" in value
-    assert "한 줄 요약:" in value
+def test_safe_truncate_text_respects_limit() -> None:
+    value = safe_truncate_text("긴 설명 " * 100, DISCORD_CORE_FIELD_LIMIT)
+    assert len(value) <= DISCORD_CORE_FIELD_LIMIT
 
 
 def test_format_source_value_truncates_to_source_limit() -> None:
@@ -185,9 +181,9 @@ def test_build_channel_embed_keeps_field_values_within_limit() -> None:
             interest="llm",
             brief=TrendBrief(
                 title="긴 제목 " * 30,
-                one_line="긴 요약 " * 80,
-                what_happened="최근 연구가 증가했다.",
+                core_explanation="긴 핵심 설명 " * 100,
                 why_it_matters="긴 중요성 설명 " * 120,
+                quick_terms="- 용어A: 설명 " * 20,
                 discussion_prompt="토론 질문",
                 sources=[
                     {"title": "Very Long Paper Title " * 10, "url": "https://example.com/very/long/url" * 3},
@@ -197,8 +193,11 @@ def test_build_channel_embed_keeps_field_values_within_limit() -> None:
         )
     ]
     embed = build_channel_embed(channel, sections)
-    assert len(cast(str, embed.fields[0].value)) <= DISCORD_SUMMARY_FIELD_LIMIT
-    assert len(cast(str, embed.fields[1].value)) <= DISCORD_REASON_FIELD_LIMIT
-    assert len(cast(str, embed.fields[2].value)) <= DISCORD_SOURCE_FIELD_LIMIT
+    assert len(cast(str, embed.fields[0].value)) <= DISCORD_TOPIC_FIELD_LIMIT
+    assert len(cast(str, embed.fields[1].value)) <= DISCORD_CORE_FIELD_LIMIT
+    assert len(cast(str, embed.fields[2].value)) <= DISCORD_REASON_FIELD_LIMIT
+    assert len(cast(str, embed.fields[3].value)) <= DISCORD_TERMS_FIELD_LIMIT
+    assert len(cast(str, embed.fields[4].value)) <= 120
+    assert len(cast(str, embed.fields[5].value)) <= DISCORD_SOURCE_FIELD_LIMIT
     for field in embed.fields:
         assert len(cast(str, field.value)) <= DISCORD_EMBED_FIELD_VALUE_LIMIT

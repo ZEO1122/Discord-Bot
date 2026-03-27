@@ -114,9 +114,9 @@ def test_select_fresh_sources_raises_no_fresh_error_when_all_seen() -> None:
 def test_build_embed_includes_hallucination_caution_field() -> None:
     brief = TrendBrief(
         title="최근 NLP 동향",
-        one_line="LLM 추론 최적화 논문이 많이 올라오고 있다.",
-        what_happened="최근 논문들이 모델 효율과 추론 안정성에 집중하고 있다.",
+        core_explanation="최근 논문들이 모델 효율과 추론 안정성에 집중하고 있다.",
         why_it_matters="서비스 적용성과 비용 효율에 직접적인 영향을 준다.",
+        quick_terms="- 추론 최적화: 더 빠르고 안정적인 응답을 만드는 기법",
         discussion_prompt="추론 최적화와 모델 성능 중 무엇을 더 우선해야 할까?",
         sources=[
             {
@@ -127,6 +127,8 @@ def test_build_embed_includes_hallucination_caution_field() -> None:
     )
     embed = build_embed(brief, track="nlp")
     caution_field = embed.fields[-1]
+    assert embed.fields[0].name == "주제"
+    assert embed.fields[1].name == "핵심 설명"
     assert caution_field.name == "주의"
     assert caution_field.value == TREND_CAUTION_MESSAGE
 
@@ -135,15 +137,15 @@ def test_normalize_generated_brief_maps_variant_keys() -> None:
     normalized = normalize_generated_brief(
         {
             "title": "LLM 최신 동향",
-            "summary": "이번 주 LLM 관련 논문 요약",
             "핵심 요약": "새로운 alignment 기법이 제안되었다.",
             "왜 중요한가": "실제 서비스 안정성과 비용에 영향을 줄 수 있다.",
+            "용어 빠르게 이해하기": "- alignment: 모델 응답을 사람 의도에 맞추는 과정",
             "question": "이 기법이 실제 제품에 적용될 수 있을까?",
         }
     )
-    assert normalized["one_line"] == "이번 주 LLM 관련 논문 요약"
-    assert normalized["what_happened"] == "새로운 alignment 기법이 제안되었다."
+    assert normalized["core_explanation"] == "새로운 alignment 기법이 제안되었다."
     assert normalized["why_it_matters"] == "실제 서비스 안정성과 비용에 영향을 줄 수 있다."
+    assert normalized["quick_terms"] == "- alignment: 모델 응답을 사람 의도에 맞추는 과정"
     assert normalized["discussion_prompt"] == "이 기법이 실제 제품에 적용될 수 있을까?"
 
 
@@ -151,9 +153,10 @@ def test_normalize_generated_brief_fills_fallback_fields() -> None:
     normalized = normalize_generated_brief(
         {
             "title": "Detection 최신 동향",
-            "one_line": "새 detector 구조가 제안되었다.",
-            "what_happened": "작은 객체 탐지 성능을 개선하는 구조다.",
+            "core_explanation": "작은 객체 탐지 성능을 개선하는 구조다.",
         }
     )
+    assert normalized["core_explanation"] == "작은 객체 탐지 성능을 개선하는 구조다."
     assert normalized["why_it_matters"]
+    assert normalized["quick_terms"]
     assert normalized["discussion_prompt"]
