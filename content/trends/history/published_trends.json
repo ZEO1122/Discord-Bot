@@ -100,5 +100,51 @@
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T04:25:49.096617+00:00"
     }
+  ],
+  "1486952912306442392:nlp": [
+    {
+      "title": "Vega: 자연어 지시를 통한 주행 학습 및 Drive My Way에서의 개인화된 주행 선호도 조정",
+      "source_title": "Vega: Learning to Drive with Natural Language Instructions",
+      "url": "https://arxiv.org/abs/2603.25741",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T05:34:25.339768+00:00"
+    },
+    {
+      "title": "Vega: 자연어 지시를 통한 주행 학습 및 Drive My Way에서의 개인화된 주행 선호도 조정",
+      "source_title": "Drive My Way: Preference Alignment of Vision-Language-Action Model for Personalized Driving",
+      "url": "https://arxiv.org/abs/2603.25740",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T05:34:25.339768+00:00"
+    },
+    {
+      "title": "Vega: 자연어 지시를 통한 주행 학습 및 Drive My Way에서의 개인화된 주행 선호도 조정",
+      "source_title": "Training the Knowledge Base through Evidence Distillation and Write-Back Enrichment",
+      "url": "https://arxiv.org/abs/2603.25737",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T05:34:25.339768+00:00"
+    }
+  ],
+  "1486952912306442392:llm": [
+    {
+      "title": "증거 증류와 페이크-백 보강을 통한 지식 베이스 학습",
+      "source_title": "Training the Knowledge Base through Evidence Distillation and Write-Back Enrichment",
+      "url": "https://arxiv.org/abs/2603.25737",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T05:34:25.340374+00:00"
+    },
+    {
+      "title": "증거 증류와 페이크-백 보강을 통한 지식 베이스 학습",
+      "source_title": "S2D2: Fast Decoding for Diffusion LLMs via Training-Free Self-Speculation",
+      "url": "https://arxiv.org/abs/2603.25702",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T05:34:25.340374+00:00"
+    },
+    {
+      "title": "증거 증류와 페이크-백 보강을 통한 지식 베이스 학습",
+      "source_title": "The Kitchen Loop: User-Spec-Driven Development for a Self-Evolving Codebase",
+      "url": "https://arxiv.org/abs/2603.25697",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T05:34:25.340374+00:00"
+    }
   ]
 }
