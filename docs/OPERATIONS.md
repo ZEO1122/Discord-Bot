@@ -58,6 +58,7 @@ ANTHROPIC_API_KEY=
 
 ### 필수 Secrets
 - `DISCORD_WEBHOOK_URL`
+- `DISCORD_WEBHOOK_MAP_JSON`
 - `OPENAI_API_KEY`
 
 ### 선택 Variables
@@ -67,7 +68,7 @@ ANTHROPIC_API_KEY=
 
 ### 권장 설정
 - concept workflow는 `workflow_dispatch`와 `schedule` 둘 다 둔다.
-- trend workflow는 track 입력을 받아 실행 시점 최신 source를 수집한다.
+- trend workflow는 채널별 관심분야 설정을 읽어 실행 시점 최신 source를 수집한다.
 - 실패 시 Actions logs에서 prompt/source/validation 단계가 구분되어야 한다.
 
 ## 5. 로그 전략
@@ -115,6 +116,9 @@ ANTHROPIC_API_KEY=
 
 ### 최소 백업 대상
 - concept markdown 원본
+- `content/concepts/manifest.json`
+- `content/concepts/history/concept_progress.json`
+- `config/channel_interest_map.json`
 - `.env.example` (실제 `.env` 제외)
 - prompt 템플릿
 - 운영 문서
@@ -131,7 +135,8 @@ ANTHROPIC_API_KEY=
 1. GitHub Actions run 확인
 2. markdown parser/validator 단계 실패 여부 확인
 3. `DISCORD_WEBHOOK_URL` secret 확인
-4. workflow_dispatch로 같은 파일 재실행
+4. `concept_progress.json` 갱신 여부 확인
+5. workflow_dispatch로 같은 파일 재실행
 
 ### 8.2 trend 브리핑이 안 올라옴
 1. source fetch step 실패 여부 확인
@@ -326,6 +331,7 @@ concept/trend 브리핑이 실제 목표 채널에 올라왔는지 확인
 #### trend workflow 실패
 - GitHub Actions run log
 - 추가 확인:
+  - `DISCORD_WEBHOOK_MAP_JSON` 설정 여부
   - `OPENAI_API_KEY` 설정 여부
   - source fetch 단계 실패 여부
   - source 없는 trend 생성 여부
@@ -335,6 +341,10 @@ concept/trend 브리핑이 실제 목표 채널에 올라왔는지 확인
 - 로그에 `publish_status=skipped reason=No fresh trend sources available ...` 가 보이면 정상 동작이다.
 - 같은 source가 이미 최근 게시 history에 있어서 중복 방지로 건너뛴 것이다.
 - 다른 track으로 실행하거나, 나중에 다시 실행해 fresh source를 기다린다.
+
+#### 채널별 게시가 안 됨
+- `config/channel_interest_map.json`의 `enabled`, `channel_id`, `webhook_key`를 확인한다.
+- `DISCORD_WEBHOOK_MAP_JSON`에 같은 `webhook_key`가 있는지 확인한다.
 
 #### Discord에 아무것도 안 올라옴
 - webhook URL이 올바른 채널인지 확인

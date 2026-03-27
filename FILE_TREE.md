@@ -8,10 +8,15 @@
     workflows/
       post-concept.yml
       post-trend.yml
+  config/
+    channel_interest_map.json
   README.md
   content/
     concepts/
       CONCEPT_BATCH_PROMPT.md
+      history/
+        concept_progress.json
+      manifest.json
       dl-basics/
         attention.md
     trends/
@@ -58,7 +63,9 @@
     fetch_trend_sources.py
     publish_daily.py
     post_concept_brief.py
+    post_concept_queue.py
     post_trend_brief.py
+    post_weekly_trends.py
     seed_smoke_data.py
   tests/
     bot/
@@ -68,6 +75,8 @@
     conftest.py
     services/
       test_fetch_trend_sources.py
+      test_post_concept_queue.py
+      test_post_weekly_trends.py
       test_publish_service.py
       test_stats_query_service.py
       test_submission_handler.py

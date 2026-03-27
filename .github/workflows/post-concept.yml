@@ -6,19 +6,19 @@ on:
       brief_path:
         description: "Path to concept markdown file"
         required: false
-        default: "content/concepts/dl-basics/attention.md"
+        default: ""
       dry_run:
         description: "Skip real Discord webhook post"
         required: false
         default: "false"
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0 * * 1-5"
 
 jobs:
   post-concept:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -33,16 +33,28 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Post concept brief
+      - name: Post concept queue
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           BRIEF_PATH: ${{ inputs.brief_path }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          brief_path="${BRIEF_PATH:-content/concepts/dl-basics/attention.md}"
-          args=(python scripts/post_concept_brief.py --brief-path "$brief_path")
+          args=(python scripts/post_concept_queue.py --manifest-file "content/concepts/manifest.json" --progress-file "content/concepts/history/concept_progress.json")
+          if [ -n "${BRIEF_PATH}" ]; then
+            args+=(--brief-path "$BRIEF_PATH")
+          fi
           if [ "${DRY_RUN}" = "true" ]; then
             args+=(--dry-run)
           fi
           "${args[@]}"
+
+      - name: Commit concept progress
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          if git diff --quiet -- content/concepts/history/concept_progress.json; then
+            echo "No concept progress changes"
+            exit 0
+          fi
+          git add content/concepts/history/concept_progress.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "update concept queue progress"
+          git push

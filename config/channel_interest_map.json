@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "timezone": "Asia/Seoul",
+  "channels": [
+    {
+      "channel_key": "default-channel",
+      "channel_id": "1486722349913997352",
+      "webhook_key": "default",
+      "enabled": true,
+      "interests": ["nlp", "llm"],
+      "max_topics": 2
+    }
+  ]
+}

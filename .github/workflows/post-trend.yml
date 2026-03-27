@@ -3,14 +3,14 @@ name: Post Trend Brief
 on:
   workflow_dispatch:
     inputs:
-      track:
-        description: "Trend track name"
-        required: true
-        default: "nlp"
-      max_results:
-        description: "How many recent sources to fetch"
+      channel_key:
+        description: "Optional channel key override"
         required: false
-        default: "5"
+        default: ""
+      max_results:
+        description: "How many recent sources to keep per interest"
+        required: false
+        default: "3"
       dry_run:
         description: "Skip real Discord webhook post"
         required: false
@@ -40,14 +40,17 @@ jobs:
       - name: Post trend brief
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_MAP_JSON: ${{ secrets.DISCORD_WEBHOOK_MAP_JSON }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          TRACK: ${{ inputs.track }}
+          CHANNEL_KEY: ${{ inputs.channel_key }}
           MAX_RESULTS: ${{ inputs.max_results }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          track="${TRACK:-nlp}"
-          max_results="${MAX_RESULTS:-5}"
-          args=(python scripts/post_trend_brief.py --track "$track" --max-results "$max_results" --history-file "content/trends/history/published_trends.json")
+          max_results="${MAX_RESULTS:-3}"
+          args=(python scripts/post_weekly_trends.py --channel-map-file "config/channel_interest_map.json" --history-file "content/trends/history/published_trends.json" --max-results "$max_results")
+          if [ -n "${CHANNEL_KEY}" ]; then
+            args+=(--channel-key "$CHANNEL_KEY")
+          fi
           if [ "${DRY_RUN}" = "true" ]; then
             args+=(--dry-run)
           fi

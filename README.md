@@ -12,9 +12,10 @@
 
 1. 학술동아리 멤버가 매일 짧고 신뢰 가능한 AI 브리핑을 받는다.
 2. 안정적인 딥러닝 개념은 미리 작성한 `.md` 파일에서 게시한다.
-3. 최신 동향 브리핑은 실행 시점에 최신 논문 소스를 수집하고 GPT API로 생성해 게시한다.
+3. 최신 동향 브리핑은 월요일 오전 9시에 채널별 관심분야를 읽고 최신 논문 소스를 수집해 GPT API로 생성/게시한다.
 4. 게시 이력은 GitHub Actions 로그와 Discord 메시지 결과로 추적한다.
 5. trend 브리핑은 최근 게시 source를 history 파일에 기록해 중복 게시를 피한다.
+6. concept 브리핑은 `manifest + progress` 큐로 평일 오전 9시에 1개씩 게시한다.
 
 ## 현재 프로젝트 해석
 
@@ -94,6 +95,7 @@ Build / Validate Script              GPT Summarize / Validate
 3. GitHub Secrets 등록
 4. concept posting workflow부터 구현
 5. trend posting workflow에 최신 source 수집과 GPT 생성 연결
+6. 채널별 관심분야 설정 파일 준비
 
 ## 콘텐츠 운영 원칙 요약
 
@@ -147,9 +149,9 @@ sources:
 추가된 워크플로우 초안:
 
 - `.github/workflows/post-concept.yml`
-  - markdown concept 브리핑 게시
+  - manifest/progress 기반 concept 큐 게시
 - `.github/workflows/post-trend.yml`
-  - 최신 source 수집 + GPT API 기반 trend 브리핑 게시
+  - 채널별 관심분야 + 최신 source 수집 + GPT API 기반 weekly trend 게시
 
 trend 브리핑에는 아래 주의 문구를 항상 포함한다.
 
@@ -159,6 +161,7 @@ trend 브리핑에는 아래 주의 문구를 항상 포함한다.
 
 필수 GitHub Secrets:
 - `DISCORD_WEBHOOK_URL`
+- `DISCORD_WEBHOOK_MAP_JSON`
 - `OPENAI_API_KEY`
 
 선택 GitHub Variables/Secrets:
@@ -186,6 +189,9 @@ PYTHONPATH=src python -m bot.app
 개념 브리핑 markdown 50개 생성을 위한 프롬프트 템플릿은 아래 파일에 둔다.
 
 - `content/concepts/CONCEPT_BATCH_PROMPT.md`
+- `content/concepts/manifest.json`
+- `content/concepts/history/concept_progress.json`
+- `config/channel_interest_map.json`
 
 ## 현재 구현 상태 해석
 

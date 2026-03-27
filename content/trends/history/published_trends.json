@@ -1,5 +1,5 @@
 {
-  "cv": [
+  "1486722349913997352:cv": [
     {
       "title": "ShotStream: 대화형 스토리텔링을 위한 다중 샷 비디오 스트리밍 생성",
       "source_title": "ShotStream: Streaming Multi-Shot Video Generation for Interactive Storytelling",
@@ -57,7 +57,7 @@
       "posted_at": "2026-03-27T04:35:27.096541+00:00"
     }
   ],
-  "nlp": [
+  "1486722349913997352:nlp": [
     {
       "title": "자연어 지침과 개인화된 선호 기반 시각-언어-행동 모델을 활용한 주행 학습 및 제어",
       "source_title": "Vega: Learning to Drive with Natural Language Instructions",

@@ -6,8 +6,8 @@
 
 현재 기본 운영 경로는 아래와 같다.
 
-1. 개념 브리핑은 저장소의 markdown 파일에서 읽는다.
-2. 최신 동향 브리핑은 실행 시점에 최신 source를 수집하고 GPT API로 생성한다.
+1. 개념 브리핑은 `manifest + progress` 큐로 순차 게시한다.
+2. 최신 동향 브리핑은 채널별 관심분야 설정을 읽고 실행 시점에 최신 source를 수집해 GPT API로 생성한다.
 3. 자동 발행은 GitHub Actions가 실행한다.
 4. Discord 전송은 webhook으로 처리한다.
 
@@ -53,9 +53,10 @@
 - 필수 필드 누락 여부를 검사한다.
 - Discord embed payload를 만든다.
 
-#### GitHub Actions Publisher
+#### Concept Queue Publisher
+- `content/concepts/manifest.json`을 읽는다.
+- `content/concepts/history/concept_progress.json`을 읽어 다음 concept를 선택한다.
 - `schedule` 또는 `workflow_dispatch`로 실행된다.
-- concept 파일을 선택해 게시 스크립트를 호출한다.
 
 #### Discord Webhook
 - 실제 Discord 채널 게시를 담당한다.
@@ -68,18 +69,19 @@
 ### 데이터 흐름
 
 ```text
-1. concept markdown 선택
-2. frontmatter / 본문 파싱
-3. 필수 필드 검증
-4. Discord payload 생성
-5. webhook 게시
-6. publish 결과 기록
+1. manifest / progress 로드
+2. 다음 concept markdown 선택
+3. frontmatter / 본문 파싱
+4. 필수 필드 검증
+5. Discord payload 생성
+6. webhook 게시
+7. progress 갱신 및 기록
 ```
 
 ## 5. Week 2 — Trend 브리핑 자동 게시
 
 ### 목표
-- 세부 분야 최신 source를 실행 시점에 수집하고 GPT API로 브리핑을 생성한다.
+- 채널별 관심분야 설정을 읽고, 최신 source를 실행 시점에 수집해 GPT API로 브리핑을 생성한다.
 - 검증을 통과한 결과만 Discord에 게시한다.
 
 ### 핵심 컴포넌트
@@ -89,6 +91,11 @@
 - 현재 기본 source는 arXiv 최근 논문이다.
 - `cv`, `multimodal`은 track별 query를 분리해 가져온다.
 - title, url, published_at, source_type을 구조화해 GPT 입력으로 넘긴다.
+
+#### Channel Interest Map
+- `config/channel_interest_map.json`
+- 채널별 관심분야, webhook key, max topic 수를 관리한다.
+- 설문 결과는 이 파일로 정규화된 뒤 workflow가 읽는다.
 
 #### GPT Generation
 - 수집된 최신 source 목록을 입력으로 받아 브리핑 초안을 만든다.
@@ -100,19 +107,23 @@
 - 금지 규칙 검사
 - 최근 게시된 source와 중복되는지 검사
 
-#### GitHub Actions Publisher
-- validated output만 webhook으로 게시한다.
+#### Weekly Trend Publisher
+- 채널별 관심분야를 순회한다.
+- 각 채널에 관심분야별 section을 묶어 1개 메시지로 게시한다.
+- `channel_id:interest` 기준 history를 갱신한다.
 
 ### 데이터 흐름
 
 ```text
-1. track 선택
-2. 최신 source 수집
-3. GPT API 호출
-4. 필수 필드 / source 검증
-5. Discord payload 생성
-6. webhook 게시
-7. publish 결과 기록
+1. channel_interest_map 로드
+2. 채널별 관심분야 선택
+3. 관심분야별 최신 source 수집
+4. `channel_id:interest` 기준 중복 제거
+5. GPT API 호출
+6. 필수 필드 / source 검증
+7. 채널별 묶음 메시지 생성
+8. webhook 게시
+9. trend history 갱신
 ```
 
 ## 6. Week 3 — 퀴즈와 기록 전략 재설계
