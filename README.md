@@ -35,6 +35,12 @@ Build / Validate Script              GPT Summarize / Validate
 
 ## 이 저장소에 들어 있는 것
 
+처음 참여한 운영자라면 아래 순서로 읽는 것을 권장한다.
+
+1. 전체 구조 이해: `README.md`
+2. 새 Discord 서버 연결: `docs/SERVER_SETUP_GUIDE.md`
+3. 운영/수정/장애 대응: `docs/MAINTENANCE_GUIDE.md`, `docs/OPERATIONS.md`
+
 - `AGENTS.md`
   에이전트 작업 규칙
 - `docs/PRD.md`

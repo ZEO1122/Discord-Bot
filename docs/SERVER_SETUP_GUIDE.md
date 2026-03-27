@@ -67,18 +67,18 @@ Discord 채널 설정에서 다음 순서로 만든다.
 
 ```json
 {
-  "default": "https://discord.com/api/webhooks/CONCEPT_CHANNEL_WEBHOOK",
-  "nlp-study": "https://discord.com/api/webhooks/NLP_CHANNEL_WEBHOOK",
-  "vision-study": "https://discord.com/api/webhooks/VISION_CHANNEL_WEBHOOK"
+  "default": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>",
+  "nlp-study": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>",
+  "vision-study": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>"
 }
 ```
 
 예시 YAML:
 
 ```yaml
-default: https://discord.com/api/webhooks/CONCEPT_CHANNEL_WEBHOOK
-nlp-study: https://discord.com/api/webhooks/NLP_CHANNEL_WEBHOOK
-vision-study: https://discord.com/api/webhooks/VISION_CHANNEL_WEBHOOK
+default: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
+nlp-study: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
+vision-study: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
 ```
 
 #### `OPENAI_API_KEY`
