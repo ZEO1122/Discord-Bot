@@ -77,3 +77,32 @@ discussion_prompt: 왜 순전파를 먼저 이해해야 할까?
     assert "손실 함수" in brief.why_it_matters
     assert brief.easy_terms == ["활성값: 층 사이에서 전달되는 중간 출력"]
     assert brief.sources[0]["title"] == "Deep Learning / 2016"
+
+
+def test_parse_brief_can_fallback_to_today_concept_heading(tmp_path: Path) -> None:
+    brief_path = tmp_path / "today-concept-only.md"
+    brief_path.write_text(
+        """---
+briefing_key: generated-003
+track: dl-basics
+mode: concept
+title: 테스트 개념
+one_line: 테스트용 요약.
+---
+
+## 오늘의 개념
+- 이 섹션만 있어도 최소 설명을 추출할 수 있어야 한다.
+
+## 왜 중요한가
+- 이유는 명확해야 한다.
+
+## source
+- Test Source
+""",
+        encoding="utf-8",
+    )
+
+    brief = parse_brief(brief_path)
+
+    assert "최소 설명" in brief.what_happened
+    assert "이유는 명확" in brief.why_it_matters
