@@ -18,7 +18,7 @@ from scripts.post_weekly_trends import (
     load_webhook_map,
     safe_truncate_text,
 )
-from scripts.post_trend_brief import TrendBrief
+from scripts.post_trend_brief import NoFreshTrendSourcesError, TrendBrief
 
 
 def test_history_key_uses_channel_and_interest() -> None:
@@ -130,6 +130,11 @@ def test_load_channel_map_preserves_disabled_channels(tmp_path: Path) -> None:
     channels = load_channel_map(config_path)
     assert len(channels) == 1
     assert channels[0].enabled is False
+
+
+def test_no_fresh_error_message_shape() -> None:
+    error = NoFreshTrendSourcesError("No fresh trend sources available for track=llm")
+    assert "No fresh trend sources available" in str(error)
 
 
 def test_format_summary_value_truncates_to_summary_limit() -> None:

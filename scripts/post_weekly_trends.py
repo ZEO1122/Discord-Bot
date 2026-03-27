@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 
 try:
     from scripts.post_trend_brief import (
+        NoFreshTrendSourcesError,
         TREND_CAUTION_MESSAGE,
         TrendBrief,
         build_prompt,
@@ -37,6 +38,7 @@ try:
     from scripts.fetch_trend_sources import fetch_trend_sources
 except ImportError:
     from post_trend_brief import (
+        NoFreshTrendSourcesError,
         TREND_CAUTION_MESSAGE,
         TrendBrief,
         build_prompt,
@@ -253,8 +255,15 @@ def main() -> None:
                     history=scoped_history,
                     max_results=args.max_results,
                 )
-            except Exception:
+            except NoFreshTrendSourcesError as exc:
+                print(
+                    f"interest_status=skipped channel_key={channel.channel_key} interest={interest} reason={exc}"
+                )
                 continue
+            except Exception as exc:
+                raise RuntimeError(
+                    f"Failed while preparing trend section for channel_key={channel.channel_key} interest={interest}"
+                ) from exc
 
             if args.dry_run:
                 brief = TrendBrief(
