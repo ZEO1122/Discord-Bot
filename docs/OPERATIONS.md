@@ -331,6 +331,11 @@ concept/trend 브리핑이 실제 목표 채널에 올라왔는지 확인
   - source 없는 trend 생성 여부
   - history 파일이 예상대로 갱신되었는지 확인
 
+#### trend workflow가 성공인데 게시가 생략됨
+- 로그에 `publish_status=skipped reason=No fresh trend sources available ...` 가 보이면 정상 동작이다.
+- 같은 source가 이미 최근 게시 history에 있어서 중복 방지로 건너뛴 것이다.
+- 다른 track으로 실행하거나, 나중에 다시 실행해 fresh source를 기다린다.
+
 #### Discord에 아무것도 안 올라옴
 - webhook URL이 올바른 채널인지 확인
 - Actions run success 여부 확인

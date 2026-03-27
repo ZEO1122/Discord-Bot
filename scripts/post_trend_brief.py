@@ -24,6 +24,10 @@ TREND_CAUTION_MESSAGE = (
 )
 
 
+class NoFreshTrendSourcesError(RuntimeError):
+    pass
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate and post a trend brief to Discord.")
     parser.add_argument("--track", required=True)
@@ -76,7 +80,7 @@ def select_fresh_sources(
     seen_urls = {normalize_source_url(item["url"]) for item in history.get(track, [])}
     fresh_sources = [source for source in fetched_sources if normalize_source_url(source["url"]) not in seen_urls]
     if not fresh_sources:
-        raise RuntimeError(f"No fresh trend sources available for track={track}")
+        raise NoFreshTrendSourcesError(f"No fresh trend sources available for track={track}")
     return fresh_sources[:max_results]
 
 
@@ -170,12 +174,16 @@ def main() -> None:
     fetch_count = min(max(args.max_results + 3, args.max_results), 10)
     fetched_sources = fetch_trend_sources(track=args.track, max_results=fetch_count)
     history = load_history(history_path)
-    sources = select_fresh_sources(
-        track=args.track,
-        fetched_sources=fetched_sources,
-        history=history,
-        max_results=args.max_results,
-    )
+    try:
+        sources = select_fresh_sources(
+            track=args.track,
+            fetched_sources=fetched_sources,
+            history=history,
+            max_results=args.max_results,
+        )
+    except NoFreshTrendSourcesError as exc:
+        print(f"publish_status=skipped reason={exc}")
+        return
     bootstrap_pythonpath()
     from core.config import get_settings
 

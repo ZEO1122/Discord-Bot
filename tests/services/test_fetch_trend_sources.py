@@ -1,7 +1,16 @@
 from __future__ import annotations
 
 from scripts.fetch_trend_sources import build_arxiv_url, parse_arxiv_feed
-from scripts.post_trend_brief import TREND_CAUTION_MESSAGE, TrendBrief, build_embed, normalize_source_url, select_fresh_sources
+import pytest
+
+from scripts.post_trend_brief import (
+    TREND_CAUTION_MESSAGE,
+    NoFreshTrendSourcesError,
+    TrendBrief,
+    build_embed,
+    normalize_source_url,
+    select_fresh_sources,
+)
 
 
 SAMPLE_FEED = """<?xml version='1.0' encoding='UTF-8'?>
@@ -66,6 +75,20 @@ def test_select_fresh_sources_filters_seen_urls_by_normalized_arxiv_id() -> None
 
 def test_normalize_source_url_strips_arxiv_version_suffix() -> None:
     assert normalize_source_url("https://arxiv.org/abs/1234.5678v3") == "https://arxiv.org/abs/1234.5678"
+
+
+def test_select_fresh_sources_raises_no_fresh_error_when_all_seen() -> None:
+    fetched_sources = [
+        {
+            "title": "Seen Paper",
+            "url": "https://arxiv.org/abs/1234.5678v2",
+            "published_at": "2026-03-26",
+            "source_type": "paper",
+        }
+    ]
+    history = {"nlp": [{"url": "https://arxiv.org/abs/1234.5678v1"}]}
+    with pytest.raises(NoFreshTrendSourcesError):
+        select_fresh_sources(track="nlp", fetched_sources=fetched_sources, history=history, max_results=1)
 
 
 def test_build_embed_includes_hallucination_caution_field() -> None:
