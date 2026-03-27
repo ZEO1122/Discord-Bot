@@ -9,6 +9,22 @@
       "enabled": true,
       "interests": ["nlp", "llm"],
       "max_topics": 2
+    },
+    {
+      "channel_key": "nlp-study",
+      "channel_id": "SET_CHANNEL_ID_FOR_NLP_STUDY",
+      "webhook_key": "nlp-study",
+      "enabled": false,
+      "interests": ["nlp", "llm"],
+      "max_topics": 2
+    },
+    {
+      "channel_key": "vision-study",
+      "channel_id": "SET_CHANNEL_ID_FOR_VISION_STUDY",
+      "webhook_key": "vision-study",
+      "enabled": false,
+      "interests": ["cv", "multimodal"],
+      "max_topics": 2
     }
   ]
 }
