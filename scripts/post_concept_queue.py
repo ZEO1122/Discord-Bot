@@ -7,8 +7,13 @@ from datetime import UTC, datetime
 import json
 from pathlib import Path
 from typing import Any, cast
+import sys
 
 import discord
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 try:
     from scripts.post_concept_brief import ParsedBrief, build_embed, parse_brief
