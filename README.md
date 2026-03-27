@@ -45,6 +45,10 @@ Build / Validate Script              GPT Summarize / Validate
   개념/동향 브리핑 생성 규칙
 - `docs/DATABASE_SCHEMA.md`
   로컬 개발용 데이터 모델과 후속 확장 스키마
+- `docs/SERVER_SETUP_GUIDE.md`
+  새 Discord 서버 연결용 사용 설명서
+- `docs/MAINTENANCE_GUIDE.md`
+  운영 중 유지보수 가이드
 - `docs/ROADMAP.md`
   Week 1~3 구현 로드맵
 - `docs/OPERATIONS.md`
