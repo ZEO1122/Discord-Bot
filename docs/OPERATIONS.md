@@ -361,6 +361,21 @@ python3 scripts/seed_smoke_data.py
 python3 scripts/publish_daily.py --dry-run
 ```
 
+### 11.9 운영 시작 전 최종 체크리스트
+
+아래 항목이 모두 맞으면 자동 스케줄 운영으로 전환해도 된다.
+
+- [ ] `DISCORD_WEBHOOK_URL`, `DISCORD_WEBHOOK_MAP_JSON`, `OPENAI_API_KEY`가 GitHub Secrets에 최신 값으로 저장되어 있다
+- [ ] `config/channel_interest_map.json`에서 실제로 운영할 채널만 `enabled: true`로 설정되어 있다
+- [ ] `DISCORD_WEBHOOK_MAP_JSON`의 key와 `config/channel_interest_map.json`의 `webhook_key`가 정확히 일치한다
+- [ ] `content/concepts/manifest.json`에 게시할 concept markdown 순서가 올바르게 들어 있다
+- [ ] `Post Concept Brief`를 수동 실행했을 때 Discord 게시와 `content/concepts/history/concept_progress.json` 갱신이 모두 성공한다
+- [ ] `Post Trend Brief`를 채널별로 수동 실행했을 때 Discord 게시 또는 `skipped` 결과가 의도대로 나온다
+- [ ] `content/trends/history/published_trends.json`가 게시 후 정상적으로 갱신된다
+- [ ] concept 스케줄은 평일 오전 9시 KST, trend 스케줄은 월요일 오전 9시 KST로 설정되어 있다
+- [ ] trend 브리핑에 GPT 요약 주의 문구가 표시된다
+- [ ] webhook/모델 key는 필요 시 재발급 가능한 상태로 관리되고 있다
+
 ## 12. 롤백 전략
 
 - 새 workflow는 먼저 `workflow_dispatch`로 검증한다.
