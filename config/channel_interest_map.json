@@ -4,7 +4,7 @@
   "channels": [
     {
       "channel_key": "llm-brief",
-      "channel_id": "SET_CLUB_CHANNEL_ID_LLM_BRIEF",
+      "channel_id": "1486941167823097937",
       "webhook_key": "llm-brief",
       "enabled": false,
       "interests": ["llm"],
@@ -12,7 +12,7 @@
     },
     {
       "channel_key": "detection-segmentation-brief",
-      "channel_id": "SET_CLUB_CHANNEL_ID_DETECTION_SEGMENTATION_BRIEF",
+      "channel_id": "1487039215421231135",
       "webhook_key": "detection-segmentation-brief",
       "enabled": false,
       "interests": ["detection-segmentation"],
@@ -20,7 +20,7 @@
     },
     {
       "channel_key": "vision-language-brief",
-      "channel_id": "SET_CLUB_CHANNEL_ID_VISION_LANGUAGE_BRIEF",
+      "channel_id": "1487039321058971668",
       "webhook_key": "vision-language-brief",
       "enabled": false,
       "interests": ["vision-language"],
