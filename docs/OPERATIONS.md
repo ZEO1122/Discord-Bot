@@ -62,12 +62,12 @@ ANTHROPIC_API_KEY=
 
 ### 선택 Variables
 - `DEFAULT_TRACK`
-- `DEFAULT_SOURCE_FILE`
+- `TREND_MAX_RESULTS`
 - `LOG_LEVEL`
 
 ### 권장 설정
 - concept workflow는 `workflow_dispatch`와 `schedule` 둘 다 둔다.
-- trend workflow는 source file을 명시 입력으로 받는다.
+- trend workflow는 track 입력을 받아 실행 시점 최신 source를 수집한다.
 - 실패 시 Actions logs에서 prompt/source/validation 단계가 구분되어야 한다.
 
 ## 5. 로그 전략
@@ -103,14 +103,13 @@ ANTHROPIC_API_KEY=
 - 필요 시 같은 입력으로 `workflow_dispatch` 수동 재실행
 
 ### GPT 생성 실패
-- source file과 prompt를 로그에서 식별 가능하게 남김
+- track과 prompt를 로그에서 식별 가능하게 남김
 - validation 실패와 API 실패를 구분한다
 
 ## 7. 백업
 
 ### 최소 백업 대상
 - concept markdown 원본
-- trend source json
 - `.env.example` (실제 `.env` 제외)
 - prompt 템플릿
 - 운영 문서
@@ -129,10 +128,10 @@ ANTHROPIC_API_KEY=
 4. workflow_dispatch로 같은 파일 재실행
 
 ### 8.2 trend 브리핑이 안 올라옴
-1. source json 형식 확인
+1. source fetch step 실패 여부 확인
 2. GPT API step 실패 여부 확인
 3. validation step 실패 여부 확인
-4. source 없는 trend인지 확인
+4. 수집 source가 비어 있는지 확인
 
 ### 8.3 게시는 됐는데 내용이 이상함
 1. concept markdown 원본 확인
@@ -151,7 +150,7 @@ ANTHROPIC_API_KEY=
 
 - [ ] GitHub Secrets 설정 완료
 - [ ] concept markdown 포맷 검증 완료
-- [ ] trend source file 검증 완료
+- [ ] trend source fetch 규칙 검증 완료
 - [ ] workflow_dispatch 실행 성공
 - [ ] schedule 설정 확인
 - [ ] 첫 자동 게시 성공
@@ -166,7 +165,8 @@ ANTHROPIC_API_KEY=
 
 - GitHub 저장소 admin 권한
 - Discord webhook 생성 완료
-- concept markdown 또는 trend source file 준비 완료
+- concept markdown 준비 완료
+- trend track 정의 완료
 - GitHub Secrets 등록 완료
 
 ### 11.2 필요한 환경변수
@@ -198,7 +198,7 @@ LOG_LEVEL=INFO
 설정 누락 시 확인 포인트:
 - `DISCORD_WEBHOOK_URL` 누락 -> 게시 step 즉시 실패
 - `OPENAI_API_KEY` 누락 -> trend workflow 생성 step 실패
-- source file 형식 오류 -> validation step 실패
+- source fetch 실패 -> trend workflow 수집 step 실패
 
 ### 11.3 테스트용 데이터 준비
 
@@ -259,12 +259,11 @@ concept 또는 trend 입력이 준비되었는지 확인한다.
 
 ```bash
 ls content/concepts
-ls content/trends/sources
 ```
 
 확인 포인트:
 - concept markdown 파일
-- trend source json 파일
+- trend track 입력값
 
 #### Step 2) concept workflow 실행
 
@@ -320,7 +319,7 @@ concept/trend 브리핑이 실제 목표 채널에 올라왔는지 확인
 - GitHub Actions run log
 - 추가 확인:
   - `OPENAI_API_KEY` 설정 여부
-  - source json 형식 오류
+  - source fetch 단계 실패 여부
   - source 없는 trend 생성 여부
 
 #### Discord에 아무것도 안 올라옴

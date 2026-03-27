@@ -7,7 +7,7 @@
 현재 기본 운영 경로는 아래와 같다.
 
 1. 개념 브리핑은 저장소의 markdown 파일에서 읽는다.
-2. 최신 동향 브리핑은 source 목록 + GPT API로 생성한다.
+2. 최신 동향 브리핑은 실행 시점에 최신 source를 수집하고 GPT API로 생성한다.
 3. 자동 발행은 GitHub Actions가 실행한다.
 4. Discord 전송은 webhook으로 처리한다.
 
@@ -23,7 +23,7 @@
 ## 3. 현재 구현 우선 구조
 
 ```text
-[Markdown Brief Source]        [Trend Source List]
+[Markdown Brief Source]        [Live Trend Source Fetch]
            ↓                           ↓
  [Build / Validate Script]   [GPT Generation + Validation]
            ↓                           ↓
@@ -79,17 +79,18 @@
 ## 5. Week 2 — Trend 브리핑 자동 게시
 
 ### 목표
-- 세부 분야 source 목록을 바탕으로 GPT API로 브리핑을 생성한다.
+- 세부 분야 최신 source를 실행 시점에 수집하고 GPT API로 브리핑을 생성한다.
 - 검증을 통과한 결과만 Discord에 게시한다.
 
 ### 핵심 컴포넌트
 
-#### Trend Source List
-- `content/trends/sources/*.json`
-- title, url, published_at, source_type을 포함한다.
+#### Live Trend Source Fetch
+- track에 따라 외부 최신 source를 수집한다.
+- 현재 기본 source는 arXiv 최근 논문이다.
+- title, url, published_at, source_type을 구조화해 GPT 입력으로 넘긴다.
 
 #### GPT Generation
-- source 목록을 입력으로 받아 브리핑 초안을 만든다.
+- 수집된 최신 source 목록을 입력으로 받아 브리핑 초안을 만든다.
 - source 없는 trend 생성은 허용하지 않는다.
 
 #### Validation
@@ -103,12 +104,13 @@
 ### 데이터 흐름
 
 ```text
-1. source json 선택
-2. GPT API 호출
-3. 필수 필드 / source 검증
-4. Discord payload 생성
-5. webhook 게시
-6. publish 결과 기록
+1. track 선택
+2. 최신 source 수집
+3. GPT API 호출
+4. 필수 필드 / source 검증
+5. Discord payload 생성
+6. webhook 게시
+7. publish 결과 기록
 ```
 
 ## 6. Week 3 — 퀴즈와 기록 전략 재설계
@@ -140,7 +142,7 @@
 
 ### Script 계층
 - markdown 파싱
-- source 로딩
+- source 수집
 - GPT 생성 호출
 - payload 생성
 - 게시 호출
@@ -152,7 +154,6 @@
 
 ### 저장 계층
 - markdown 원본
-- source json
 - 선택적 로컬 SQLite
 - GitHub Actions logs
 
@@ -187,7 +188,7 @@
 - GitHub Actions logs 확인
 
 ### 10.2 trend 게시 실패
-- source json 유효성 확인
+- source fetch 성공 여부 확인
 - GPT API 응답 구조 확인
 - source 없는 출력인지 확인
 

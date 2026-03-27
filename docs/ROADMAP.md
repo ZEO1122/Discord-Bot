@@ -52,12 +52,14 @@
 ## Week 2 — trend 브리핑 GPT 생성/게시
 
 ### 목표
-- source 목록을 입력으로 받아 GPT로 trend 브리핑을 생성하고 Discord에 게시한다.
+- 실행 시점에 최신 source를 수집하고 GPT로 trend 브리핑을 생성해 Discord에 게시한다.
 
 ### 체크리스트
-- [ ] trend source json 포맷 정의
+- [ ] trend source 수집 전략 정의
+- [ ] track별 source fetch 규칙 정의
 - [ ] GPT prompt 템플릿 확정
 - [ ] trend generator 스크립트 추가
+- [ ] source 수집 실패 처리 규칙 추가
 - [ ] source 필수 검증 규칙 추가
 - [ ] GPT 출력 validator 추가
 - [ ] trend posting workflow 추가
@@ -65,13 +67,13 @@
 - [ ] 실패 시 Actions logs에서 원인을 확인할 수 있게 정리
 
 ### 산출물
-- `content/trends/sources/` 포맷
+- trend source fetch 스크립트
 - GPT prompt 템플릿
 - `.github/workflows/post-trend.yml`
 - trend 생성/게시 실행 가이드
 
 ### 완료 조건
-- [ ] source json을 기반으로 trend 브리핑 1건을 자동 생성/게시할 수 있다
+- [ ] 실행 시점 최신 source를 수집해 trend 브리핑 1건을 자동 생성/게시할 수 있다
 - [ ] source 없는 trend 생성은 차단된다
 - [ ] GPT 출력 필수 필드 누락 시 게시가 차단된다
 

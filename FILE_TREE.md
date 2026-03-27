@@ -15,8 +15,6 @@
       dl-basics/
         attention.md
     trends/
-      sources/
-        nlp_sources.json
   requirements.txt
   requirements-dev.txt
   data/
@@ -55,6 +53,7 @@
       submission_handler.py
   scripts/
     bootstrap_sqlite.py
+    fetch_trend_sources.py
     publish_daily.py
     post_concept_brief.py
     post_trend_brief.py
@@ -66,6 +65,7 @@
       test_stats_me.py
     conftest.py
     services/
+      test_fetch_trend_sources.py
       test_publish_service.py
       test_stats_query_service.py
       test_submission_handler.py

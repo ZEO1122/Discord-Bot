@@ -7,10 +7,10 @@ on:
         description: "Trend track name"
         required: true
         default: "nlp"
-      source_file:
-        description: "Path to source json file"
-        required: true
-        default: "content/trends/sources/nlp_sources.json"
+      max_results:
+        description: "How many recent sources to fetch"
+        required: false
+        default: "5"
       dry_run:
         description: "Skip real Discord webhook post"
         required: false
@@ -42,12 +42,12 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           TRACK: ${{ inputs.track }}
-          SOURCE_FILE: ${{ inputs.source_file }}
+          MAX_RESULTS: ${{ inputs.max_results }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           track="${TRACK:-nlp}"
-          source_file="${SOURCE_FILE:-content/trends/sources/nlp_sources.json}"
-          args=(python scripts/post_trend_brief.py --track "$track" --source-file "$source_file")
+          max_results="${MAX_RESULTS:-5}"
+          args=(python scripts/post_trend_brief.py --track "$track" --max-results "$max_results")
           if [ "${DRY_RUN}" = "true" ]; then
             args+=(--dry-run)
           fi

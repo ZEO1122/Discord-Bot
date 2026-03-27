@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# pyright: reportMissingImports=false
+
 import argparse
 from dataclasses import dataclass
 import json
@@ -9,11 +11,13 @@ from urllib import request
 
 import discord
 
+from fetch_trend_sources import fetch_trend_sources
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate and post a trend brief to Discord.")
     parser.add_argument("--track", required=True)
-    parser.add_argument("--source-file", required=True)
+    parser.add_argument("--max-results", type=int, default=5)
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
@@ -33,13 +37,6 @@ class TrendBrief:
     why_it_matters: str
     discussion_prompt: str
     sources: list[dict[str, str]]
-
-
-def load_sources(path: Path) -> list[dict[str, str]]:
-    sources = json.loads(path.read_text(encoding="utf-8"))
-    if not sources:
-        raise ValueError("Source list must not be empty.")
-    return sources
 
 
 def build_prompt(track: str, sources: list[dict[str, str]]) -> str:
@@ -103,7 +100,7 @@ def build_embed(brief: TrendBrief, track: str) -> discord.Embed:
 
 def main() -> None:
     args = parse_args()
-    sources = load_sources(Path(args.source_file))
+    sources = fetch_trend_sources(track=args.track, max_results=args.max_results)
     bootstrap_pythonpath()
     from core.config import get_settings
 
