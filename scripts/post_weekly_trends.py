@@ -248,12 +248,18 @@ def main() -> None:
         for interest in channel.interests[: channel.max_topics]:
             fetched_sources = fetch_trend_sources(track=interest, max_results=min(max(args.max_results + 3, args.max_results), 10))
             scoped_history = {interest: history.get(history_key(channel.channel_id, interest), [])}
+            print(
+                f"interest_status=fetch channel_key={channel.channel_key} interest={interest} fetched_count={len(fetched_sources)} history_count={len(scoped_history.get(interest, []))}"
+            )
             try:
                 fresh_sources = select_fresh_sources(
                     track=interest,
                     fetched_sources=fetched_sources,
                     history=scoped_history,
                     max_results=args.max_results,
+                )
+                print(
+                    f"interest_status=fresh channel_key={channel.channel_key} interest={interest} fresh_count={len(fresh_sources)}"
                 )
             except NoFreshTrendSourcesError as exc:
                 print(
