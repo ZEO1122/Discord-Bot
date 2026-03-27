@@ -106,6 +106,11 @@ ANTHROPIC_API_KEY=
 - track과 prompt를 로그에서 식별 가능하게 남김
 - validation 실패와 API 실패를 구분한다
 
+### 중복 게시 방지
+- `content/trends/history/published_trends.json`에 최근 게시 source를 기록한다.
+- 같은 source URL은 다시 게시하지 않는다.
+- arXiv URL은 버전 suffix를 제거한 canonical URL 기준으로 비교한다.
+
 ## 7. 백업
 
 ### 최소 백업 대상
@@ -114,6 +119,7 @@ ANTHROPIC_API_KEY=
 - prompt 템플릿
 - 운영 문서
 - workflow yaml
+- `content/trends/history/published_trends.json`
 
 ### 주기
 - DB 일일 백업
@@ -321,6 +327,7 @@ concept/trend 브리핑이 실제 목표 채널에 올라왔는지 확인
   - `OPENAI_API_KEY` 설정 여부
   - source fetch 단계 실패 여부
   - source 없는 trend 생성 여부
+  - history 파일이 예상대로 갱신되었는지 확인
 
 #### Discord에 아무것도 안 올라옴
 - webhook URL이 올바른 채널인지 확인

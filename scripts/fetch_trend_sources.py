@@ -10,9 +10,9 @@ import xml.etree.ElementTree as ET
 ARXIV_API_URL: Final[str] = "http://export.arxiv.org/api/query"
 ATOM_NS: Final[dict[str, str]] = {"atom": "http://www.w3.org/2005/Atom"}
 TRACK_QUERY_MAP: Final[dict[str, str]] = {
-    "nlp": "cat:cs.CL",
-    "cv": "cat:cs.CV",
-    "multimodal": "all:multimodal AND (cat:cs.CV OR cat:cs.CL OR cat:cs.AI)",
+    "nlp": "(cat:cs.CL OR cat:cs.AI) AND (all:language OR all:llm OR all:translation OR all:reasoning)",
+    "cv": "cat:cs.CV AND (all:vision OR all:detection OR all:segmentation OR all:diffusion)",
+    "multimodal": "(cat:cs.CV OR cat:cs.CL OR cat:cs.AI) AND (all:multimodal OR all:vision-language OR all:text-image OR all:video-language)",
     "dl-basics": "cat:cs.LG",
 }
 

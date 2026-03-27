@@ -57,10 +57,12 @@
 ### 체크리스트
 - [ ] trend source 수집 전략 정의
 - [ ] track별 source fetch 규칙 정의
+- [ ] `cv`, `multimodal` query 정교화
 - [ ] GPT prompt 템플릿 확정
 - [ ] trend generator 스크립트 추가
 - [ ] source 수집 실패 처리 규칙 추가
 - [ ] source 필수 검증 규칙 추가
+- [ ] 최근 게시 source 중복 방지 규칙 추가
 - [ ] GPT 출력 validator 추가
 - [ ] trend posting workflow 추가
 - [ ] `OPENAI_API_KEY` secret 기준 실행 경로 정리

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+from datetime import UTC, datetime
 import json
 from pathlib import Path
 import sys
@@ -11,13 +12,17 @@ from urllib import request
 
 import discord
 
-from fetch_trend_sources import fetch_trend_sources
+try:
+    from scripts.fetch_trend_sources import fetch_trend_sources
+except ImportError:
+    from fetch_trend_sources import fetch_trend_sources
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate and post a trend brief to Discord.")
     parser.add_argument("--track", required=True)
     parser.add_argument("--max-results", type=int, default=5)
+    parser.add_argument("--history-file", default="content/trends/history/published_trends.json")
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
@@ -37,6 +42,60 @@ class TrendBrief:
     why_it_matters: str
     discussion_prompt: str
     sources: list[dict[str, str]]
+
+
+def normalize_source_url(url: str) -> str:
+    normalized = url.strip()
+    if "arxiv.org/abs/" in normalized:
+        prefix, arxiv_id = normalized.split("/abs/", 1)
+        arxiv_id = arxiv_id.split("?", 1)[0]
+        if "v" in arxiv_id and arxiv_id.rsplit("v", 1)[-1].isdigit():
+            arxiv_id = arxiv_id.rsplit("v", 1)[0]
+        return f"{prefix}/abs/{arxiv_id}"
+    return normalized
+
+
+def load_history(history_path: Path) -> dict[str, list[dict[str, str]]]:
+    if not history_path.exists():
+        return {}
+    return json.loads(history_path.read_text(encoding="utf-8"))
+
+
+def select_fresh_sources(
+    track: str,
+    fetched_sources: list[dict[str, str]],
+    history: dict[str, list[dict[str, str]]],
+    max_results: int,
+) -> list[dict[str, str]]:
+    seen_urls = {normalize_source_url(item["url"]) for item in history.get(track, [])}
+    fresh_sources = [source for source in fetched_sources if normalize_source_url(source["url"]) not in seen_urls]
+    if not fresh_sources:
+        raise RuntimeError(f"No fresh trend sources available for track={track}")
+    return fresh_sources[:max_results]
+
+
+def update_history(
+    history_path: Path,
+    track: str,
+    generated_title: str,
+    selected_sources: list[dict[str, str]],
+) -> None:
+    history = load_history(history_path)
+    track_history = history.get(track, [])
+    posted_at = datetime.now(UTC).isoformat()
+    for source in selected_sources:
+        track_history.append(
+            {
+                "title": generated_title,
+                "source_title": source["title"],
+                "url": normalize_source_url(source["url"]),
+                "published_at": source.get("published_at", ""),
+                "posted_at": posted_at,
+            }
+        )
+    history[track] = track_history[-50:]
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def build_prompt(track: str, sources: list[dict[str, str]]) -> str:
@@ -100,7 +159,15 @@ def build_embed(brief: TrendBrief, track: str) -> discord.Embed:
 
 def main() -> None:
     args = parse_args()
-    sources = fetch_trend_sources(track=args.track, max_results=args.max_results)
+    history_path = Path(args.history_file)
+    fetched_sources = fetch_trend_sources(track=args.track, max_results=max(args.max_results * 3, args.max_results))
+    history = load_history(history_path)
+    sources = select_fresh_sources(
+        track=args.track,
+        fetched_sources=fetched_sources,
+        history=history,
+        max_results=args.max_results,
+    )
     bootstrap_pythonpath()
     from core.config import get_settings
 
@@ -128,6 +195,7 @@ def main() -> None:
     embed = build_embed(brief, args.track)
     webhook = discord.SyncWebhook.from_url(settings.discord_webhook_url)
     message = webhook.send(content=f"오늘의 동향 브리핑 - {args.track}", embed=embed, wait=True)
+    update_history(history_path, args.track, brief.title, sources)
     print(f"publish_status=success discord_message_id={message.id} track={args.track}")
 
 

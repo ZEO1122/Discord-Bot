@@ -15,6 +15,8 @@
       dl-basics/
         attention.md
     trends/
+      history/
+        published_trends.json
   requirements.txt
   requirements-dev.txt
   data/

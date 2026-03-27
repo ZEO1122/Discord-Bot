@@ -87,6 +87,7 @@
 #### Live Trend Source Fetch
 - track에 따라 외부 최신 source를 수집한다.
 - 현재 기본 source는 arXiv 최근 논문이다.
+- `cv`, `multimodal`은 track별 query를 분리해 가져온다.
 - title, url, published_at, source_type을 구조화해 GPT 입력으로 넘긴다.
 
 #### GPT Generation
@@ -97,6 +98,7 @@
 - 필수 필드 존재 여부 검사
 - source 존재 여부 검사
 - 금지 규칙 검사
+- 최근 게시된 source와 중복되는지 검사
 
 #### GitHub Actions Publisher
 - validated output만 webhook으로 게시한다.

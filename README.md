@@ -14,6 +14,7 @@
 2. 안정적인 딥러닝 개념은 미리 작성한 `.md` 파일에서 게시한다.
 3. 최신 동향 브리핑은 실행 시점에 최신 논문 소스를 수집하고 GPT API로 생성해 게시한다.
 4. 게시 이력은 GitHub Actions 로그와 Discord 메시지 결과로 추적한다.
+5. trend 브리핑은 최근 게시 source를 history 파일에 기록해 중복 게시를 피한다.
 
 ## 현재 프로젝트 해석
 
@@ -186,4 +187,5 @@ PYTHONPATH=src python -m bot.app
 - `src/services/publish_service.py` 의 webhook 게시 경로는 GitHub Actions 자동화에서도 재사용 가능하다.
 - `SQLite`는 로컬 개발/검증용이다.
 - trend source는 저장소 파일이 아니라 런타임에 수집한다.
+- trend 중복 방지는 `content/trends/history/published_trends.json` 으로 관리한다.
 - GitHub Actions 런너는 기본적으로 휘발성이므로, 자동 발행 운영에서는 DB보다 **Actions logs + Discord 결과**를 1차 추적 수단으로 본다.

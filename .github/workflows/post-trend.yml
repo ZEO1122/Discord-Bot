@@ -22,7 +22,7 @@ jobs:
   post-trend:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -47,8 +47,19 @@ jobs:
         run: |
           track="${TRACK:-nlp}"
           max_results="${MAX_RESULTS:-5}"
-          args=(python scripts/post_trend_brief.py --track "$track" --max-results "$max_results")
+          args=(python scripts/post_trend_brief.py --track "$track" --max-results "$max_results" --history-file "content/trends/history/published_trends.json")
           if [ "${DRY_RUN}" = "true" ]; then
             args+=(--dry-run)
           fi
           "${args[@]}"
+
+      - name: Commit trend history
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          if git diff --quiet -- content/trends/history/published_trends.json; then
+            echo "No trend history changes"
+            exit 0
+          fi
+          git add content/trends/history/published_trends.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "update trend publish history"
+          git push
