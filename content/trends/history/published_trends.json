@@ -1,1 +1,25 @@
-{}
+{
+  "1486941167823097937:llm": [
+    {
+      "title": "자율주행과 지식베이스를 잇는 LLM 기반 최신 세 편의 연구 동향 브리핑",
+      "source_title": "Vega: Learning to Drive with Natural Language Instructions",
+      "url": "https://arxiv.org/abs/2603.25741",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:02:13.967377+00:00"
+    },
+    {
+      "title": "자율주행과 지식베이스를 잇는 LLM 기반 최신 세 편의 연구 동향 브리핑",
+      "source_title": "Drive My Way: Preference Alignment of Vision-Language-Action Model for Personalized Driving",
+      "url": "https://arxiv.org/abs/2603.25740",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:02:13.967377+00:00"
+    },
+    {
+      "title": "자율주행과 지식베이스를 잇는 LLM 기반 최신 세 편의 연구 동향 브리핑",
+      "source_title": "Training the Knowledge Base through Evidence Distillation and Write-Back Enrichment",
+      "url": "https://arxiv.org/abs/2603.25737",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:02:13.967377+00:00"
+    }
+  ]
+}
