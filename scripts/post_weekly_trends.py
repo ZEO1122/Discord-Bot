@@ -123,38 +123,37 @@ def history_key(channel_id: str, interest: str) -> str:
 def build_channel_embed(channel: ChannelConfig, sections: list[InterestSection]) -> discord.Embed:
     embed = discord.Embed(
         title=f"이번 주 관심분야 브리핑 | {channel.channel_key}",
-        description="채널 관심분야 기준으로 최신 동향을 묶어 전송합니다.",
         color=discord.Color.gold(),
     )
     for section in sections:
         source_lines = [f"- {source['title']}: {source['url']}" for source in section.brief.sources[:2]]
         embed.add_field(
-            name=f"{section.interest.upper()} | 주제",
+            name="주제",
             value=safe_truncate_text(section.brief.title, DISCORD_TOPIC_FIELD_LIMIT),
             inline=False,
         )
         embed.add_field(
-            name=f"{section.interest.upper()} | 핵심 설명",
+            name="핵심 설명",
             value=safe_truncate_text(section.brief.core_explanation, DISCORD_CORE_FIELD_LIMIT),
             inline=False,
         )
         embed.add_field(
-            name=f"{section.interest.upper()} | 왜 중요한가",
+            name="왜 중요한가",
             value=safe_truncate_text(section.brief.why_it_matters, DISCORD_REASON_FIELD_LIMIT),
             inline=False,
         )
         embed.add_field(
-            name=f"{section.interest.upper()} | 용어 빠르게 이해하기",
+            name="용어 빠르게 이해하기",
             value=safe_truncate_text(section.brief.quick_terms, DISCORD_TERMS_FIELD_LIMIT),
             inline=False,
         )
         embed.add_field(
-            name=f"{section.interest.upper()} | 생각해볼 질문",
+            name="생각해볼 질문",
             value=safe_truncate_text(section.brief.discussion_prompt, 120),
             inline=False,
         )
         embed.add_field(
-            name=f"{section.interest.upper()} | 출처",
+            name="출처",
             value=format_source_value(source_lines),
             inline=False,
         )
@@ -214,7 +213,7 @@ def build_interest_brief(track: str, sources: list[dict[str, str]], api_key: str
 
 def post_channel_embed(webhook_url: str, channel: ChannelConfig, embed: discord.Embed) -> str:
     webhook = discord.SyncWebhook.from_url(webhook_url)
-    message = webhook.send(content=f"이번 주 관심분야 브리핑 - {channel.channel_key}", embed=embed, wait=True)
+    message = webhook.send(embed=embed, wait=True)
     return str(message.id)
 
 

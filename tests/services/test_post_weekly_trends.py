@@ -88,6 +88,12 @@ def test_build_channel_embed_bundles_interest_sections() -> None:
     ]
     embed = build_channel_embed(channel, sections)
     assert "이번 주 관심분야 브리핑" in (embed.title or "")
+    assert embed.fields[0].name == "주제"
+    assert embed.fields[1].name == "핵심 설명"
+    assert embed.fields[2].name == "왜 중요한가"
+    assert embed.fields[3].name == "용어 빠르게 이해하기"
+    assert embed.fields[4].name == "생각해볼 질문"
+    assert embed.fields[5].name == "출처"
     assert embed.fields[-1].name == "주의"
 
 
