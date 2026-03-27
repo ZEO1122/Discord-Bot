@@ -1,0 +1,48 @@
+name: Post Concept Brief
+
+on:
+  workflow_dispatch:
+    inputs:
+      brief_path:
+        description: "Path to concept markdown file"
+        required: false
+        default: "content/concepts/dl-basics/attention.md"
+      dry_run:
+        description: "Skip real Discord webhook post"
+        required: false
+        default: "false"
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  post-concept:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Post concept brief
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          BRIEF_PATH: ${{ inputs.brief_path }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          brief_path="${BRIEF_PATH:-content/concepts/dl-basics/attention.md}"
+          args=(python scripts/post_concept_brief.py --brief-path "$brief_path")
+          if [ "${DRY_RUN}" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          "${args[@]}"
