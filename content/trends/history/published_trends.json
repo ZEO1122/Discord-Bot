@@ -122,6 +122,27 @@
       "url": "https://arxiv.org/abs/2603.25737",
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T05:34:25.339768+00:00"
+    },
+    {
+      "title": "기본으로 돌아가기: 음성 비서 시대의 자동 음성 인식(ASR) 재조명",
+      "source_title": "Back to Basics: Revisiting ASR in the Age of Voice Agents",
+      "url": "https://arxiv.org/abs/2603.25727",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T06:01:59.586054+00:00"
+    },
+    {
+      "title": "기본으로 돌아가기: 음성 비서 시대의 자동 음성 인식(ASR) 재조명",
+      "source_title": "Natural-Language Agent Harnesses",
+      "url": "https://arxiv.org/abs/2603.25723",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T06:01:59.586054+00:00"
+    },
+    {
+      "title": "기본으로 돌아가기: 음성 비서 시대의 자동 음성 인식(ASR) 재조명",
+      "source_title": "R-C2: Cycle-Consistent Reinforcement Learning Improves Multimodal Reasoning",
+      "url": "https://arxiv.org/abs/2603.25720",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T06:01:59.586054+00:00"
     }
   ],
   "1486952912306442392:llm": [
@@ -145,6 +166,27 @@
       "url": "https://arxiv.org/abs/2603.25697",
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T05:34:25.340374+00:00"
+    },
+    {
+      "title": "대규모 언어 모델의 자기개선과 평가 체계의 한계: 최신 연구 동향",
+      "source_title": "Self-Improvement of Large Language Models: A Technical Overview and Future Outlook",
+      "url": "https://arxiv.org/abs/2603.25681",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T06:01:59.586735+00:00"
+    },
+    {
+      "title": "대규모 언어 모델의 자기개선과 평가 체계의 한계: 최신 연구 동향",
+      "source_title": "Measuring What Matters -- or What's Convenient?: Robustness of LLM-Based Scoring Systems to Construct-Irrelevant Factors",
+      "url": "https://arxiv.org/abs/2603.25674",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T06:01:59.586735+00:00"
+    },
+    {
+      "title": "대규모 언어 모델의 자기개선과 평가 체계의 한계: 최신 연구 동향",
+      "source_title": "SHAPR: Operationalising Human-AI Collaborative Research Through Structured Knowledge Generation",
+      "url": "https://arxiv.org/abs/2603.25660",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T06:01:59.586735+00:00"
     }
   ]
 }
