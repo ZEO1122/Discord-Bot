@@ -42,5 +42,28 @@
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T12:55:39.812539+00:00"
     }
+  ],
+  "1487039321058971668:vision-language": [
+    {
+      "title": "자연어 기반 자율주행·영상 생성 최신 3편 정리",
+      "source_title": "RefAlign: Representation Alignment for Reference-to-Video Generation",
+      "url": "https://arxiv.org/abs/2603.25743",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:56:51.728797+00:00"
+    },
+    {
+      "title": "자연어 기반 자율주행·영상 생성 최신 3편 정리",
+      "source_title": "Vega: Learning to Drive with Natural Language Instructions",
+      "url": "https://arxiv.org/abs/2603.25741",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:56:51.728797+00:00"
+    },
+    {
+      "title": "자연어 기반 자율주행·영상 생성 최신 3편 정리",
+      "source_title": "Drive My Way: Preference Alignment of Vision-Language-Action Model for Personalized Driving",
+      "url": "https://arxiv.org/abs/2603.25740",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:56:51.728797+00:00"
+    }
   ]
 }
