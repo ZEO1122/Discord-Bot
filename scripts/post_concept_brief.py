@@ -103,9 +103,9 @@ def parse_brief(path: Path) -> ParsedBrief:
     if not isinstance(meta, dict):
         raise ValueError("Frontmatter must be a mapping.")
 
-    what_happened = extract_section_any(body, ["무슨 내용인가", "핵심 설명"])
+    what_happened = extract_section_any(body, ["무슨 내용인가", "핵심 설명", "핵심 요약"])
     why_it_matters = extract_section_any(body, ["왜 중요한가", "직관", "헷갈리기 쉬운 점"])
-    easy_terms_block = extract_section_any(body, ["쉬운 용어"], required=False)
+    easy_terms_block = extract_section_any(body, ["쉬운 용어", "용어 빠르게 이해하기"], required=False)
     easy_terms = [line.strip("- ").strip() for line in easy_terms_block.splitlines() if line.strip()]
     sources = parse_sources(meta, body)
 
