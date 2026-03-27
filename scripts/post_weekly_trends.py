@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 
 import discord
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -90,7 +91,13 @@ def load_channel_map(path: Path) -> list[ChannelConfig]:
 def load_webhook_map() -> dict[str, str]:
     raw_map = os.getenv("DISCORD_WEBHOOK_MAP_JSON", "")
     if raw_map:
-        return json.loads(raw_map)
+        try:
+            parsed = json.loads(raw_map)
+        except json.JSONDecodeError:
+            parsed = yaml.safe_load(raw_map)
+        if not isinstance(parsed, dict) or not parsed:
+            raise RuntimeError("DISCORD_WEBHOOK_MAP_JSON must be a non-empty JSON object.")
+        return {str(key): str(value) for key, value in parsed.items()}
     fallback_webhook = os.getenv("DISCORD_WEBHOOK_URL", "")
     if fallback_webhook:
         return {"default": fallback_webhook}

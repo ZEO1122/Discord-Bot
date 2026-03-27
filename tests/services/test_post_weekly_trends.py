@@ -80,3 +80,14 @@ def test_load_webhook_map_uses_fallback(monkeypatch) -> None:  # type: ignore[no
     monkeypatch.delenv("DISCORD_WEBHOOK_MAP_JSON", raising=False)
     monkeypatch.setenv("DISCORD_WEBHOOK_URL", "https://discord.com/api/webhooks/test")
     assert load_webhook_map() == {"default": "https://discord.com/api/webhooks/test"}
+
+
+def test_load_webhook_map_accepts_yaml_style_secret(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setenv(
+        "DISCORD_WEBHOOK_MAP_JSON",
+        "default: https://discord.com/api/webhooks/test\nnlp-study: https://discord.com/api/webhooks/test2\n",
+    )
+    assert load_webhook_map() == {
+        "default": "https://discord.com/api/webhooks/test",
+        "nlp-study": "https://discord.com/api/webhooks/test2",
+    }
