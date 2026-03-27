@@ -153,12 +153,14 @@ def test_build_full_embed_adds_all_markdown_sections() -> None:
     field_names = [field.name for field in embed.fields]
     assert embed.title == "퍼셉트론"
     assert embed.description == brief.one_line
-    assert "핵심 요약" in field_names
+    assert "정의" in field_names
+    assert "핵심 정리" in field_names
     assert "왜 중요한가" in field_names
-    assert "실무 포인트" in field_names
+    assert "공부 포인트" in field_names
+    assert "직관" in field_names
     assert "예시" in field_names
     assert "용어 빠르게 이해하기" in field_names
-    assert "자주 하는 실수" in field_names
+    assert "헷갈리기 쉬운 점" in field_names
     assert "셀프 체크" in field_names
     assert "토론 거리" in field_names
     assert "출처" in field_names
