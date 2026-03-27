@@ -23,6 +23,7 @@ try:
         build_prompt,
         generate_with_openai,
         load_history,
+        normalize_generated_brief,
         select_fresh_sources,
         update_history,
         validate_brief,
@@ -35,6 +36,7 @@ except ImportError:
         build_prompt,
         generate_with_openai,
         load_history,
+        normalize_generated_brief,
         select_fresh_sources,
         update_history,
         validate_brief,
@@ -132,7 +134,7 @@ def build_channel_embed(channel: ChannelConfig, sections: list[InterestSection])
 
 def build_interest_brief(track: str, sources: list[dict[str, str]], api_key: str) -> TrendBrief:
     prompt = build_prompt(track, sources)
-    generated = generate_with_openai(prompt, api_key)
+    generated = normalize_generated_brief(generate_with_openai(prompt, api_key))
     validate_brief(generated)
     return TrendBrief(
         title=generated["title"],

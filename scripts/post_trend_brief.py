@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 import json
 from pathlib import Path
 import sys
+from typing import Any
 from urllib import request
 
 import discord
@@ -116,6 +117,9 @@ def build_prompt(track: str, sources: list[dict[str, str]]) -> str:
         "아래 출처만 근거로 한국어 브리핑을 작성하라.\n"
         "반드시 JSON으로만 답하라.\n"
         "필수 키: title, one_line, what_happened, why_it_matters, discussion_prompt\n"
+        "키 이름은 반드시 영어 snake_case 그대로 사용하라.\n"
+        "반드시 아래 JSON 형식을 정확히 지켜라.\n"
+        '{"title":"...","one_line":"...","what_happened":"...","why_it_matters":"...","discussion_prompt":"..."}\n'
         "출처를 바꾸거나 추가하지 마라.\n\n"
         f"출처 목록:\n{source_lines}\n"
     )
@@ -145,6 +149,57 @@ def generate_with_openai(prompt: str, api_key: str) -> dict[str, str]:
             if content.get("type") == "output_text":
                 return json.loads(content["text"])
     raise RuntimeError("OpenAI response did not contain output_text.")
+
+
+def normalize_generated_brief(data: dict[str, Any]) -> dict[str, str]:
+    alias_groups = {
+        "title": ["title", "제목"],
+        "one_line": ["one_line", "oneLine", "summary", "한줄요약", "한 줄 요약"],
+        "what_happened": [
+            "what_happened",
+            "whatHappened",
+            "summary_detail",
+            "무슨_내용인가",
+            "무슨 내용인가",
+            "핵심요약",
+            "핵심 요약",
+        ],
+        "why_it_matters": [
+            "why_it_matters",
+            "whyItMatters",
+            "importance",
+            "why_important",
+            "왜_중요한가",
+            "왜 중요한가",
+            "의미",
+        ],
+        "discussion_prompt": [
+            "discussion_prompt",
+            "discussionPrompt",
+            "prompt",
+            "question",
+            "토론질문",
+            "토론 질문",
+            "생각해볼질문",
+            "생각해볼 질문",
+        ],
+    }
+
+    normalized: dict[str, str] = {}
+    for target, aliases in alias_groups.items():
+        value = ""
+        for alias in aliases:
+            raw = data.get(alias)
+            if isinstance(raw, str) and raw.strip():
+                value = raw.strip()
+                break
+        normalized[target] = value
+
+    if not normalized["why_it_matters"] and normalized["what_happened"]:
+        normalized["why_it_matters"] = "이 동향이 실제 모델 설계와 응용 방향에 어떤 영향을 주는지 추가 확인이 필요합니다."
+    if not normalized["discussion_prompt"] and normalized["title"]:
+        normalized["discussion_prompt"] = f"{normalized['title']}가 실제 적용에 미칠 영향은 무엇일까?"
+    return normalized
 
 
 def validate_brief(data: dict[str, str]) -> None:
@@ -199,7 +254,7 @@ def main() -> None:
     if not settings.discord_webhook_url:
         raise RuntimeError("DISCORD_WEBHOOK_URL is required.")
 
-    generated = generate_with_openai(prompt, api_key)
+    generated = normalize_generated_brief(generate_with_openai(prompt, api_key))
     validate_brief(generated)
     brief = TrendBrief(
         title=generated["title"],

@@ -8,6 +8,7 @@ from scripts.post_trend_brief import (
     NoFreshTrendSourcesError,
     TrendBrief,
     build_embed,
+    normalize_generated_brief,
     normalize_source_url,
     select_fresh_sources,
 )
@@ -128,3 +129,31 @@ def test_build_embed_includes_hallucination_caution_field() -> None:
     caution_field = embed.fields[-1]
     assert caution_field.name == "주의"
     assert caution_field.value == TREND_CAUTION_MESSAGE
+
+
+def test_normalize_generated_brief_maps_variant_keys() -> None:
+    normalized = normalize_generated_brief(
+        {
+            "title": "LLM 최신 동향",
+            "summary": "이번 주 LLM 관련 논문 요약",
+            "핵심 요약": "새로운 alignment 기법이 제안되었다.",
+            "왜 중요한가": "실제 서비스 안정성과 비용에 영향을 줄 수 있다.",
+            "question": "이 기법이 실제 제품에 적용될 수 있을까?",
+        }
+    )
+    assert normalized["one_line"] == "이번 주 LLM 관련 논문 요약"
+    assert normalized["what_happened"] == "새로운 alignment 기법이 제안되었다."
+    assert normalized["why_it_matters"] == "실제 서비스 안정성과 비용에 영향을 줄 수 있다."
+    assert normalized["discussion_prompt"] == "이 기법이 실제 제품에 적용될 수 있을까?"
+
+
+def test_normalize_generated_brief_fills_fallback_fields() -> None:
+    normalized = normalize_generated_brief(
+        {
+            "title": "Detection 최신 동향",
+            "one_line": "새 detector 구조가 제안되었다.",
+            "what_happened": "작은 객체 탐지 성능을 개선하는 구조다.",
+        }
+    )
+    assert normalized["why_it_matters"]
+    assert normalized["discussion_prompt"]
