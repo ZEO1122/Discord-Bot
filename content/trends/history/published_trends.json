@@ -65,5 +65,28 @@
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T12:56:51.728797+00:00"
     }
+  ],
+  "1487039215421231135:detection-segmentation": [
+    {
+      "title": "의료·해양 영상에서의 효율적 검출·분할",
+      "source_title": "LEMMA: Laplacian pyramids for Efficient Marine SeMAntic Segmentation",
+      "url": "https://arxiv.org/abs/2603.25689",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:57:30.803302+00:00"
+    },
+    {
+      "title": "의료·해양 영상에서의 효율적 검출·분할",
+      "source_title": "Colon-Bench: An Agentic Workflow for Scalable Dense Lesion Annotation in Full-Procedure Colonoscopy Videos",
+      "url": "https://arxiv.org/abs/2603.25645",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:57:30.803302+00:00"
+    },
+    {
+      "title": "의료·해양 영상에서의 효율적 검출·분할",
+      "source_title": "DeepFAN, a transformer-based deep learning model for human-artificial intelligence collaborative assessment of incidental pulmonary nodules in CT scans: a multi-reader, multi-case trial",
+      "url": "https://arxiv.org/abs/2603.25607",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T12:57:30.803302+00:00"
+    }
   ]
 }
