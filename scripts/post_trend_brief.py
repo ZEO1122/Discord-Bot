@@ -18,6 +18,12 @@ except ImportError:
     from fetch_trend_sources import fetch_trend_sources
 
 
+TREND_CAUTION_MESSAGE = (
+    "주의: 이 브리핑은 최신 source를 바탕으로 GPT가 요약한 내용입니다. "
+    "해석 오류나 누락 가능성이 있으니 원문 출처를 함께 확인하세요."
+)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate and post a trend brief to Discord.")
     parser.add_argument("--track", required=True)
@@ -153,6 +159,7 @@ def build_embed(brief: TrendBrief, track: str) -> discord.Embed:
         value="\n".join(f"- {source['title']}: {source['url']}" for source in brief.sources),
         inline=False,
     )
+    embed.add_field(name="주의", value=TREND_CAUTION_MESSAGE, inline=False)
     embed.set_footer(text=f"track={track} | mode=trend")
     return embed
 

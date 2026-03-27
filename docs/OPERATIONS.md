@@ -143,8 +143,9 @@ ANTHROPIC_API_KEY=
 ### 8.3 게시는 됐는데 내용이 이상함
 1. concept markdown 원본 확인
 2. trend prompt 템플릿 확인
-3. source file 확인
+3. trend source 수집 결과 확인
 4. Actions logs에서 생성 결과 확인
+5. Discord 메시지에 GPT 요약 주의 문구가 포함되어 있는지 확인
 
 ## 9. 보안 운영
 

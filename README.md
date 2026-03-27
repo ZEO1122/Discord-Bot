@@ -151,6 +151,12 @@ sources:
 - `.github/workflows/post-trend.yml`
   - 최신 source 수집 + GPT API 기반 trend 브리핑 게시
 
+trend 브리핑에는 아래 주의 문구를 항상 포함한다.
+
+```text
+주의: 이 브리핑은 최신 source를 바탕으로 GPT가 요약한 내용입니다. 해석 오류나 누락 가능성이 있으니 원문 출처를 함께 확인하세요.
+```
+
 필수 GitHub Secrets:
 - `DISCORD_WEBHOOK_URL`
 - `OPENAI_API_KEY`

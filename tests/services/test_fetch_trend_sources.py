@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from scripts.fetch_trend_sources import build_arxiv_url, parse_arxiv_feed
-from scripts.post_trend_brief import normalize_source_url, select_fresh_sources
+from scripts.post_trend_brief import TREND_CAUTION_MESSAGE, TrendBrief, build_embed, normalize_source_url, select_fresh_sources
 
 
 SAMPLE_FEED = """<?xml version='1.0' encoding='UTF-8'?>
@@ -66,3 +66,23 @@ def test_select_fresh_sources_filters_seen_urls_by_normalized_arxiv_id() -> None
 
 def test_normalize_source_url_strips_arxiv_version_suffix() -> None:
     assert normalize_source_url("https://arxiv.org/abs/1234.5678v3") == "https://arxiv.org/abs/1234.5678"
+
+
+def test_build_embed_includes_hallucination_caution_field() -> None:
+    brief = TrendBrief(
+        title="최근 NLP 동향",
+        one_line="LLM 추론 최적화 논문이 많이 올라오고 있다.",
+        what_happened="최근 논문들이 모델 효율과 추론 안정성에 집중하고 있다.",
+        why_it_matters="서비스 적용성과 비용 효율에 직접적인 영향을 준다.",
+        discussion_prompt="추론 최적화와 모델 성능 중 무엇을 더 우선해야 할까?",
+        sources=[
+            {
+                "title": "Sample NLP Paper",
+                "url": "https://arxiv.org/abs/1234.5678v1",
+            }
+        ],
+    )
+    embed = build_embed(brief, track="nlp")
+    caution_field = embed.fields[-1]
+    assert caution_field.name == "주의"
+    assert caution_field.value == TREND_CAUTION_MESSAGE
