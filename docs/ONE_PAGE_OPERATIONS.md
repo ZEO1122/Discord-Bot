@@ -54,14 +54,15 @@ GitHub Actions에서:
 ### 채널 설정 변경
 1. `config/channel_interest_map.json` 수정
 2. 운영할 채널은 `enabled: true`
-3. `interests`와 `max_topics` 조정
-4. push
+3. `interests`는 초기 기준 taxonomy(`llm`, `detection-segmentation`, `vision-language`) 안에서 설정
+4. `max_topics` 조정
+5. push
 
 ### trend 수동 테스트
 GitHub Actions에서:
 
 - `Post Trend Brief`
-- `channel_key`: 예) `vision-study`
+- `channel_key`: 예) `llm-brief`
 - `max_results`: `3`
 - `dry_run`: `false`
 

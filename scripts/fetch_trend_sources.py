@@ -11,6 +11,9 @@ import xml.etree.ElementTree as ET
 ARXIV_API_URL: Final[str] = "https://export.arxiv.org/api/query"
 ATOM_NS: Final[dict[str, str]] = {"atom": "http://www.w3.org/2005/Atom"}
 TRACK_QUERY_MAP: Final[dict[str, str]] = {
+    "llm": "(cat:cs.CL OR cat:cs.AI) AND (all:llm OR all:instruction OR all:alignment OR all:agent OR all:reasoning)",
+    "detection-segmentation": "cat:cs.CV AND (all:detection OR all:segmentation OR all:instance OR all:panoptic)",
+    "vision-language": "(cat:cs.CV OR cat:cs.CL OR cat:cs.AI) AND (all:vision-language OR all:image-text OR all:captioning OR all:multimodal OR all:vlm)",
     "nlp": "(cat:cs.CL OR cat:cs.AI) AND (all:language OR all:llm OR all:translation OR all:reasoning)",
     "cv": "cat:cs.CV AND (all:vision OR all:detection OR all:segmentation OR all:diffusion)",
     "multimodal": "(cat:cs.CV OR cat:cs.CL OR cat:cs.AI) AND (all:multimodal OR all:vision-language OR all:text-image OR all:video-language)",

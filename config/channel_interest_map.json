@@ -3,28 +3,28 @@
   "timezone": "Asia/Seoul",
   "channels": [
     {
-      "channel_key": "default-channel",
-      "channel_id": "1486952912306442392",
-      "webhook_key": "default",
-      "enabled": true,
-      "interests": ["nlp", "llm"],
-      "max_topics": 2
+      "channel_key": "llm-brief",
+      "channel_id": "SET_CLUB_CHANNEL_ID_LLM_BRIEF",
+      "webhook_key": "llm-brief",
+      "enabled": false,
+      "interests": ["llm"],
+      "max_topics": 1
     },
     {
-      "channel_key": "nlp-study",
-      "channel_id": "1486952859613270046",
-      "webhook_key": "nlp-study",
-      "enabled": true,
-      "interests": ["nlp", "llm"],
-      "max_topics": 2
+      "channel_key": "detection-segmentation-brief",
+      "channel_id": "SET_CLUB_CHANNEL_ID_DETECTION_SEGMENTATION_BRIEF",
+      "webhook_key": "detection-segmentation-brief",
+      "enabled": false,
+      "interests": ["detection-segmentation"],
+      "max_topics": 1
     },
     {
-      "channel_key": "vision-study",
-      "channel_id": "1486952802801684500",
-      "webhook_key": "vision-study",
-      "enabled": true,
-      "interests": ["cv", "multimodal"],
-      "max_topics": 2
+      "channel_key": "vision-language-brief",
+      "channel_id": "SET_CLUB_CHANNEL_ID_VISION_LANGUAGE_BRIEF",
+      "webhook_key": "vision-language-brief",
+      "enabled": false,
+      "interests": ["vision-language"],
+      "max_topics": 1
     }
   ]
 }

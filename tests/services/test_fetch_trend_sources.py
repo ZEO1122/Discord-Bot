@@ -30,6 +30,25 @@ def test_build_arxiv_url_uses_track_mapping() -> None:
     assert "max_results=5" in url
 
 
+def test_build_arxiv_url_supports_llm_query() -> None:
+    url = build_arxiv_url(track="llm", max_results=4)
+    assert "llm" in url
+    assert "alignment" in url
+    assert "max_results=4" in url
+
+
+def test_build_arxiv_url_supports_detection_segmentation_query() -> None:
+    url = build_arxiv_url(track="detection-segmentation", max_results=2)
+    assert "detection" in url
+    assert "segmentation" in url
+
+
+def test_build_arxiv_url_supports_vision_language_query() -> None:
+    url = build_arxiv_url(track="vision-language", max_results=2)
+    assert "vision-language" in url or "vision%2Dlanguage" in url
+    assert "image-text" in url or "image%2Dtext" in url
+
+
 def test_build_arxiv_url_supports_refined_multimodal_query() -> None:
     url = build_arxiv_url(track="multimodal", max_results=3)
     assert "multimodal" in url

@@ -16,6 +16,7 @@
 4. 게시 이력은 GitHub Actions 로그와 Discord 메시지 결과로 추적한다.
 5. trend 브리핑은 최근 게시 source를 history 파일에 기록해 중복 게시를 피한다.
 6. concept 브리핑은 `manifest + progress` 큐로 평일 오전 9시에 1개씩 게시한다.
+7. trend 관심분야 기본 taxonomy는 `llm`, `detection-segmentation`, `vision-language`를 사용한다.
 
 ## 현재 프로젝트 해석
 

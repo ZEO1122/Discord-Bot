@@ -102,19 +102,24 @@ reset하지 않아도 되는 경우:
 
 1. `config/channel_interest_map.json`을 동아리 서버 기준으로 수정
 2. GitHub Secrets를 동아리 서버 기준으로 교체
-3. 아래 중 필요한 파일 reset
+3. trend 관심분야 taxonomy를 아래 3개로 맞춘다.
+   - `llm`
+   - `detection-segmentation`
+   - `vision-language`
+4. 아래 중 필요한 파일 reset
    - `content/concepts/history/concept_progress.json`
    - `content/trends/history/published_trends.json`
-4. push
-5. `workflow_dispatch`로 concept 1회 수동 실행
-6. `workflow_dispatch`로 trend를 채널별로 수동 실행
-7. 결과가 맞으면 schedule 운영 시작
+5. push
+6. `workflow_dispatch`로 concept 1회 수동 실행
+7. `workflow_dispatch`로 trend를 채널별로 수동 실행
+8. 결과가 맞으면 schedule 운영 시작
 
 ## 6. 전환 전 최종 점검
 
 - [ ] `config/channel_interest_map.json`이 동아리 서버 채널 ID로 바뀌었다
 - [ ] `DISCORD_WEBHOOK_URL`이 동아리 concept 채널 webhook로 교체됐다
 - [ ] `DISCORD_WEBHOOK_MAP_JSON`이 동아리 trend 채널 webhook 맵으로 교체됐다
+- [ ] `llm`, `detection-segmentation`, `vision-language` taxonomy 기준으로 채널 관심분야를 정리했다
 - [ ] concept를 처음부터 보낼지 결정했고, 필요하면 `concept_progress.json`을 reset했다
 - [ ] trend history를 새로 시작할지 결정했고, 필요하면 `published_trends.json`을 reset했다
 - [ ] concept 수동 실행 성공
@@ -125,6 +130,7 @@ reset하지 않아도 되는 경우:
 동아리 서버로 처음 옮길 때는 아래를 권장한다.
 
 - `config/channel_interest_map.json`: 동아리 채널 정보로 교체
+- `config/channel_interest_map.json`: `llm`, `detection-segmentation`, `vision-language` 기준으로 정규화
 - `DISCORD_WEBHOOK_URL`: 새 concept 채널 webhook로 교체
 - `DISCORD_WEBHOOK_MAP_JSON`: 새 trend 채널 webhook 맵으로 교체
 - `content/concepts/history/concept_progress.json`: reset

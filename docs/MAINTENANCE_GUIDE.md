@@ -50,7 +50,7 @@
 ### 채널별 관심분야 변경
 
 1. `channel_interest_map.json` 수정
-2. `interests` 변경
+2. `interests` 변경 (`llm`, `detection-segmentation`, `vision-language` 기준)
 3. 필요하면 `max_topics` 조정
 4. push
 

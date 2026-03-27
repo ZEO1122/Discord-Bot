@@ -71,7 +71,7 @@
 ```json
 {
   "content_id": "2026-03-26-nlp-001",
-  "track": "nlp",
+  "track": "llm",
   "mode": "trend",
   "title": "....",
   "one_line": "....",

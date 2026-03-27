@@ -26,9 +26,9 @@
 
 - 관심분야별 채널을 정한다.
 - 예:
-  - `nlp-study`
-  - `vision-study`
-  - `multimodal-lab`
+  - `llm-brief`
+  - `detection-segmentation-brief`
+  - `vision-language-brief`
 
 ### 2.3 각 채널 webhook 만들기
 
@@ -67,18 +67,18 @@ Discord 채널 설정에서 다음 순서로 만든다.
 
 ```json
 {
-  "default": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>",
-  "nlp-study": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>",
-  "vision-study": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>"
+  "llm-brief": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>",
+  "detection-segmentation-brief": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>",
+  "vision-language-brief": "https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>"
 }
 ```
 
 예시 YAML:
 
 ```yaml
-default: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
-nlp-study: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
-vision-study: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
+llm-brief: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
+detection-segmentation-brief: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
+vision-language-brief: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
 ```
 
 #### `OPENAI_API_KEY`
@@ -92,6 +92,11 @@ vision-study: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
 `config/channel_interest_map.json`
 
 이 파일에서 실제 운영할 채널만 `enabled: true`로 두고, 각 채널의 관심분야를 입력한다.
+초기 운영 기준 taxonomy는 아래 3개를 권장한다.
+
+- `llm`
+- `detection-segmentation`
+- `vision-language`
 
 예시:
 
@@ -101,20 +106,28 @@ vision-study: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
   "timezone": "Asia/Seoul",
   "channels": [
     {
-      "channel_key": "default-channel",
+      "channel_key": "llm-brief",
       "channel_id": "123456789012345678",
-      "webhook_key": "default",
+      "webhook_key": "llm-brief",
       "enabled": true,
-      "interests": ["nlp", "llm"],
-      "max_topics": 2
+      "interests": ["llm"],
+      "max_topics": 1
     },
     {
-      "channel_key": "vision-study",
+      "channel_key": "detection-segmentation-brief",
       "channel_id": "234567890123456789",
-      "webhook_key": "vision-study",
+      "webhook_key": "detection-segmentation-brief",
       "enabled": true,
-      "interests": ["cv", "multimodal"],
-      "max_topics": 2
+      "interests": ["detection-segmentation"],
+      "max_topics": 1
+    },
+    {
+      "channel_key": "vision-language-brief",
+      "channel_id": "345678901234567890",
+      "webhook_key": "vision-language-brief",
+      "enabled": true,
+      "interests": ["vision-language"],
+      "max_topics": 1
     }
   ]
 }
@@ -165,7 +178,7 @@ vision-study: https://discord.com/api/webhooks/<CHANNEL_ID>/<WEBHOOK_TOKEN>
 
 입력값 예시:
 
-- `channel_key`: `vision-study`
+- `channel_key`: `llm-brief`
 - `max_results`: `3`
 - `dry_run`: `false`
 
