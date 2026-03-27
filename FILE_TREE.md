@@ -18,7 +18,9 @@
         concept_progress.json
       manifest.json
       dl-basics/
-        attention.md
+        dl-concept-001-perceptron.md
+        ...
+        dl-concept-050-training-vs-inference.md
     trends/
       history/
         published_trends.json
@@ -75,6 +77,7 @@
     conftest.py
     services/
       test_fetch_trend_sources.py
+      test_post_concept_brief.py
       test_post_concept_queue.py
       test_post_weekly_trends.py
       test_publish_service.py

@@ -104,11 +104,11 @@ Build / Validate Script              GPT Summarize / Validate
 - 출처는 문자열이 아니라 구조화 객체로 저장한다.
 - trend 브리핑은 **실행 시점 최신 source를 수집한 뒤** 게시한다.
 - trend 브리핑은 **출처 없이 자동 게시하지 않는다.**
-- concept 브리핑은 저장소의 `.md` 원문 본문을 최대한 그대로 Discord에 전송한다.
+- concept 브리핑은 저장소의 `.md` 본문 섹션을 **Discord full embed field**로 정리해 전송한다.
 
 ## concept markdown 포맷
 
-추천 형식은 `frontmatter + 본문 섹션`이다.
+추천 형식은 `frontmatter + 본문 섹션`이다. 현재 concept 게시물은 아래 섹션을 기준으로 full embed field를 만든다.
 
 ```md
 ---
@@ -124,14 +124,38 @@ sources:
     source_type: paper
 ---
 
-## 무슨 내용인가
+## 오늘의 개념
+...
+
+## 핵심 요약
 ...
 
 ## 왜 중요한가
 ...
 
-## 쉬운 용어
+## 실무 포인트
+...
+
+## 예시
+...
+
+## 용어 빠르게 이해하기
 - Attention: ...
+
+## 자주 하는 실수
+...
+
+## 셀프 체크
+...
+
+## 토론 거리
+...
+
+## source
+- Attention Is All You Need / https://arxiv.org/abs/1706.03762
+
+## 주의
+- 이 문서는 AI로 생성·편집된 브리핑이어서 할루시네이션이 포함되어 있을 수 있다.
 ```
 
 필수 필드:
@@ -140,16 +164,16 @@ sources:
 - `mode`
 - `title`
 - `one_line`
-- `sources`
-- 본문 `무슨 내용인가`
+- 본문 `오늘의 개념` 또는 `핵심 요약`
 - 본문 `왜 중요한가`
+- 본문 `source`
 
 ## GitHub Actions 워크플로우
 
 추가된 워크플로우 초안:
 
 - `.github/workflows/post-concept.yml`
-  - manifest/progress 기반 concept 큐 게시 (`.md` 본문을 여러 메시지로 분할 전송 가능)
+  - manifest/progress 기반 concept 큐 게시 (`.md` 섹션을 full embed field로 전송)
 - `.github/workflows/post-trend.yml`
   - 채널별 관심분야 + 최신 source 수집 + GPT API 기반 weekly trend 게시
 

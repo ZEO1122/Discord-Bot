@@ -137,7 +137,9 @@ ANTHROPIC_API_KEY=
 3. `DISCORD_WEBHOOK_URL` secret 확인
 4. `concept_progress.json` 갱신 여부 확인
 5. workflow_dispatch로 같은 파일 재실행
-6. concept 본문이 Discord 2000자 제한 때문에 여러 메시지로 나뉘는지 확인
+6. concept 각 섹션이 Discord embed field 제한(1024자)을 넘지 않는지 확인
+7. concept field 수가 25개를 넘지 않는지 확인
+8. concept embed 전체 길이가 6000자를 넘지 않는지 확인
 
 ### 8.2 trend 브리핑이 안 올라옴
 1. source fetch step 실패 여부 확인
@@ -170,6 +172,7 @@ ANTHROPIC_API_KEY=
 - [ ] 첫 자동 게시 성공
 - [ ] Actions logs 확인
 - [ ] webhook 재생성 절차 확인
+- [ ] concept embed field 제한(1024/25/6000) 준수 확인
 
 ## 11. End-to-End Smoke Path
 
@@ -370,7 +373,7 @@ python3 scripts/publish_daily.py --dry-run
 - [ ] `config/channel_interest_map.json`에서 실제로 운영할 채널만 `enabled: true`로 설정되어 있다
 - [ ] `DISCORD_WEBHOOK_MAP_JSON`의 key와 `config/channel_interest_map.json`의 `webhook_key`가 정확히 일치한다
 - [ ] `content/concepts/manifest.json`에 게시할 concept markdown 순서가 올바르게 들어 있다
-- [ ] `Post Concept Brief`를 수동 실행했을 때 Discord 게시와 `content/concepts/history/concept_progress.json` 갱신이 모두 성공한다
+- [ ] `Post Concept Brief`를 수동 실행했을 때 Discord full embed 게시와 `content/concepts/history/concept_progress.json` 갱신이 모두 성공한다
 - [ ] `Post Trend Brief`를 채널별로 수동 실행했을 때 Discord 게시 또는 `skipped` 결과가 의도대로 나온다
 - [ ] `content/trends/history/published_trends.json`가 게시 후 정상적으로 갱신된다
 - [ ] concept 스케줄은 평일 오전 9시 KST, trend 스케줄은 월요일 오전 9시 KST로 설정되어 있다
