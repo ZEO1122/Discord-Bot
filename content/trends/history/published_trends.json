@@ -35,5 +35,28 @@
       "published_at": "2026-03-26",
       "posted_at": "2026-03-27T04:21:52.045700+00:00"
     }
+  ],
+  "nlp": [
+    {
+      "title": "자연어 지침과 개인화된 선호 기반 시각-언어-행동 모델을 활용한 주행 학습 및 제어",
+      "source_title": "Vega: Learning to Drive with Natural Language Instructions",
+      "url": "https://arxiv.org/abs/2603.25741",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:23:06.689217+00:00"
+    },
+    {
+      "title": "자연어 지침과 개인화된 선호 기반 시각-언어-행동 모델을 활용한 주행 학습 및 제어",
+      "source_title": "Drive My Way: Preference Alignment of Vision-Language-Action Model for Personalized Driving",
+      "url": "https://arxiv.org/abs/2603.25740",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:23:06.689217+00:00"
+    },
+    {
+      "title": "자연어 지침과 개인화된 선호 기반 시각-언어-행동 모델을 활용한 주행 학습 및 제어",
+      "source_title": "Training the Knowledge Base through Evidence Distillation and Write-Back Enrichment",
+      "url": "https://arxiv.org/abs/2603.25737",
+      "published_at": "2026-03-26",
+      "posted_at": "2026-03-27T04:23:06.689217+00:00"
+    }
   ]
 }
