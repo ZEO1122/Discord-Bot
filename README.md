@@ -104,7 +104,7 @@ Build / Validate Script              GPT Summarize / Validate
 - 출처는 문자열이 아니라 구조화 객체로 저장한다.
 - trend 브리핑은 **실행 시점 최신 source를 수집한 뒤** 게시한다.
 - trend 브리핑은 **출처 없이 자동 게시하지 않는다.**
-- concept 브리핑은 저장소의 `.md` 원본을 진실 소스로 본다.
+- concept 브리핑은 저장소의 `.md` 원문 본문을 최대한 그대로 Discord에 전송한다.
 
 ## concept markdown 포맷
 
@@ -149,7 +149,7 @@ sources:
 추가된 워크플로우 초안:
 
 - `.github/workflows/post-concept.yml`
-  - manifest/progress 기반 concept 큐 게시
+  - manifest/progress 기반 concept 큐 게시 (`.md` 본문을 여러 메시지로 분할 전송 가능)
 - `.github/workflows/post-trend.yml`
   - 채널별 관심분야 + 최신 source 수집 + GPT API 기반 weekly trend 게시
 

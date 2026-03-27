@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
+import re
 import sys
 from typing import Any
 
@@ -37,12 +38,20 @@ class ParsedBrief:
     sources: list[dict[str, str]]
 
 
+DISCORD_MESSAGE_LIMIT = 1900
+
+
 def split_frontmatter(text: str) -> tuple[str, str]:
     if not text.startswith("---\n"):
         raise ValueError("Markdown must start with YAML frontmatter.")
     _, rest = text.split("---\n", 1)
     frontmatter, body = rest.split("\n---\n", 1)
     return frontmatter, body.strip()
+
+
+def load_markdown_body(path: Path) -> str:
+    _, body = split_frontmatter(path.read_text(encoding="utf-8"))
+    return body.strip()
 
 
 def extract_section(body: str, heading: str) -> str:
@@ -97,6 +106,90 @@ def parse_sources(meta: dict[str, Any], body: str) -> list[dict[str, str]]:
     return sources
 
 
+def split_discord_messages(text: str, limit: int = DISCORD_MESSAGE_LIMIT) -> list[str]:
+    stripped = text.strip()
+    if not stripped:
+        return []
+    if len(stripped) <= limit:
+        return [stripped]
+
+    sections = [section.strip() for section in re.split(r"(?=^##\s)", stripped, flags=re.MULTILINE) if section.strip()]
+    if not sections:
+        sections = [stripped]
+
+    chunks: list[str] = []
+    current = ""
+    for section in sections:
+        if len(section) > limit:
+            if current:
+                chunks.append(current.strip())
+                current = ""
+            chunks.extend(_split_long_section(section, limit))
+            continue
+
+        candidate = f"{current}\n\n{section}".strip() if current else section
+        if len(candidate) <= limit:
+            current = candidate
+        else:
+            chunks.append(current.strip())
+            current = section
+
+    if current:
+        chunks.append(current.strip())
+    return chunks
+
+
+def _split_long_section(section: str, limit: int) -> list[str]:
+    paragraphs = [paragraph.strip() for paragraph in section.split("\n\n") if paragraph.strip()]
+    chunks: list[str] = []
+    current = ""
+    for paragraph in paragraphs:
+        if len(paragraph) > limit:
+            if current:
+                chunks.append(current.strip())
+                current = ""
+            chunks.extend(_split_paragraph(paragraph, limit))
+            continue
+
+        candidate = f"{current}\n\n{paragraph}".strip() if current else paragraph
+        if len(candidate) <= limit:
+            current = candidate
+        else:
+            chunks.append(current.strip())
+            current = paragraph
+
+    if current:
+        chunks.append(current.strip())
+    return chunks
+
+
+def _split_paragraph(paragraph: str, limit: int) -> list[str]:
+    lines = paragraph.splitlines()
+    chunks: list[str] = []
+    current = ""
+    for line in lines:
+        candidate = f"{current}\n{line}".strip() if current else line
+        if len(candidate) <= limit:
+            current = candidate
+            continue
+
+        if current:
+            chunks.append(current.strip())
+        if len(line) <= limit:
+            current = line
+            continue
+
+        start = 0
+        while start < len(line):
+            chunks.append(line[start : start + limit].strip())
+            start += limit
+        current = ""
+
+    if current:
+        chunks.append(current.strip())
+    return chunks
+
+
 def parse_brief(path: Path) -> ParsedBrief:
     frontmatter_text, body = split_frontmatter(path.read_text(encoding="utf-8"))
     meta = yaml.safe_load(frontmatter_text)
@@ -143,6 +236,15 @@ def build_embed(brief: ParsedBrief) -> discord.Embed:
         inline=False,
     )
     return embed
+
+
+def post_markdown_messages(webhook_url: str, body: str) -> list[str]:
+    webhook = discord.SyncWebhook.from_url(webhook_url)
+    message_ids: list[str] = []
+    for chunk in split_discord_messages(body):
+        message = webhook.send(content=chunk, wait=True)
+        message_ids.append(str(message.id))
+    return message_ids
 
 
 def main() -> None:

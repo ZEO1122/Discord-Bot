@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.post_concept_brief import parse_brief
+from scripts.post_concept_brief import load_markdown_body, parse_brief, split_discord_messages
 
 
 def test_parse_brief_supports_generated_concept_format(tmp_path: Path) -> None:
@@ -106,3 +106,35 @@ one_line: 테스트용 요약.
 
     assert "최소 설명" in brief.what_happened
     assert "이유는 명확" in brief.why_it_matters
+
+
+def test_load_markdown_body_excludes_frontmatter(tmp_path: Path) -> None:
+    brief_path = tmp_path / "body-only.md"
+    brief_path.write_text(
+        """---
+briefing_key: sample-1
+track: dl-basics
+mode: concept
+title: 샘플
+one_line: 샘플 요약
+---
+
+## 오늘의 개념
+- 본문만 남아야 한다.
+""",
+        encoding="utf-8",
+    )
+
+    body = load_markdown_body(brief_path)
+    assert body.startswith("## 오늘의 개념")
+    assert "briefing_key" not in body
+
+
+def test_split_discord_messages_preserves_section_order() -> None:
+    body = "\n\n".join(
+        [f"## 섹션 {index}\n" + ("내용 " * 250) for index in range(1, 5)]
+    )
+    chunks = split_discord_messages(body, limit=300)
+    assert len(chunks) > 1
+    assert chunks[0].startswith("## 섹션 1")
+    assert any("## 섹션 4" in chunk for chunk in chunks)

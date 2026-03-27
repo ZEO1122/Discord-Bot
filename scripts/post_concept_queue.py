@@ -9,8 +9,6 @@ from pathlib import Path
 from typing import Any, cast
 import sys
 
-import discord
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -19,9 +17,9 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 try:
-    from scripts.post_concept_brief import ParsedBrief, build_embed, parse_brief
+    from scripts.post_concept_brief import ParsedBrief, load_markdown_body, parse_brief, post_markdown_messages, split_discord_messages
 except ImportError:
-    from post_concept_brief import ParsedBrief, build_embed, parse_brief
+    from post_concept_brief import ParsedBrief, load_markdown_body, parse_brief, post_markdown_messages, split_discord_messages
 
 
 def parse_args() -> argparse.Namespace:
@@ -84,12 +82,6 @@ def update_progress(progress_path: Path, index: int, path: str, brief: ParsedBri
     progress_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def post_embed(webhook_url: str, brief: ParsedBrief, embed: discord.Embed) -> str:
-    webhook = discord.SyncWebhook.from_url(webhook_url)
-    message = webhook.send(content=f"오늘의 브리핑 - {brief.track}", embed=embed, wait=True)
-    return str(message.id)
-
-
 def main() -> None:
     args = parse_args()
     from core.config import get_settings
@@ -112,18 +104,23 @@ def main() -> None:
         selected_index, selected_path = selection
 
     brief = parse_brief(Path(selected_path))
-    embed = build_embed(brief)
+    body = load_markdown_body(Path(selected_path))
+    message_chunks = split_discord_messages(body)
     if args.dry_run:
-        print(f"publish_status=dry_run briefing_key={brief.briefing_key} path={selected_path}")
+        print(
+            f"publish_status=dry_run briefing_key={brief.briefing_key} path={selected_path} message_count={len(message_chunks)}"
+        )
         return
 
     if not settings.discord_webhook_url:
         raise RuntimeError("DISCORD_WEBHOOK_URL is required.")
 
-    message_id = post_embed(settings.discord_webhook_url, brief, embed)
+    message_ids = post_markdown_messages(settings.discord_webhook_url, body)
     if selected_index is not None:
         update_progress(progress_path, selected_index, selected_path, brief)
-    print(f"publish_status=success discord_message_id={message_id} briefing_key={brief.briefing_key}")
+    print(
+        f"publish_status=success first_message_id={message_ids[0]} message_count={len(message_ids)} briefing_key={brief.briefing_key}"
+    )
 
 
 if __name__ == "__main__":

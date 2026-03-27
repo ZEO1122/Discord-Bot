@@ -137,6 +137,7 @@ ANTHROPIC_API_KEY=
 3. `DISCORD_WEBHOOK_URL` secret 확인
 4. `concept_progress.json` 갱신 여부 확인
 5. workflow_dispatch로 같은 파일 재실행
+6. concept 본문이 Discord 2000자 제한 때문에 여러 메시지로 나뉘는지 확인
 
 ### 8.2 trend 브리핑이 안 올라옴
 1. source fetch step 실패 여부 확인
