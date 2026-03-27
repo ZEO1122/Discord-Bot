@@ -14,7 +14,9 @@ import yaml
 
 
 DISCORD_EMBED_FIELD_VALUE_LIMIT = 1024
-DISCORD_SAFE_FIELD_VALUE_LIMIT = 900
+DISCORD_SUMMARY_FIELD_LIMIT = 700
+DISCORD_REASON_FIELD_LIMIT = 1000
+DISCORD_SOURCE_FIELD_LIMIT = 500
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -122,15 +124,23 @@ def build_channel_embed(channel: ChannelConfig, sections: list[InterestSection])
     )
     for section in sections:
         source_lines = [f"- {source['title']}: {source['url']}" for source in section.brief.sources[:2]]
-        field_value = format_section_value(
+        summary_value = format_summary_value(
             title=section.brief.title,
             one_line=section.brief.one_line,
-            why_it_matters=section.brief.why_it_matters,
-            source_lines=source_lines,
         )
         embed.add_field(
             name=section.interest.upper(),
-            value=field_value,
+            value=summary_value,
+            inline=False,
+        )
+        embed.add_field(
+            name=f"{section.interest.upper()} | 왜 중요한가",
+            value=safe_truncate_text(section.brief.why_it_matters, DISCORD_REASON_FIELD_LIMIT),
+            inline=False,
+        )
+        embed.add_field(
+            name=f"{section.interest.upper()} | 출처",
+            value=format_source_value(source_lines),
             inline=False,
         )
     embed.add_field(name="주의", value=TREND_CAUTION_MESSAGE, inline=False)
@@ -146,34 +156,41 @@ def truncate_text(text: str, limit: int) -> str:
     return stripped[: limit - 1].rstrip() + "..."
 
 
-def format_section_value(title: str, one_line: str, why_it_matters: str, source_lines: list[str]) -> str:
-    parts = [
-        f"제목: {title.strip()}",
-        f"한 줄 요약: {one_line.strip()}",
-        f"왜 중요한가: {why_it_matters.strip()}",
-    ]
-    if source_lines:
-        parts.append("출처:")
-        parts.extend(source_lines)
+def safe_truncate_text(text: str, limit: int) -> str:
+    stripped = text.strip()
+    if len(stripped) <= limit:
+        return stripped
+    if limit <= 3:
+        return stripped[:limit]
+    search_window = stripped[:limit]
+    boundaries = [search_window.rfind(token) for token in [". ", ".\n", "다.", "요.", "! ", "? ", "\n", " "]]
+    cut = max(boundaries)
+    if cut < int(limit * 0.6):
+        return truncate_text(stripped, limit)
+    candidate = search_window[: cut + 1].rstrip()
+    return truncate_text(candidate, limit)
 
-    value = "\n".join(part for part in parts if part)
-    if len(value) <= DISCORD_SAFE_FIELD_VALUE_LIMIT:
-        return value
 
-    compact_parts = [
-        f"제목: {truncate_text(title, 120)}",
-        f"한 줄 요약: {truncate_text(one_line, 180)}",
-        f"왜 중요한가: {truncate_text(why_it_matters, 320)}",
-    ]
-    if source_lines:
-        compact_parts.append("출처:")
-        compact_parts.extend(truncate_text(line, 120) for line in source_lines[:1])
+def format_summary_value(title: str, one_line: str) -> str:
+    value = "\n".join(
+        [
+            f"제목: {title.strip()}",
+            f"한 줄 요약: {one_line.strip()}",
+        ]
+    )
+    return safe_truncate_text(value, DISCORD_SUMMARY_FIELD_LIMIT)
 
-    compact_value = "\n".join(part for part in compact_parts if part)
-    if len(compact_value) <= DISCORD_SAFE_FIELD_VALUE_LIMIT:
-        return compact_value
 
-    return truncate_text(compact_value, DISCORD_SAFE_FIELD_VALUE_LIMIT)
+def format_source_value(source_lines: list[str]) -> str:
+    if not source_lines:
+        return "출처 없음"
+    joined = "\n".join(source_lines)
+    if len(joined) <= DISCORD_SOURCE_FIELD_LIMIT:
+        return joined
+
+    compact_lines = [safe_truncate_text(line, 220) for line in source_lines[:1]]
+    compact_joined = "\n".join(compact_lines)
+    return safe_truncate_text(compact_joined, DISCORD_SOURCE_FIELD_LIMIT)
 
 
 def build_interest_brief(track: str, sources: list[dict[str, str]], api_key: str) -> TrendBrief:

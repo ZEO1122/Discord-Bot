@@ -6,13 +6,17 @@ from typing import cast
 
 from scripts.post_weekly_trends import (
     DISCORD_EMBED_FIELD_VALUE_LIMIT,
-    DISCORD_SAFE_FIELD_VALUE_LIMIT,
+    DISCORD_REASON_FIELD_LIMIT,
+    DISCORD_SOURCE_FIELD_LIMIT,
+    DISCORD_SUMMARY_FIELD_LIMIT,
     InterestSection,
     build_channel_embed,
-    format_section_value,
+    format_source_value,
+    format_summary_value,
     history_key,
     load_channel_map,
     load_webhook_map,
+    safe_truncate_text,
 )
 from scripts.post_trend_brief import TrendBrief
 
@@ -128,16 +132,26 @@ def test_load_channel_map_preserves_disabled_channels(tmp_path: Path) -> None:
     assert channels[0].enabled is False
 
 
-def test_format_section_value_truncates_long_content_to_embed_limit() -> None:
-    value = format_section_value(
+def test_format_summary_value_truncates_to_summary_limit() -> None:
+    value = format_summary_value(
         title="긴 제목 " * 30,
         one_line="긴 요약 " * 80,
-        why_it_matters="긴 중요성 설명 " * 120,
-        source_lines=["- Source A: https://example.com/very/long/url" * 5],
     )
-    assert len(value) <= DISCORD_SAFE_FIELD_VALUE_LIMIT
+    assert len(value) <= DISCORD_SUMMARY_FIELD_LIMIT
     assert "제목:" in value
     assert "한 줄 요약:" in value
+
+
+def test_format_source_value_truncates_to_source_limit() -> None:
+    value = format_source_value(["- Source A: https://example.com/very/long/url" * 10])
+    assert len(value) <= DISCORD_SOURCE_FIELD_LIMIT
+
+
+def test_safe_truncate_text_prefers_sentence_boundary() -> None:
+    text = "첫 문장이다. 둘째 문장도 있다. 셋째 문장도 충분히 길다."
+    truncated = safe_truncate_text(text, 20)
+    assert len(truncated) <= 20
+    assert truncated.startswith("첫 문장이다")
 
 
 def test_build_channel_embed_keeps_field_values_within_limit() -> None:
@@ -178,5 +192,8 @@ def test_build_channel_embed_keeps_field_values_within_limit() -> None:
         )
     ]
     embed = build_channel_embed(channel, sections)
-    assert len(cast(str, embed.fields[0].value)) <= DISCORD_SAFE_FIELD_VALUE_LIMIT
-    assert len(cast(str, embed.fields[0].value)) <= DISCORD_EMBED_FIELD_VALUE_LIMIT
+    assert len(cast(str, embed.fields[0].value)) <= DISCORD_SUMMARY_FIELD_LIMIT
+    assert len(cast(str, embed.fields[1].value)) <= DISCORD_REASON_FIELD_LIMIT
+    assert len(cast(str, embed.fields[2].value)) <= DISCORD_SOURCE_FIELD_LIMIT
+    for field in embed.fields:
+        assert len(cast(str, field.value)) <= DISCORD_EMBED_FIELD_VALUE_LIMIT
