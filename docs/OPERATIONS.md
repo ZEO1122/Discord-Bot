@@ -192,6 +192,7 @@ GitHub Actions 운영 기준 필수 secret/variable을 먼저 채운다.
 
 ```bash
 DISCORD_WEBHOOK_URL
+DISCORD_WEBHOOK_MAP_JSON
 OPENAI_API_KEY
 ```
 
@@ -210,10 +211,12 @@ LOG_LEVEL=INFO
 
 주의:
 - GitHub Actions 자동 발행의 핵심은 `DISCORD_WEBHOOK_URL`이다.
+- 채널별 trend 발행에는 `DISCORD_WEBHOOK_MAP_JSON`이 필요하다.
 - trend workflow에는 `OPENAI_API_KEY`가 필요하다.
 
 설정 누락 시 확인 포인트:
 - `DISCORD_WEBHOOK_URL` 누락 -> 게시 step 즉시 실패
+- `DISCORD_WEBHOOK_MAP_JSON` 누락 -> 채널별 trend 게시 step 실패
 - `OPENAI_API_KEY` 누락 -> trend workflow 생성 step 실패
 - source fetch 실패 -> trend workflow 수집 step 실패
 
