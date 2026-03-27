@@ -6,6 +6,7 @@ from typing import cast
 
 from scripts.post_weekly_trends import (
     DISCORD_EMBED_FIELD_VALUE_LIMIT,
+    DISCORD_SAFE_FIELD_VALUE_LIMIT,
     InterestSection,
     build_channel_embed,
     format_section_value,
@@ -134,7 +135,7 @@ def test_format_section_value_truncates_long_content_to_embed_limit() -> None:
         why_it_matters="긴 중요성 설명 " * 120,
         source_lines=["- Source A: https://example.com/very/long/url" * 5],
     )
-    assert len(value) <= DISCORD_EMBED_FIELD_VALUE_LIMIT
+    assert len(value) <= DISCORD_SAFE_FIELD_VALUE_LIMIT
     assert "제목:" in value
     assert "한 줄 요약:" in value
 
@@ -177,4 +178,5 @@ def test_build_channel_embed_keeps_field_values_within_limit() -> None:
         )
     ]
     embed = build_channel_embed(channel, sections)
+    assert len(cast(str, embed.fields[0].value)) <= DISCORD_SAFE_FIELD_VALUE_LIMIT
     assert len(cast(str, embed.fields[0].value)) <= DISCORD_EMBED_FIELD_VALUE_LIMIT
