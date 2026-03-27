@@ -39,8 +39,9 @@ Build / Validate Script              GPT Summarize / Validate
 
 1. 전체 구조 이해: `README.md`
 2. 새 Discord 서버 연결: `docs/SERVER_SETUP_GUIDE.md`
-3. 빠른 운영 요약: `docs/ONE_PAGE_OPERATIONS.md`
-4. 운영/수정/장애 대응: `docs/MAINTENANCE_GUIDE.md`, `docs/OPERATIONS.md`
+3. 서버 전환 준비: `docs/CLUB_SERVER_TRANSITION.md`
+4. 빠른 운영 요약: `docs/ONE_PAGE_OPERATIONS.md`
+5. 운영/수정/장애 대응: `docs/MAINTENANCE_GUIDE.md`, `docs/OPERATIONS.md`
 
 - `AGENTS.md`
   에이전트 작업 규칙
@@ -54,6 +55,8 @@ Build / Validate Script              GPT Summarize / Validate
   로컬 개발용 데이터 모델과 후속 확장 스키마
 - `docs/SERVER_SETUP_GUIDE.md`
   새 Discord 서버 연결용 사용 설명서
+- `docs/CLUB_SERVER_TRANSITION.md`
+  개인 테스트 서버에서 동아리 서버로 옮길 때의 전환 체크리스트
 - `docs/MAINTENANCE_GUIDE.md`
   운영 중 유지보수 가이드
 - `docs/ONE_PAGE_OPERATIONS.md`
