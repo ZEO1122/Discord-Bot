@@ -160,7 +160,8 @@ def build_embed(brief: TrendBrief, track: str) -> discord.Embed:
 def main() -> None:
     args = parse_args()
     history_path = Path(args.history_file)
-    fetched_sources = fetch_trend_sources(track=args.track, max_results=max(args.max_results * 3, args.max_results))
+    fetch_count = min(max(args.max_results + 3, args.max_results), 10)
+    fetched_sources = fetch_trend_sources(track=args.track, max_results=fetch_count)
     history = load_history(history_path)
     sources = select_fresh_sources(
         track=args.track,

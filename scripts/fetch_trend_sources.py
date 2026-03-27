@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+import time
 from typing import Final
 from urllib import error, parse, request
 import xml.etree.ElementTree as ET
 
 
-ARXIV_API_URL: Final[str] = "http://export.arxiv.org/api/query"
+ARXIV_API_URL: Final[str] = "https://export.arxiv.org/api/query"
 ATOM_NS: Final[dict[str, str]] = {"atom": "http://www.w3.org/2005/Atom"}
 TRACK_QUERY_MAP: Final[dict[str, str]] = {
     "nlp": "(cat:cs.CL OR cat:cs.AI) AND (all:language OR all:llm OR all:translation OR all:reasoning)",
@@ -72,13 +73,23 @@ def fetch_trend_sources(track: str, max_results: int = 5) -> list[dict[str, str]
             "User-Agent": "Discord-Bot/1.0 (GitHub Actions trend fetch)",
         },
     )
-    try:
-        with request.urlopen(http_request, timeout=60) as response:
-            xml_text = response.read().decode("utf-8")
-    except error.HTTPError as exc:
-        if exc.code == 429:
-            raise RuntimeError("Trend source fetch was rate-limited by arXiv. Retry later.") from exc
-        raise RuntimeError(f"Trend source fetch failed with HTTP {exc.code}.") from exc
+    xml_text = ""
+    for attempt in range(1, 4):
+        try:
+            with request.urlopen(http_request, timeout=60) as response:
+                xml_text = response.read().decode("utf-8")
+                break
+        except error.HTTPError as exc:
+            if exc.code == 429 and attempt < 4:
+                retry_after = exc.headers.get("Retry-After")
+                delay = int(retry_after) if retry_after and retry_after.isdigit() else attempt * 10
+                time.sleep(delay)
+                continue
+            if exc.code == 429:
+                raise RuntimeError("Trend source fetch was rate-limited by arXiv after retries.") from exc
+            raise RuntimeError(f"Trend source fetch failed with HTTP {exc.code}.") from exc
+    if not xml_text:
+        raise RuntimeError(f"Trend source fetch failed for track={track}")
 
     sources = parse_arxiv_feed(xml_text)
     if not sources:

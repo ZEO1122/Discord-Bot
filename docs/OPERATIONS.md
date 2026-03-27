@@ -138,6 +138,7 @@ ANTHROPIC_API_KEY=
 2. GPT API step 실패 여부 확인
 3. validation step 실패 여부 확인
 4. 수집 source가 비어 있는지 확인
+5. arXiv rate limit(429) 발생 시 잠시 후 재실행 또는 `max_results` 축소
 
 ### 8.3 게시는 됐는데 내용이 이상함
 1. concept markdown 원본 확인
