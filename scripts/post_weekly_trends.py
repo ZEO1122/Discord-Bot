@@ -166,8 +166,15 @@ def main() -> None:
         channels = [channel for channel in channels if channel.channel_key == args.channel_key]
 
     if not channels:
-        print("publish_status=skipped reason=no_enabled_channels")
-        return
+        if args.channel_key:
+            raise RuntimeError(
+                f"No enabled channel matched channel_key={args.channel_key}. "
+                "Check config/channel_interest_map.json and enabled flags."
+            )
+        raise RuntimeError(
+            "No enabled trend channels configured. "
+            "Set enabled=true in config/channel_interest_map.json before running the workflow."
+        )
 
     posted_channels = 0
     skipped_channels = 0

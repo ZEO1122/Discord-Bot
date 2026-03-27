@@ -353,6 +353,11 @@ concept/trend 브리핑이 실제 목표 채널에 올라왔는지 확인
 - `config/channel_interest_map.json`의 `enabled`, `channel_id`, `webhook_key`를 확인한다.
 - `DISCORD_WEBHOOK_MAP_JSON`에 같은 `webhook_key`가 있는지 확인한다.
 
+#### Action은 성공인데 Discord에 안 올라옴
+- 가장 흔한 원인은 `config/channel_interest_map.json`에서 채널이 `enabled: false` 상태인 경우다.
+- `channel_key`를 지정해도 해당 채널이 비활성화면 게시 대상에서 제외된다.
+- fresh source가 없는 경우에도 workflow는 `skipped`로 끝날 수 있다.
+
 #### Discord에 아무것도 안 올라옴
 - webhook URL이 올바른 채널인지 확인
 - Actions run success 여부 확인

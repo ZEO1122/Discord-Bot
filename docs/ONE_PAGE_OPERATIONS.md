@@ -88,6 +88,7 @@ GitHub Actions에서:
 - `OPENAI_API_KEY` 확인
 - `DISCORD_WEBHOOK_MAP_JSON` 확인
 - `channel_interest_map.json`의 `webhook_key`와 secret key 일치 확인
+- `channel_interest_map.json`에서 해당 채널이 `enabled: true`인지 확인
 - fresh source 부족이면 `skipped` 가능
 
 ## 7. 운영 시작 전 마지막 확인

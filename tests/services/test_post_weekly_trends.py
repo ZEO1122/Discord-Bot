@@ -91,3 +91,28 @@ def test_load_webhook_map_accepts_yaml_style_secret(monkeypatch) -> None:  # typ
         "default": "https://discord.com/api/webhooks/test",
         "nlp-study": "https://discord.com/api/webhooks/test2",
     }
+
+
+def test_load_channel_map_preserves_disabled_channels(tmp_path: Path) -> None:
+    config_path = tmp_path / "channel_interest_map.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "channels": [
+                    {
+                        "channel_key": "llm-brief",
+                        "channel_id": "123",
+                        "webhook_key": "llm-brief",
+                        "enabled": False,
+                        "interests": ["llm"],
+                        "max_topics": 1,
+                    }
+                ]
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    channels = load_channel_map(config_path)
+    assert len(channels) == 1
+    assert channels[0].enabled is False
