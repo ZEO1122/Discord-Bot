@@ -62,6 +62,8 @@ Build / Validate Script              GPT Summarize / Validate
   운영 중 유지보수 가이드
 - `docs/ONE_PAGE_OPERATIONS.md`
   누구나 바로 따라할 수 있는 1페이지 운영 요약
+- `docs/LEADERBOARD_STRATEGY.md`
+  퀴즈/리더보드/상금 운영 방향 의사결정 문서
 - `docs/ROADMAP.md`
   Week 1~3 구현 로드맵
 - `docs/OPERATIONS.md`
