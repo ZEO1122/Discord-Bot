@@ -11,7 +11,12 @@ from repositories.quiz_repository import QuizRepository
 from services.attempt_recording_service import AttemptRecordingService
 from services.grading_service import GradingService
 from services.private_feedback_renderer import PrivateFeedbackRenderer
-from services.submission_handler import QuizNotFoundError, SubmissionHandlerService
+from services.submission_handler import (
+    InvalidChoiceError,
+    QuizClosedError,
+    QuizNotFoundError,
+    SubmissionHandlerService,
+)
 
 
 def create_test_session() -> Session:
@@ -107,3 +112,68 @@ def test_invalid_quiz_id_raises_error() -> None:
         pass
     else:
         raise AssertionError("Expected QuizNotFoundError for invalid quiz id")
+
+
+def test_closed_quiz_raises_error() -> None:
+    session = create_test_session()
+    handler, quiz_repository = build_submission_handler(session)
+    quiz = quiz_repository.get_latest_open()
+    assert quiz is not None
+    quiz.status = "closed"
+    session.flush()
+
+    try:
+        handler.submit_multiple_choice(
+            discord_user_id="1001",
+            display_name="tester",
+            username="tester",
+            quiz_id=quiz.id,
+            selected_choice=2,
+        )
+    except QuizClosedError:
+        pass
+    else:
+        raise AssertionError("Expected QuizClosedError for closed quiz")
+
+
+def test_invalid_choice_raises_error() -> None:
+    session = create_test_session()
+    handler, quiz_repository = build_submission_handler(session)
+    quiz = quiz_repository.get_latest_open()
+    assert quiz is not None
+
+    try:
+        handler.submit_multiple_choice(
+            discord_user_id="1001",
+            display_name="tester",
+            username="tester",
+            quiz_id=quiz.id,
+            selected_choice=99,
+        )
+    except InvalidChoiceError:
+        pass
+    else:
+        raise AssertionError("Expected InvalidChoiceError for invalid choice")
+
+
+def test_missing_user_first_attempt_is_recorded_as_one() -> None:
+    session = create_test_session()
+    handler, quiz_repository = build_submission_handler(session)
+    quiz = quiz_repository.get_latest_open()
+    assert quiz is not None
+
+    result = handler.submit_multiple_choice(
+        discord_user_id="new-user",
+        display_name=None,
+        username=None,
+        quiz_id=quiz.id,
+        selected_choice=2,
+    )
+    session.commit()
+
+    recorded_attempts = session.scalars(
+        select(Attempt).where(Attempt.quiz_id == quiz.id).order_by(Attempt.attempt_no.asc())
+    ).all()
+    assert result.attempt_no == 1
+    assert len(recorded_attempts) == 1
+    assert recorded_attempts[0].attempt_no == 1
