@@ -11,10 +11,6 @@ on:
         description: "Skip real Discord webhook post"
         required: false
         default: "false"
-  schedule:
-    - cron: "0 0 * * 1-5"
-    - cron: "0 6 * * 1"
-    - cron: "0 0 * * 2"
 
 jobs:
   post-concept:
