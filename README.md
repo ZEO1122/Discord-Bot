@@ -42,9 +42,10 @@ Google Apps Script
 2. 새 Discord 서버 연결: `docs/SERVER_SETUP_GUIDE.md`
 3. 서버 전환 준비: `docs/CLUB_SERVER_TRANSITION.md`
 4. 빠른 운영 요약: `docs/ONE_PAGE_OPERATIONS.md`
-5. Apps Script 설정: `docs/GAS_SETUP_GUIDE.md`
-6. Apps Script 가져오기 순서: `docs/GAS_IMPORT_CHECKLIST.md`
-7. 운영/수정/장애 대응: `docs/MAINTENANCE_GUIDE.md`, `docs/OPERATIONS.md`
+5. 운영 시작 전 최종 점검: `docs/GAS_FINAL_CHECKLIST.md`
+6. Apps Script 설정: `docs/GAS_SETUP_GUIDE.md`
+7. Apps Script 가져오기 순서: `docs/GAS_IMPORT_CHECKLIST.md`
+8. 운영/수정/장애 대응: `docs/MAINTENANCE_GUIDE.md`, `docs/OPERATIONS.md`
 
 ## 주요 문서
 
@@ -56,6 +57,8 @@ Google Apps Script
   개인 테스트 서버에서 동아리 서버로 전환하는 체크리스트
 - `docs/ONE_PAGE_OPERATIONS.md`
   운영자용 1페이지 요약
+- `docs/GAS_FINAL_CHECKLIST.md`
+  실제 운영 시작 직전 확인용 최종 체크리스트
 - `docs/MAINTENANCE_GUIDE.md`
   유지보수 절차
 - `docs/OPERATIONS.md`
