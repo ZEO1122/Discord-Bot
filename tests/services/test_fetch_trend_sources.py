@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.fetch_trend_sources import build_arxiv_url, parse_arxiv_feed
+from scripts.fetch_trend_sources import build_arxiv_url, parse_arxiv_feed, parse_arxiv_rss
 import pytest
 
 from scripts.post_trend_brief import (
@@ -22,6 +22,25 @@ SAMPLE_FEED = """<?xml version='1.0' encoding='UTF-8'?>
     <link rel="alternate" href="https://arxiv.org/abs/1234.5678v1"/>
   </entry>
 </feed>
+"""
+
+SAMPLE_RSS = """<?xml version='1.0' encoding='UTF-8'?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Alignment for LLM Agents</title>
+      <link>https://arxiv.org/abs/2603.12345v1</link>
+      <pubDate>Mon, 30 Mar 2026 00:00:00 GMT</pubDate>
+      <description>Large language model agent alignment paper.</description>
+    </item>
+    <item>
+      <title>Unrelated Vision Paper</title>
+      <link>https://arxiv.org/abs/2603.99999v1</link>
+      <pubDate>Mon, 30 Mar 2026 00:00:00 GMT</pubDate>
+      <description>Computer vision segmentation.</description>
+    </item>
+  </channel>
+</rss>
 """
 
 
@@ -64,6 +83,13 @@ def test_parse_arxiv_feed_extracts_sources() -> None:
     assert sources[0].url == "https://arxiv.org/abs/1234.5678v1"
     assert sources[0].published_at == "2026-03-26"
     assert sources[0].source_type == "paper"
+
+
+def test_parse_arxiv_rss_filters_by_keywords() -> None:
+    sources = parse_arxiv_rss(SAMPLE_RSS, ["alignment", "agent"])
+    assert len(sources) == 1
+    assert sources[0].title == "Alignment for LLM Agents"
+    assert sources[0].url == "https://arxiv.org/abs/2603.12345v1"
 
 
 def test_select_fresh_sources_filters_seen_urls_by_normalized_arxiv_id() -> None:
