@@ -4,10 +4,6 @@
 .
   AGENTS.md
   .env.example
-  .github/
-    workflows/
-      post-concept.yml
-      post-trend.yml
   apps-script/
     appsscript.json
     Code.gs
@@ -42,10 +38,10 @@
     bot/
       app.py
       cogs/
-      admin.py
-      briefing.py
-      quiz.py
-      stats.py
+        admin.py
+        briefing.py
+        quiz.py
+        stats.py
       views/
         quiz.py
     core/

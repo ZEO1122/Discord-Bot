@@ -1,116 +1,110 @@
-# Architecture — GitHub Actions 중심 발행 구조
+# Architecture — GAS 중심 발행 구조
 
 ## 1. 문서 목적
 
-이 문서는 서버 없는 운영 제약을 전제로, AI 학술동아리 Discord 브리핑 시스템의 현재 아키텍처를 설명한다.
+이 문서는 AI 학술동아리 Discord 브리핑 시스템의 현재 아키텍처를 설명한다.
 
 현재 기본 운영 경로는 아래와 같다.
 
-1. 개념 브리핑은 `manifest + progress` 큐로 순차 게시한다.
-2. 최신 동향 브리핑은 채널별 관심분야 설정을 읽고 실행 시점에 최신 source를 수집해 GPT API로 생성한다.
-3. 자동 발행은 GitHub Actions가 실행한다.
+1. concept 브리핑은 GitHub public repo의 markdown을 읽는다.
+2. trend 브리핑은 Apps Script가 최신 source를 수집하고 GPT API로 생성한다.
+3. 예약 실행은 Google Apps Script time trigger가 담당한다.
 4. Discord 전송은 webhook으로 처리한다.
 
 ## 2. 핵심 설계 원칙
 
 - 상시 서버를 기본 전제로 두지 않는다.
-- 자동화의 중심은 `GitHub Actions + Discord Webhook`이다.
-- `discord.py` Gateway bot 코드는 보조 개발 경로로 유지한다.
-- trend 브리핑은 출처 없는 자동 게시를 허용하지 않는다.
-- 개념 브리핑은 저장소의 markdown 파일을 진실 소스로 본다.
-- 게시 실패는 Discord 응답, Actions logs, publish log로 추적 가능해야 한다.
+- 자동화의 중심은 `Google Apps Script + Discord Webhook`이다.
+- GitHub는 concept 원본과 설정의 source of truth로 유지한다.
+- trend 브리핑은 source 없이 자동 게시하지 않는다.
+- concept 브리핑은 저장소의 markdown 파일을 진실 소스로 본다.
+- 게시 실패는 Apps Script 실행 로그와 Discord 게시 결과로 추적 가능해야 한다.
 
-## 3. 현재 구현 우선 구조
+## 3. 현재 기본 구조
 
 ```text
-[Markdown Brief Source]        [Live Trend Source Fetch]
-           ↓                           ↓
- [Build / Validate Script]   [GPT Generation + Validation]
-           ↓                           ↓
-             [GitHub Actions Publisher]
-                        ↓
-                [Discord Webhook]
-                        ↓
-            [Publish Logs / Action Logs]
+[GitHub Public Repo]
+   ├─ concept markdown
+   ├─ concept manifest
+   └─ channel interest config
+              ↓
+       [Google Apps Script]
+   ├─ ConceptService
+   ├─ TrendService
+   ├─ GitHub raw fetch
+   ├─ OpenAI generate
+   ├─ Discord webhook send
+   ├─ Script Properties
+   └─ Google Sheets history
 ```
 
-이 구조가 현재 운영의 기본값이다.
-
-## 4. Week 1 — Concept 브리핑 자동 게시
+## 4. Concept 브리핑 자동 게시
 
 ### 목표
-- 미리 작성한 딥러닝 개념 markdown을 Discord에 안정적으로 게시한다.
-- 게시 결과를 추적 가능하게 만든다.
+- 미리 작성한 딥러닝 개념 markdown을 평일 오전 9시에 Discord에 안정적으로 게시한다.
 
 ### 핵심 컴포넌트
 
-#### Markdown Brief Source
+#### GitHub Concept Source
 - `content/concepts/**/*.md`
-- 브리핑 원문, 요약, 토론 질문, 출처를 저장한다.
+- `content/concepts/manifest.json`
 
-#### Build / Validate Script
+#### Concept Queue
+- Script Properties에 저장된 progress를 읽어 다음 concept를 선택한다.
+
+#### Concept Renderer
 - markdown frontmatter와 본문 섹션을 파싱한다.
-- 필수 필드 누락 여부를 검사한다.
-- Discord embed payload를 만든다.
+- Discord full embed payload를 만든다.
 
-#### Concept Queue Publisher
-- `content/concepts/manifest.json`을 읽는다.
-- `content/concepts/history/concept_progress.json`을 읽어 다음 concept를 선택한다.
-- `schedule` 또는 `workflow_dispatch`로 실행된다.
-
-#### Discord Webhook
-- 실제 Discord 채널 게시를 담당한다.
-
-#### Publish Logs
-- GitHub Actions logs
-- webhook 결과 로그
-- 선택적 로컬/외부 DB 기록
+#### Concept Delivery
+- concept 채널 webhook으로 게시한다.
 
 ### 데이터 흐름
 
 ```text
-1. manifest / progress 로드
-2. 다음 concept markdown 선택
-3. frontmatter / 본문 파싱
-4. 필수 필드 검증
-5. Discord payload 생성
-6. webhook 게시
-7. progress 갱신 및 기록
+1. manifest 읽기
+2. Script Properties에서 last index 읽기
+3. 다음 concept 선택
+4. markdown 파싱
+5. embed 생성
+6. Discord webhook 게시
+7. Script Properties progress 갱신
 ```
 
-## 5. Week 2 — Trend 브리핑 자동 게시
+## 5. Trend 브리핑 자동 게시
 
 ### 목표
-- 채널별 관심분야 설정을 읽고, 최신 source를 실행 시점에 수집해 GPT API로 브리핑을 생성한다.
-- 검증을 통과한 결과만 Discord에 게시한다.
+- 채널별 관심분야를 읽고, 월요일 오전 9시에 최신 source를 바탕으로 trend 브리핑을 게시한다.
 
 ### 핵심 컴포넌트
 
-#### Live Trend Source Fetch
-- track에 따라 외부 최신 source를 수집한다.
-- 현재 기본 source는 arXiv 최근 논문이다.
-- `cv`, `multimodal`은 track별 query를 분리해 가져온다.
-- title, url, published_at, source_type을 구조화해 GPT 입력으로 넘긴다.
-
 #### Channel Interest Map
 - `config/channel_interest_map.json`
-- 채널별 관심분야, webhook key, max topic 수를 관리한다.
-- 설문 결과는 이 파일로 정규화된 뒤 workflow가 읽는다.
+- 채널별 관심분야와 webhook key를 정의한다.
+
+#### Live Trend Source Fetch
+- Apps Script가 arXiv API를 먼저 시도한다.
+- 필요 시 RSS fallback을 사용한다.
+- taxonomy:
+  - `llm`
+  - `detection-segmentation`
+  - `vision-language`
 
 #### GPT Generation
-- 수집된 최신 source 목록을 입력으로 받아 브리핑 초안을 만든다.
-- source 없는 trend 생성은 허용하지 않는다.
+- source 목록만 근거로 GPT API 브리핑을 생성한다.
+- 출력 구조:
+  - `title`
+  - `core_explanation`
+  - `why_it_matters`
+  - `quick_terms`
+  - `discussion_prompt`
 
-#### Validation
-- 필수 필드 존재 여부 검사
-- source 존재 여부 검사
-- 금지 규칙 검사
-- 최근 게시된 source와 중복되는지 검사
+#### Trend History Store
+- Google Sheets `trend_history`
+- `channel_id + interest + normalized_url` 기준 중복 방지
 
-#### Weekly Trend Publisher
-- 채널별 관심분야를 순회한다.
-- 각 채널에 관심분야별 section을 묶어 1개 메시지로 게시한다.
-- `channel_id:interest` 기준 history를 갱신한다.
+#### Trend Delivery
+- `DISCORD_WEBHOOK_MAP_JSON`에서 채널별 webhook을 찾아 전송한다.
 
 ### 데이터 흐름
 
@@ -118,100 +112,80 @@
 1. channel_interest_map 로드
 2. 채널별 관심분야 선택
 3. 관심분야별 최신 source 수집
-4. `channel_id:interest` 기준 중복 제거
+4. Google Sheets history 기준 중복 제거
 5. GPT API 호출
-6. 필수 필드 / source 검증
-7. 채널별 묶음 메시지 생성
+6. 출력 정규화 및 검증
+7. Discord embed 생성
 8. webhook 게시
-9. trend history 갱신
+9. Google Sheets history 기록
 ```
 
-## 6. Week 3 — 퀴즈와 기록 전략 재설계
+## 6. 상태 저장 전략
 
-### 목표
-- 브리핑과 함께 퀴즈를 게시하는 형식을 정리한다.
-- 상시 서버 없이 유지 가능한 기록 전략을 결정한다.
+### Concept progress
+- 저장 위치: Script Properties
+- 예:
+  - `CONCEPT_LAST_INDEX`
+  - `CONCEPT_LAST_PATH`
+  - `CONCEPT_LAST_BRIEFING_KEY`
+  - `CONCEPT_LAST_POSTED_AT`
 
-### 현재 판단
-- `discord.py` 기반 slash command 제출/통계는 상시 런타임이 필요하다.
-- 서버를 둘 수 없다면, 아래 둘 중 하나를 선택해야 한다.
+### Trend history
+- 저장 위치: Google Sheets
+- 시트 이름: `trend_history`
+- 컬럼:
+  - `channel_key`
+  - `channel_id`
+  - `interest`
+  - `source_url`
+  - `source_title`
+  - `published_at`
+  - `posted_at`
+  - `brief_title`
 
-1. 퀴즈는 게시만 하고 제출/채점은 후순위로 둔다.
-2. 외부 폼/시트/별도 수집 도구를 사용한다.
+## 7. 개발/보조 구조
 
-### 후속 확장 후보
-- `discord.py` Gateway bot 기반 `/quiz_solve`
-- `/stats me`
-- `/admin stats`
-- 외부 DB 또는 캐시 기반 통계
-
-## 7. 컴포넌트 책임 구분
-
-### GitHub Actions 계층
-- 스케줄 실행
-- 수동 실행(`workflow_dispatch`)
-- secret 주입
-- 로그/실패 상태 제공
-
-### Script 계층
-- markdown 파싱
-- source 수집
-- GPT 생성 호출
-- payload 생성
-- 게시 호출
-
-### Publish Service 계층
-- Discord embed payload 생성
-- webhook 전송
-- publish 결과 모델화
-
-### 저장 계층
-- markdown 원본
-- 선택적 로컬 SQLite
-- GitHub Actions logs
-
-## 8. 개발/보조 구조
-
-현재 저장소에는 `src/bot/*` 기반 Gateway bot 코드도 있다.
+현재 저장소에는 `src/bot/*` 기반 Gateway bot 코드와 Python 스크립트도 있다.
 
 이 코드는 아래 용도로 유지한다.
 - 로컬 실험
-- slash command UX 검증
-- 향후 상시 런타임 확보 시 재사용
+- 과거 구현 참고
+- 필요 시 수동 디버깅
 
 하지만 현재 운영 기본 구조는 아니다.
 
-## 9. 운영 기본값
+## 8. 운영 기본값
 
 ### 기본 운영
-- GitHub Actions scheduled workflow
+- GAS time trigger
 - Discord webhook 게시
-- Actions logs 기반 추적
+- Apps Script 실행 로그 기반 추적
 
 ### 보조 운영
-- 로컬 `python -m bot.app`
-- 수동 `/admin publish`
-- slash command 실험
+- GitHub public repo에서 source 읽기
+- 로컬 Python 수동 실험
 
-## 10. 장애 포인트와 대응
+## 9. 장애 포인트와 대응
 
-### 10.1 concept 게시 실패
-- markdown 필드 누락 확인
-- webhook secret 확인
-- GitHub Actions logs 확인
+### 9.1 concept 게시 실패
+- manifest 경로 확인
+- markdown 포맷 확인
+- Script Properties progress 확인
+- embed 제한 초과 여부 확인
 
-### 10.2 trend 게시 실패
+### 9.2 trend 게시 실패
 - source fetch 성공 여부 확인
-- GPT API 응답 구조 확인
-- source 없는 출력인지 확인
+- OpenAI 응답 구조 확인
+- webhook map key 일치 여부 확인
+- Google Sheets history 접근 가능 여부 확인
 
-### 10.3 Discord 게시 성공 여부 불명확
-- webhook 응답 확인
-- Actions run log 확인
-- 필요 시 publish log 아티팩트 저장
+### 9.3 Discord 게시 성공 여부 불명확
+- Apps Script 실행 로그 확인
+- webhook 응답 본문 확인
+- Google Sheets history 또는 Script Properties 갱신 여부 확인
 
-## 11. 설계 결론
+## 10. 설계 결론
 
-현재 이 프로젝트의 핵심은 "상시 Discord 봇"이 아니라, **GitHub Actions가 markdown 또는 GPT 생성 결과를 Discord webhook으로 자동 발행하는 시스템**이다.
+현재 이 프로젝트의 핵심은 **GitHub가 콘텐츠 저장소 역할을 하고, Google Apps Script가 예약 실행기 역할을 맡아 Discord webhook으로 자동 발행하는 구조**다.
 
-Gateway bot 기반 interaction 기능은 후속 확장으로 유지하되, 현재 MVP 아키텍처의 중심은 아니다.
+즉, 이 프로젝트는 **GAS 중심 브리핑 자동화 시스템**으로 이해하는 것이 맞다.

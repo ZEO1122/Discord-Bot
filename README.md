@@ -1,264 +1,163 @@
 # AI 학술동아리 Discord 브리핑 자동화 저장소
 
-이 저장소는 **딥러닝 개념 브리핑 + 세부 분야 동향 브리핑 + 퀴즈 포함 게시물**을 Discord로 자동 발행하기 위한 프로젝트다.
+이 저장소는 **딥러닝 개념 브리핑 + 최신 동향 브리핑**을 Discord로 자동 발행하기 위한 프로젝트다.
 
-현재 운영 전제는 다음과 같다.
+현재 운영 방식은 아래와 같다.
 
-1. **상시 서버를 두지 않는다.**
-2. 자동 발행은 **GitHub Actions + Discord Webhook**로 처리한다.
-3. `discord.py` 기반 Gateway bot 코드는 남겨두되, 당장은 **개발/실험용 보조 경로**로 취급한다.
+1. **Google Apps Script**가 예약 실행을 담당한다.
+2. concept 브리핑은 GitHub public 저장소의 markdown 파일을 읽어 게시한다.
+3. trend 브리핑은 GAS가 최신 source를 수집하고 GPT API로 생성한다.
+4. Discord 전송은 webhook으로 처리한다.
 
 ## 핵심 목표
 
-1. 학술동아리 멤버가 매일 짧고 신뢰 가능한 AI 브리핑을 받는다.
-2. 안정적인 딥러닝 개념은 미리 작성한 `.md` 파일에서 게시한다.
-3. 최신 동향 브리핑은 월요일 오전 9시에 채널별 관심분야를 읽고 최신 논문 소스를 수집해 GPT API로 생성/게시한다.
-4. 게시 이력은 GitHub Actions 로그와 Discord 메시지 결과로 추적한다.
-5. trend 브리핑은 최근 게시 source를 history 파일에 기록해 중복 게시를 피한다.
-6. concept 브리핑은 `manifest + progress` 큐로 평일 오전 9시에 1개씩 게시한다.
-7. trend 관심분야 기본 taxonomy는 `llm`, `detection-segmentation`, `vision-language`를 사용한다.
+1. 학술동아리 멤버가 정해진 시간에 짧고 신뢰 가능한 AI 브리핑을 받는다.
+2. concept는 사람이 정리한 `.md` 원본을 기반으로 게시한다.
+3. trend는 최신 source를 바탕으로 생성하되, 주의 문구와 출처를 반드시 함께 보낸다.
+4. 운영자는 서버 없이도 브리핑 운영/수정/유지보수를 할 수 있어야 한다.
 
 ## 현재 프로젝트 해석
 
-이 저장소는 더 이상 "상시 Discord 봇 서비스"가 아니라, 아래 경로를 기본으로 하는 **콘텐츠 발행 자동화 저장소**로 본다.
+이 저장소는 "상시 Discord 봇 서비스"가 아니라, 아래 경로를 기본으로 하는 **콘텐츠 저장소 + GAS 실행기 구조**다.
 
 ```text
-Markdown Brief Source                    Live Trend Fetch
-        ↓                                      ↓
-Build / Validate Script              GPT Summarize / Validate
-        ↓                                      ↓
-                  GitHub Actions
-                        ↓
-                 Discord Webhook
-                        ↓
-             Publish Logs / Action Logs
+GitHub Public Repo
+  ├─ concept markdown
+  ├─ concept manifest
+  └─ channel interest config
+
+Google Apps Script
+  ├─ daily concept trigger
+  ├─ weekly trend trigger
+  ├─ GitHub raw fetch
+  ├─ OpenAI generate
+  ├─ Discord webhook send
+  ├─ Script Properties
+  └─ Google Sheets history
 ```
 
-## 이 저장소에 들어 있는 것
-
-처음 참여한 운영자라면 아래 순서로 읽는 것을 권장한다.
+## 처음 보는 사람이 읽을 순서
 
 1. 전체 구조 이해: `README.md`
 2. 새 Discord 서버 연결: `docs/SERVER_SETUP_GUIDE.md`
 3. 서버 전환 준비: `docs/CLUB_SERVER_TRANSITION.md`
 4. 빠른 운영 요약: `docs/ONE_PAGE_OPERATIONS.md`
-5. 운영/수정/장애 대응: `docs/MAINTENANCE_GUIDE.md`, `docs/OPERATIONS.md`
+5. Apps Script 설정: `docs/GAS_SETUP_GUIDE.md`
+6. Apps Script 가져오기 순서: `docs/GAS_IMPORT_CHECKLIST.md`
+7. 운영/수정/장애 대응: `docs/MAINTENANCE_GUIDE.md`, `docs/OPERATIONS.md`
 
-- `AGENTS.md`
-  에이전트 작업 규칙
-- `docs/PRD.md`
-  제품 목표와 범위
+## 주요 문서
+
 - `docs/ARCHITECTURE.md`
-  GitHub Actions 중심 구조와 후속 확장 구조
-- `docs/CONTENT_PIPELINE.md`
-  개념/동향 브리핑 생성 규칙
-- `docs/DATABASE_SCHEMA.md`
-  로컬 개발용 데이터 모델과 후속 확장 스키마
+  GAS 중심 시스템 구조
 - `docs/SERVER_SETUP_GUIDE.md`
   새 Discord 서버 연결용 사용 설명서
 - `docs/CLUB_SERVER_TRANSITION.md`
-  개인 테스트 서버에서 동아리 서버로 옮길 때의 전환 체크리스트
-- `docs/MAINTENANCE_GUIDE.md`
-  운영 중 유지보수 가이드
+  개인 테스트 서버에서 동아리 서버로 전환하는 체크리스트
 - `docs/ONE_PAGE_OPERATIONS.md`
-  누구나 바로 따라할 수 있는 1페이지 운영 요약
-- `docs/LEADERBOARD_STRATEGY.md`
-  퀴즈/리더보드/상금 운영 방향 의사결정 문서
-- `docs/GAS_MIGRATION_PLAN.md`
-  GitHub Actions에서 Google Apps Script로 전환하는 계획 문서
-- `docs/GAS_SETUP_GUIDE.md`
-  Google Apps Script 운영을 위한 설정 가이드
-- `docs/GAS_IMPORT_CHECKLIST.md`
-  Apps Script 프로젝트에 파일을 실제로 넣는 순서 체크리스트
-- `docs/ROADMAP.md`
-  Week 1~3 구현 로드맵
+  운영자용 1페이지 요약
+- `docs/MAINTENANCE_GUIDE.md`
+  유지보수 절차
 - `docs/OPERATIONS.md`
-  GitHub Actions 운영과 smoke path
-
-## Google Apps Script 전환 준비
-
-GitHub Actions 대신 Google Apps Script를 실행기로 쓰려면 아래 문서를 본다.
-
+  상세 운영/장애 대응
 - `docs/GAS_MIGRATION_PLAN.md`
+  GAS 운영 구조 요약
 - `docs/GAS_SETUP_GUIDE.md`
+  Script Properties, Sheet, trigger 설정 방법
 - `docs/GAS_IMPORT_CHECKLIST.md`
-
-초기 skeleton 코드는 아래 폴더에 있다.
-
-- `apps-script/`
+  Apps Script 파일을 붙여넣는 순서
 
 ## 권장 기술 스택
 
-- 언어: Python 3.11+
-- 자동화: GitHub Actions
+- 콘텐츠 저장소: GitHub public repo
+- 실행기: Google Apps Script
 - Discord 게시: Discord Webhook
-- 동향 생성: GPT API
-- 로컬 개발 DB: SQLite
-- 선택적 로컬 실험: `discord.py` Gateway bot
+- 동향 생성: GPT API (`gpt-5.1`)
+- concept progress 저장: Script Properties
+- trend history 저장: Google Sheets
+- 로컬 개발/실험: Python 3.11+, SQLite
 
-## 추천 저장소 구조
+## 저장소 핵심 구조
 
 ```text
 .
-├─ AGENTS.md
-├─ README.md
-├─ requirements.txt
-├─ requirements-dev.txt
+├─ apps-script/
+├─ config/
 ├─ content/
-│  ├─ concepts/
-│  └─ trends/
-├─ scripts/
-│  ├─ bootstrap_sqlite.py
-│  ├─ publish_daily.py
-│  ├─ seed_smoke_data.py
-│  ├─ post_concept_brief.py
-│  └─ post_trend_brief.py
-├─ .github/
-│  └─ workflows/
-├─ src/
-│  ├─ bot/
-│  ├─ services/
-│  ├─ repositories/
-│  ├─ models/
-│  └─ core/
 ├─ docs/
-└─ data/
+├─ scripts/
+└─ src/
 ```
 
-## 가장 먼저 할 일
+## 운영 원칙 요약
 
-1. `.env.example`를 참고해 로컬 `.env` 구성
-2. `content/concepts/`용 markdown 포맷 확정
-3. GitHub Secrets 등록
-4. concept posting workflow부터 구현
-5. trend posting workflow에 최신 source 수집과 GPT 생성 연결
-6. 채널별 관심분야 설정 파일 준비
+- trend 브리핑은 출처 없이 자동 게시하지 않는다.
+- concept 브리핑은 `.md` 본문 섹션을 Discord full embed field로 전송한다.
+- trend 브리핑은 아래 구조를 유지한다.
+  - 주제
+  - 핵심 설명
+  - 왜 중요한가
+  - 용어 빠르게 이해하기
+  - 생각해볼 질문
+  - 출처
+  - 주의
 
-## 콘텐츠 운영 원칙 요약
+## concept 원본 형식
 
-- `discussion_prompt`와 `graded_quiz`를 분리한다.
-- 정답 정보(`answer_key`)는 공개 Discord 메시지에 포함하지 않는다.
-- 출처는 문자열이 아니라 구조화 객체로 저장한다.
-- trend 브리핑은 **실행 시점 최신 source를 수집한 뒤** 게시한다.
-- trend 브리핑은 **출처 없이 자동 게시하지 않는다.**
-- concept 브리핑은 저장소의 `.md` 본문 섹션을 **Discord full embed field**로 정리해 전송한다.
+concept 브리핑은 `frontmatter + 본문 섹션` 형식을 사용한다.
 
-## concept markdown 포맷
-
-추천 형식은 `frontmatter + 본문 섹션`이다. 현재 concept 게시물은 아래 섹션을 기준으로 full embed field를 만든다.
-
-```md
----
-briefing_key: dl-basics-attention-001
-track: dl-basics
-mode: concept
-title: 어텐션은 왜 중요한가
-one_line: 어텐션은 입력 전체 중 중요한 부분에 더 집중하도록 돕는 메커니즘이다.
-discussion_prompt: Transformer가 RNN보다 유리한 상황은 언제일까?
-sources:
-  - title: Attention Is All You Need
-    url: https://arxiv.org/abs/1706.03762
-    source_type: paper
----
-
-## 오늘의 개념
-...
-
-## 핵심 요약
-...
-
-## 왜 중요한가
-...
-
-## 실무 포인트
-...
-
-## 예시
-...
-
-## 용어 빠르게 이해하기
-- Attention: ...
-
-## 자주 하는 실수
-...
-
-## 셀프 체크
-...
-
-## 토론 거리
-...
-
-## source
-- Attention Is All You Need / https://arxiv.org/abs/1706.03762
-
-## 주의
-- 이 문서는 AI로 생성·편집된 브리핑이어서 할루시네이션이 포함되어 있을 수 있다.
-```
-
-필수 필드:
+필수 frontmatter:
 - `briefing_key`
 - `track`
 - `mode`
 - `title`
 - `one_line`
-- 본문 `오늘의 개념` 또는 `핵심 요약`
-- 본문 `왜 중요한가`
-- 본문 `source`
 
-## GitHub Actions 워크플로우
+권장 본문 섹션:
+- `정의`
+- `핵심 정리`
+- `왜 중요한가`
+- `공부 포인트`
+- `직관`
+- `예시`
+- `용어 빠르게 이해하기`
+- `헷갈리기 쉬운 점`
+- `셀프 체크`
+- `토론 거리`
+- `source`
+- `주의`
 
-추가된 워크플로우 초안:
+## concept 게시 기준
 
-- `.github/workflows/post-concept.yml`
-  - manifest/progress 기반 concept 큐 게시 (`.md` 섹션을 full embed field로 전송)
-- `.github/workflows/post-trend.yml`
-  - 채널별 관심분야 + 최신 source 수집 + GPT API 기반 weekly trend 게시
+- source of truth: `content/concepts/manifest.json`
+- 게시 순서 상태: Script Properties
+- concept는 평일 오전 9시 KST에 1개씩 게시
 
-trend 브리핑에는 아래 주의 문구를 항상 포함한다.
+## trend 게시 기준
 
-```text
-주의: 이 브리핑은 최신 source를 바탕으로 GPT가 요약한 내용입니다. 해석 오류나 누락 가능성이 있으니 원문 출처를 함께 확인하세요.
-```
+- source of truth: `config/channel_interest_map.json`
+- 기본 taxonomy:
+  - `llm`
+  - `detection-segmentation`
+  - `vision-language`
+- trend history는 Google Sheets에 저장
+- trend는 월요일 오전 9시 KST에 채널별로 게시
 
-필수 GitHub Secrets:
-- `DISCORD_WEBHOOK_URL`
-- `DISCORD_WEBHOOK_MAP_JSON`
-- `OPENAI_API_KEY`
+## Apps Script 전환 준비
 
-선택 GitHub Variables/Secrets:
-- `DEFAULT_TRACK`
-- `TREND_MAX_RESULTS`
+아래 문서를 순서대로 보면 된다.
 
-## 로컬 smoke path
+- `docs/GAS_MIGRATION_PLAN.md`
+- `docs/GAS_SETUP_GUIDE.md`
+- `docs/GAS_IMPORT_CHECKLIST.md`
 
-로컬에서 concept 게시 경로를 확인하려면:
+Apps Script 코드 위치:
 
-```bash
-python3 scripts/bootstrap_sqlite.py
-python3 scripts/seed_smoke_data.py
-python3 scripts/publish_daily.py --dry-run
-```
-
-Gateway bot 실험이 필요할 때만 아래를 사용한다.
-
-```bash
-PYTHONPATH=src python -m bot.app
-```
-
-## GPT 프롬프트 위치
-
-개념 브리핑 markdown 50개 생성을 위한 프롬프트 템플릿은 아래 파일에 둔다.
-
-- `content/concepts/CONCEPT_BATCH_PROMPT.md`
-- `content/concepts/manifest.json`
-- `content/concepts/history/concept_progress.json`
-- `config/channel_interest_map.json`
+- `apps-script/`
 
 ## 현재 구현 상태 해석
 
-- `src/bot/*` 는 실험용 slash command 경로다.
-- `src/services/publish_service.py` 의 webhook 게시 경로는 GitHub Actions 자동화에서도 재사용 가능하다.
-- `SQLite`는 로컬 개발/검증용이다.
-- trend source는 저장소 파일이 아니라 런타임에 수집한다.
-- trend 중복 방지는 `content/trends/history/published_trends.json` 으로 관리한다.
-- GitHub Actions 런너는 기본적으로 휘발성이므로, 자동 발행 운영에서는 DB보다 **Actions logs + Discord 결과**를 1차 추적 수단으로 본다.
+- `apps-script/`가 현재 운영 기준 구현이다.
+- `src/`와 `scripts/`는 과거 Python 구현 및 참고용이다.
+- `SQLite`는 로컬 개발/실험용이다.
+- Discord 자동 게시의 기준 실행기는 GAS다.
