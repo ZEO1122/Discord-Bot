@@ -64,10 +64,25 @@ Build / Validate Script              GPT Summarize / Validate
   누구나 바로 따라할 수 있는 1페이지 운영 요약
 - `docs/LEADERBOARD_STRATEGY.md`
   퀴즈/리더보드/상금 운영 방향 의사결정 문서
+- `docs/GAS_MIGRATION_PLAN.md`
+  GitHub Actions에서 Google Apps Script로 전환하는 계획 문서
+- `docs/GAS_SETUP_GUIDE.md`
+  Google Apps Script 운영을 위한 설정 가이드
 - `docs/ROADMAP.md`
   Week 1~3 구현 로드맵
 - `docs/OPERATIONS.md`
   GitHub Actions 운영과 smoke path
+
+## Google Apps Script 전환 준비
+
+GitHub Actions 대신 Google Apps Script를 실행기로 쓰려면 아래 문서를 본다.
+
+- `docs/GAS_MIGRATION_PLAN.md`
+- `docs/GAS_SETUP_GUIDE.md`
+
+초기 skeleton 코드는 아래 폴더에 있다.
+
+- `apps-script/`
 
 ## 권장 기술 스택
 

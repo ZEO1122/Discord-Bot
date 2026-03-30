@@ -8,6 +8,17 @@
     workflows/
       post-concept.yml
       post-trend.yml
+  apps-script/
+    appsscript.json
+    Code.gs
+    ConfigService.gs
+    GitHubService.gs
+    DiscordService.gs
+    OpenAIService.gs
+    HistoryService.gs
+    Utils.gs
+    ConceptService.gs
+    TrendService.gs
   config/
     channel_interest_map.json
   README.md
@@ -104,6 +115,8 @@
     CONTENT_PIPELINE.md
     DATABASE_SCHEMA.md
     DISCORD_BOT_SPEC.md
+    GAS_MIGRATION_PLAN.md
+    GAS_SETUP_GUIDE.md
     LEADERBOARD_STRATEGY.md
     LINUX_OPENCODE_SETUP.md
     MAINTENANCE_GUIDE.md
