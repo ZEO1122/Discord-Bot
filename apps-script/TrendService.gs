@@ -13,28 +13,33 @@ const TrendService = {
 
   runWeeklyTrends() {
     const config = GitHubService.fetchJson(ConfigService.getChannelMapPath());
-    const webhookMap = ConfigService.getTrendWebhookMap();
     const channels = (config.channels || []).filter((channel) => channel.enabled);
+    Logger.log(`TrendService:enabled_channels count=${channels.length}`);
 
     if (!channels.length) {
       throw new Error('No enabled trend channels configured.');
     }
 
     channels.forEach((channel) => {
+      Logger.log(`TrendService:channel_start key=${channel.channel_key} interests=${(channel.interests || []).join(',')}`);
       const sections = [];
       (channel.interests || []).slice(0, channel.max_topics || 1).forEach((interest) => {
         const sources = this.fetchSourcesForInterest(interest, 3);
+        Logger.log(`TrendService:interest_fetch key=${channel.channel_key} interest=${interest} fetched=${sources.length}`);
         const freshSources = sources.filter(
           (source) => !HistoryService.hasSeenSource(channel.channel_id, interest, Utils.normalizeArxivUrl(source.url))
         );
+        Logger.log(`TrendService:interest_fresh key=${channel.channel_key} interest=${interest} fresh=${freshSources.length}`);
         if (!freshSources.length) {
           Logger.log(`No fresh trend sources for ${channel.channel_key}:${interest}`);
           return;
         }
 
         const prompt = this.buildPrompt(interest, freshSources);
+        Logger.log(`TrendService:interest_prompt key=${channel.channel_key} interest=${interest} source_count=${freshSources.length}`);
         const response = OpenAIService.generateTrendBrief(prompt);
         const generated = this.normalizeTrendOutput(response);
+        Logger.log(`TrendService:interest_generated key=${channel.channel_key} interest=${interest} title=${generated.title}`);
         sections.push({ interest, generated, sources: freshSources });
       });
 
@@ -43,13 +48,12 @@ const TrendService = {
         return;
       }
 
-      const webhookUrl = webhookMap[channel.webhook_key];
-      if (!webhookUrl) {
-        throw new Error(`Missing webhook mapping for ${channel.webhook_key}`);
-      }
+      const webhookUrl = ConfigService.getTrendWebhookUrl(channel.webhook_key);
 
       const payload = this.buildTrendEmbed(channel.channel_key, sections);
+      Logger.log(`TrendService:channel_post key=${channel.channel_key} section_count=${sections.length}`);
       DiscordService.sendWebhook(webhookUrl, payload);
+      Logger.log(`TrendService:channel_posted key=${channel.channel_key}`);
 
       sections.forEach((section) => {
         section.sources.forEach((source) => {
@@ -65,6 +69,7 @@ const TrendService = {
           });
         });
       });
+      Logger.log(`TrendService:history_written key=${channel.channel_key}`);
     });
   },
 
@@ -78,11 +83,13 @@ const TrendService = {
 
   fetchArxivApiSources(interest, maxResults) {
     try {
+      Logger.log(`TrendService:arxiv_api_start interest=${interest} maxResults=${maxResults}`);
       const response = UrlFetchApp.fetch(Utils.buildArxivUrl(interest, maxResults), {
         muteHttpExceptions: true,
         headers: { 'User-Agent': 'Discord-Bot/1.0 (GAS trend fetch)' },
       });
       const status = response.getResponseCode();
+      Logger.log(`TrendService:arxiv_api_status interest=${interest} status=${status}`);
       if (status === 429) {
         Logger.log(`arXiv API rate limited for ${interest}`);
         return [];
@@ -98,6 +105,7 @@ const TrendService = {
   },
 
   fetchArxivRssSources(interest, maxResults) {
+    Logger.log(`TrendService:arxiv_rss_start interest=${interest} maxResults=${maxResults}`);
     const categories = Utils.RSS_CATEGORY_MAP[interest] || [];
     const keywords = Utils.RSS_KEYWORDS_MAP[interest] || [];
     if (!categories.length) {
@@ -111,6 +119,7 @@ const TrendService = {
         headers: { 'User-Agent': 'Discord-Bot/1.0 (GAS trend fetch fallback)' },
       });
       const status = response.getResponseCode();
+      Logger.log(`TrendService:arxiv_rss_status interest=${interest} category=${category} status=${status}`);
       if (status < 200 || status >= 300) {
         throw new Error(`arXiv RSS failed: ${status} for ${category}`);
       }
@@ -119,7 +128,9 @@ const TrendService = {
       });
     });
 
-    return Object.values(dedup).slice(0, maxResults);
+    const results = Object.values(dedup).slice(0, maxResults);
+    Logger.log(`TrendService:arxiv_rss_results interest=${interest} count=${results.length}`);
+    return results;
   },
 
   parseArxivAtom(xmlText) {
