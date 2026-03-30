@@ -8,15 +8,23 @@ const ConfigService = {
     if (!raw) {
       throw new Error(`Missing Script Property: ${key}`);
     }
+    const normalizedRaw = this.normalizeJsonLikeString(raw);
     try {
-      return JSON.parse(raw);
+      return JSON.parse(normalizedRaw);
     } catch (error) {
-      return this.parseSimpleYamlMap(raw);
+      return this.parseSimpleYamlMap(normalizedRaw);
     }
   },
 
+  normalizeJsonLikeString(raw) {
+    return String(raw)
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .trim();
+  },
+
   parseSimpleYamlMap(raw) {
-    const normalizedRaw = String(raw)
+    const normalizedRaw = this.normalizeJsonLikeString(raw)
       .trim()
       .replace(/^\{\s*/, '')
       .replace(/\s*\}$/, '');
@@ -26,15 +34,21 @@ const ConfigService = {
       .filter((line) => line && !line.startsWith('#') && line !== '{' && line !== '}');
     const result = {};
     lines.forEach((line) => {
-      const idx = line.indexOf(':');
-      if (idx === -1) {
-        return;
-      }
-      const key = line.slice(0, idx).trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '');
-      const value = line.slice(idx + 1).trim().replace(/,$/, '').replace(/^"|"$/g, '').replace(/^'|'$/g, '');
-      if (key && value) {
-        result[key] = value;
-      }
+      line
+        .split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/)
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .forEach((part) => {
+          const idx = part.indexOf(':');
+          if (idx === -1) {
+            return;
+          }
+          const key = part.slice(0, idx).trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '');
+          const value = part.slice(idx + 1).trim().replace(/,$/, '').replace(/^"|"$/g, '').replace(/^'|'$/g, '');
+          if (key && value) {
+            result[key] = value;
+          }
+        });
     });
     if (!Object.keys(result).length) {
       throw new Error('Failed to parse JSON/YAML Script Property');
