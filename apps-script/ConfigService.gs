@@ -16,18 +16,22 @@ const ConfigService = {
   },
 
   parseSimpleYamlMap(raw) {
-    const lines = String(raw)
+    const normalizedRaw = String(raw)
+      .trim()
+      .replace(/^\{\s*/, '')
+      .replace(/\s*\}$/, '');
+    const lines = normalizedRaw
       .split('\n')
       .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith('#'));
+      .filter((line) => line && !line.startsWith('#') && line !== '{' && line !== '}');
     const result = {};
     lines.forEach((line) => {
       const idx = line.indexOf(':');
       if (idx === -1) {
         return;
       }
-      const key = line.slice(0, idx).trim();
-      const value = line.slice(idx + 1).trim();
+      const key = line.slice(0, idx).trim().replace(/^"|"$/g, '').replace(/^'|'$/g, '');
+      const value = line.slice(idx + 1).trim().replace(/,$/, '').replace(/^"|"$/g, '').replace(/^'|'$/g, '');
       if (key && value) {
         result[key] = value;
       }
@@ -56,6 +60,23 @@ const ConfigService = {
 
   getTrendWebhookMap() {
     return this.getJsonFromProperty('DISCORD_WEBHOOK_MAP_JSON');
+  },
+
+  getTrendWebhookUrl(webhookKey) {
+    const webhookMap = this.getTrendWebhookMap();
+    if (webhookMap[webhookKey]) {
+      return webhookMap[webhookKey];
+    }
+
+    const normalizedTarget = String(webhookKey).trim().toLowerCase();
+    const match = Object.keys(webhookMap).find(
+      (key) => String(key).trim().toLowerCase() === normalizedTarget,
+    );
+    if (match) {
+      return webhookMap[match];
+    }
+
+    throw new Error(`Missing webhook mapping for ${webhookKey}. Available keys: ${Object.keys(webhookMap).join(', ')}`);
   },
 
   getOpenAiKey() {
