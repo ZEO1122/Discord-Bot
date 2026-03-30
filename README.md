@@ -68,6 +68,8 @@ Build / Validate Script              GPT Summarize / Validate
   GitHub Actions에서 Google Apps Script로 전환하는 계획 문서
 - `docs/GAS_SETUP_GUIDE.md`
   Google Apps Script 운영을 위한 설정 가이드
+- `docs/GAS_IMPORT_CHECKLIST.md`
+  Apps Script 프로젝트에 파일을 실제로 넣는 순서 체크리스트
 - `docs/ROADMAP.md`
   Week 1~3 구현 로드맵
 - `docs/OPERATIONS.md`
@@ -79,6 +81,7 @@ GitHub Actions 대신 Google Apps Script를 실행기로 쓰려면 아래 문서
 
 - `docs/GAS_MIGRATION_PLAN.md`
 - `docs/GAS_SETUP_GUIDE.md`
+- `docs/GAS_IMPORT_CHECKLIST.md`
 
 초기 skeleton 코드는 아래 폴더에 있다.
 
