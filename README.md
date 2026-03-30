@@ -18,7 +18,7 @@
 
 ## 현재 프로젝트 해석
 
-이 저장소는 "상시 Discord 봇 서비스"가 아니라, 아래 경로를 기본으로 하는 **콘텐츠 저장소 + GAS 실행기 구조**다.
+이 저장소는 상시 Discord 봇 서비스가 아니라, 아래 경로를 기본으로 하는 **콘텐츠 저장소 + GAS 실행기 구조**다.
 
 ```text
 GitHub Public Repo
@@ -69,6 +69,8 @@ Google Apps Script
   Script Properties, Sheet, trigger 설정 방법
 - `docs/GAS_IMPORT_CHECKLIST.md`
   Apps Script 파일을 붙여넣는 순서
+- `docs/LEADERBOARD_STRATEGY.md`
+  현재 구조에서 리더보드가 가능한지와 한계점 정리
 
 ## 권장 기술 스택
 
@@ -146,13 +148,14 @@ concept 브리핑은 `frontmatter + 본문 섹션` 형식을 사용한다.
 - trend history는 Google Sheets에 저장
 - trend는 월요일 오전 9시 KST에 채널별로 게시
 
-## Apps Script 전환 준비
+## Apps Script 운영 준비
 
 아래 문서를 순서대로 보면 된다.
 
 - `docs/GAS_MIGRATION_PLAN.md`
 - `docs/GAS_SETUP_GUIDE.md`
 - `docs/GAS_IMPORT_CHECKLIST.md`
+- `docs/GAS_FINAL_CHECKLIST.md`
 
 Apps Script 코드 위치:
 
