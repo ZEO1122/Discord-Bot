@@ -47,6 +47,10 @@ discussion_prompt: "입력을 이해하는 단계와 출력을 만들어 내는 
 ## 토론 거리
 - 입력을 이해하는 단계와 출력을 만들어 내는 단계를 나누면 어떤 종류의 문제를 더 잘 다룰 수 있을까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Ilya Sutskever, Oriol Vinyals, Quoc Le / [Sequence to Sequence Learning with Neural Networks](https://arxiv.org/abs/1409.3215)
+- 논문: Kyunghyun Cho et al. / [Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation](https://aclanthology.org/D14-1179/)
+
 ## source
 - Ilya Sutskever, Oriol Vinyals, Quoc V. Le / Sequence to Sequence Learning with Neural Networks / 2014
 - Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio / Neural Machine Translation by Jointly Learning to Align and Translate / 2015

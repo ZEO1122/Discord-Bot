@@ -35,6 +35,47 @@ const Utils = {
     return `${parts[0]}/abs/${arxivId}`;
   },
 
+  extractArxivId(value) {
+    const trimmed = String(value || '').trim();
+    if (!trimmed) {
+      return '';
+    }
+
+    const absMatch = trimmed.match(/\/abs\/([^?/#]+)/i);
+    if (absMatch && absMatch[1]) {
+      return absMatch[1].replace(/v\d+$/i, '');
+    }
+
+    const doiMatch = trimmed.match(/10\.48550\/arxiv\.([^\s/?#]+)/i);
+    if (doiMatch && doiMatch[1]) {
+      return doiMatch[1].replace(/v\d+$/i, '');
+    }
+
+    return '';
+  },
+
+  normalizeTitle(value) {
+    return String(value || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  },
+
+  toNumber(value, fallback) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : fallback;
+  },
+
+  buildTrendCandidateCount(config) {
+    const topPapers = Math.max(Number(config.top_papers || 3), 1);
+    const explicitSize = Number(config.candidate_pool_size || 0);
+    if (Number.isFinite(explicitSize) && explicitSize > 0) {
+      return Math.max(explicitSize, topPapers);
+    }
+    return Math.min(Math.max(topPapers * 4, topPapers + 5), 20);
+  },
+
   buildOpenAlexUrl(config) {
     const toDate = new Date();
     const fromDate = new Date(toDate.getTime() - Number(config.lookback_days || 7) * 24 * 60 * 60 * 1000);
@@ -45,8 +86,8 @@ const Utils = {
     const params = [
       `search=${encodeURIComponent(config.search_query || 'artificial intelligence')}`,
       `filter=${encodeURIComponent(filters)}`,
-      'sort=cited_by_count:desc',
-      `per-page=${Math.max(Number(config.top_papers || 3) * 10, 30)}`,
+      'sort=publication_date:desc',
+      `per-page=${this.buildTrendCandidateCount(config)}`,
     ].join('&');
     return `${this.OPENALEX_API_URL}?${params}`;
   },

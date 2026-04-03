@@ -47,6 +47,10 @@ discussion_prompt: "모든 정보를 같은 비중으로 처리하지 않고 중
 ## 토론 거리
 - 모든 정보를 같은 비중으로 처리하지 않고 중요한 부분만 더 주목하는 전략이 왜 효과적일까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Ashish Vaswani et al. / [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+- 설명글: Lilian Weng / [Attention? Attention!](https://lilianweng.github.io/posts/2018-06-24-attention/)
+
 ## source
 - Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio / Neural Machine Translation by Jointly Learning to Align and Translate / 2015
 - Aston Zhang, Zachary C. Lipton, Mu Li, Alexander J. Smola / Dive into Deep Learning

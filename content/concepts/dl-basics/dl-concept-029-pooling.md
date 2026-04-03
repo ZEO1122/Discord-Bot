@@ -47,6 +47,10 @@ discussion_prompt: "세부 값을 모두 남기지 않고 요약하는 과정이
 ## 토론 거리
 - 세부 값을 모두 남기지 않고 요약하는 과정이 왜 이미지 인식에서 유용할까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Matthew Zeiler, Rob Fergus / [Visualizing and Understanding Convolutional Networks](https://arxiv.org/abs/1311.2901)
+- 설명글: Stanford / [CS231n Notes: Convolutional Neural Networks](https://cs231n.github.io/convolutional-networks/)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - Stanford / CS231n Convolutional Neural Networks Notes

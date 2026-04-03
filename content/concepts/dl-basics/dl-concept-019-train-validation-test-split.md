@@ -47,6 +47,10 @@ discussion_prompt: "좋은 성능을 주장하려면 왜 데이터를 나눠서 
 ## 토론 거리
 - 좋은 성능을 주장하려면 왜 데이터를 나눠서 서로 다른 역할을 맡겨야 할까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: Google / [Machine Learning Crash Course: training, validation, and test sets](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets)
+- 설명글: Bishop / [Pattern Recognition and Machine Learning (model selection sections)](https://link.springer.com/book/10.1007/978-0-387-45528-0)
+
 ## source
 - Christopher M. Bishop / Pattern Recognition and Machine Learning / 2006
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016

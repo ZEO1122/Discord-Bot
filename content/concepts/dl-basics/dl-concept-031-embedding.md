@@ -47,6 +47,10 @@ discussion_prompt: "단순한 번호표처럼 보이는 토큰을 왜 굳이 벡
 ## 토론 거리
 - 단순한 번호표처럼 보이는 토큰을 왜 굳이 벡터 공간에 옮겨 놓아야 할까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Jeffrey Pennington, Richard Socher, Christopher Manning / [GloVe: Global Vectors for Word Representation](https://aclanthology.org/D14-1162/)
+- 설명글: Jay Alammar / [The Illustrated Word2vec](https://jalammar.github.io/illustrated-word2vec/)
+
 ## source
 - Tomas Mikolov et al. / Efficient Estimation of Word Representations in Vector Space / 2013
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016

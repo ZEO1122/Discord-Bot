@@ -47,6 +47,10 @@ discussion_prompt: "새로운 데이터를 못 맞히는 것뿐 아니라 학습
 ## 토론 거리
 - 새로운 데이터를 못 맞히는 것뿐 아니라 학습 데이터도 잘 못 맞히는 상태를 왜 따로 구분해야 할까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: Google / [Machine Learning Crash Course: Overfitting and Underfitting](https://developers.google.com/machine-learning/crash-course/overfitting)
+- 설명글: Andrej Karpathy / [A Recipe for Training Neural Networks](https://karpathy.github.io/2019/04/25/recipe/)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - Christopher M. Bishop / Pattern Recognition and Machine Learning / 2006

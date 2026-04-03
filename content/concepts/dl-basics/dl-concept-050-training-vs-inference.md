@@ -47,6 +47,10 @@ discussion_prompt: "같은 모델이라도 학습 모드와 추론 모드가 달
 ## 토론 거리
 - 같은 모델이라도 학습 모드와 추론 모드가 달라져야 하는 이유는 무엇일까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: NVIDIA Blog / [Training versus Inference](https://blogs.nvidia.com/blog/difference-deep-learning-training-inference-ai/)
+- 설명글: TensorFlow / [Save, serialize, and export models](https://www.tensorflow.org/guide/keras/serialization_and_saving)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - PyTorch / Module Training and Evaluation Modes Documentation
