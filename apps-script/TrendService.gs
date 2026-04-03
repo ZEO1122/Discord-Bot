@@ -233,7 +233,7 @@ const TrendService = {
       normalized.why_it_matters = 'This work may matter for real-world AI systems. 이 연구가 실제 AI 시스템 설계와 응용에 어떤 영향을 주는지 추가 확인이 필요합니다.';
     }
     if (!normalized.quick_terms) {
-      normalized.quick_terms = '- key term | 핵심 용어: 원문 source를 함께 확인하세요.';
+      normalized.quick_terms = '- 핵심 용어는 원문 논문을 함께 확인하세요.';
     }
     if (!normalized.discussion_prompt && normalized.title) {
       normalized.discussion_prompt = `${normalized.title}가 실제 적용에 미칠 영향은 무엇일까?`;
@@ -251,12 +251,16 @@ const TrendService = {
 
   buildTrendPayload(section, index, total) {
     return {
-      content: `이번 주 AI 뉴스 ${index}/${total}`,
       embeds: [
         {
           title: Utils.safeTruncateText(section.generated.title, 220),
           color: 15844367,
           fields: [
+            {
+              name: '이번 주 AI 뉴스',
+              value: `선정 논문 ${index}/${total}`,
+              inline: false,
+            },
             {
               name: '분야',
               value: Utils.safeTruncateText(this.TOPIC_LABELS[section.topicTag] || this.TOPIC_LABELS.other, this.FIELD_LIMITS.category),
