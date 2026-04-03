@@ -46,7 +46,7 @@ const Utils = {
       `search=${encodeURIComponent(config.search_query || 'artificial intelligence')}`,
       `filter=${encodeURIComponent(filters)}`,
       'sort=cited_by_count:desc',
-      `per-page=${Math.max(Number(config.top_papers || 3) * 3, 10)}`,
+      `per-page=${Math.max(Number(config.top_papers || 3) * 10, 30)}`,
     ].join('&');
     return `${this.OPENALEX_API_URL}?${params}`;
   },

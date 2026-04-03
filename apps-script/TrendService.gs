@@ -163,14 +163,16 @@ const TrendService = {
       '논문을 source로 유지하되, 제목과 서술은 뉴스형(news-style)으로 작성하라.',
       '반드시 아래 논문 정보만 근거로 작성하라.',
       '기본 문장은 한국어로만 작성하라.',
-      '영어는 기술용어가 꼭 필요할 때만 쓰고 반드시 English(한국어) 형식으로 병기하라.',
+      '영어는 논문을 읽으며 이해가 필요한 기술용어에만 제한적으로 사용하라.',
+      '영어를 쓸 경우 반드시 English(한국어) 형식으로 병기하라.',
+      '일반 문장, 평가 문장, 시사점 문장에는 영어를 섞지 마라.',
       '반드시 JSON으로만 답하라.',
       '필수 키: title, core_explanation, why_it_matters, quick_terms, discussion_prompt',
       '과장된 일반론, 뜬금없는 시사점, 출처에 없는 주장 금지.',
       'title: 뉴스 스타일 제목, 50자 이내',
       'core_explanation: 2~3문장, 350자 이내',
       'why_it_matters: 2~3문장, 350자 이내',
-      'quick_terms: 2~3개 bullet, 220자 이내, 기술용어만 English(한국어) 형식 사용',
+      'quick_terms: 2~3개 bullet, 220자 이내, 어려운 기술용어만 English(한국어) 형식으로 설명',
       'discussion_prompt: 1문장, 80자 이내',
       '',
       `Category: ${this.TOPIC_LABELS[topicTag] || this.TOPIC_LABELS.other}`,
@@ -233,7 +235,7 @@ const TrendService = {
       normalized.why_it_matters = 'This work may matter for real-world AI systems. 이 연구가 실제 AI 시스템 설계와 응용에 어떤 영향을 주는지 추가 확인이 필요합니다.';
     }
     if (!normalized.quick_terms) {
-      normalized.quick_terms = '- 핵심 용어는 원문 논문을 함께 확인하세요.';
+      normalized.quick_terms = '- 기술 용어는 원문 논문을 함께 확인하세요.';
     }
     if (!normalized.discussion_prompt && normalized.title) {
       normalized.discussion_prompt = `${normalized.title}가 실제 적용에 미칠 영향은 무엇일까?`;
