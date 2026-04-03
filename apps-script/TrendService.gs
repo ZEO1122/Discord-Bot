@@ -9,12 +9,12 @@ const TrendService = {
   },
 
   TOPIC_LABELS: {
-    'foundation-models': 'foundation models(파운데이션 모델)',
-    'vision-perception': 'vision perception(비전 인지)',
-    'multimodal-agents': 'multimodal agents(멀티모달 에이전트)',
-    'generation-creative': 'generation creative(생성·크리에이티브)',
-    'systems-efficiency': 'systems efficiency(시스템 효율화)',
-    other: 'other(기타)',
+    'foundation-models': '파운데이션 모델',
+    'vision-perception': '비전 인지',
+    'multimodal-agents': '멀티모달 에이전트',
+    'generation-creative': '생성·크리에이티브',
+    'systems-efficiency': '시스템 효율화',
+    other: '기타',
   },
 
   CAUTION_MESSAGE:
@@ -106,14 +106,24 @@ const TrendService = {
 
   selectWeeklyPapers(papers, topN) {
     const selected = [];
+    const seen = [];
     for (let i = 0; i < papers.length; i += 1) {
       const paper = papers[i];
       if (HistoryService.hasSeenPaper(Utils.normalizeArxivUrl(paper.url))) {
+        seen.push(paper);
         continue;
       }
       selected.push(paper);
       if (selected.length >= topN) {
         break;
+      }
+    }
+    if (selected.length < topN) {
+      for (let i = 0; i < seen.length; i += 1) {
+        selected.push(seen[i]);
+        if (selected.length >= topN) {
+          break;
+        }
       }
     }
     return selected;
@@ -166,6 +176,7 @@ const TrendService = {
       '영어는 논문을 읽으며 이해가 필요한 기술용어에만 제한적으로 사용하라.',
       '영어를 쓸 경우 반드시 English(한국어) 형식으로 병기하라.',
       '일반 문장, 평가 문장, 시사점 문장에는 영어를 섞지 마라.',
+      '예: alignment(정렬), quantization(양자화), retrieval(검색)',
       '반드시 JSON으로만 답하라.',
       '필수 키: title, core_explanation, why_it_matters, quick_terms, discussion_prompt',
       '과장된 일반론, 뜬금없는 시사점, 출처에 없는 주장 금지.',
@@ -232,7 +243,7 @@ const TrendService = {
     });
 
     if (!normalized.why_it_matters && normalized.core_explanation) {
-      normalized.why_it_matters = 'This work may matter for real-world AI systems. 이 연구가 실제 AI 시스템 설계와 응용에 어떤 영향을 주는지 추가 확인이 필요합니다.';
+      normalized.why_it_matters = '이 연구가 실제 AI 시스템 설계와 응용 방향에 어떤 영향을 줄지 추가 확인이 필요합니다.';
     }
     if (!normalized.quick_terms) {
       normalized.quick_terms = this.buildQuickTermsFallback(paper, topicTag);
@@ -305,14 +316,9 @@ const TrendService = {
     return {
       embeds: [
         {
-          title: Utils.safeTruncateText(section.generated.title, 220),
+          title: Utils.safeTruncateText(`이번 주 AI 뉴스 | ${section.generated.title}`, 220),
           color: 15844367,
           fields: [
-            {
-              name: '이번 주 AI 뉴스',
-              value: `선정 논문 ${index}/${total}`,
-              inline: false,
-            },
             {
               name: '분야',
               value: Utils.safeTruncateText(this.TOPIC_LABELS[section.topicTag] || this.TOPIC_LABELS.other, this.FIELD_LIMITS.category),
