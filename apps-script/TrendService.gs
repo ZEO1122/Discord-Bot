@@ -316,9 +316,14 @@ const TrendService = {
     return {
       embeds: [
         {
-          title: Utils.safeTruncateText(`이번 주 AI 뉴스 | ${section.generated.title}`, 220),
+          title: Utils.safeTruncateText(section.generated.title, 220),
           color: 15844367,
           fields: [
+            {
+              name: '이번 주 AI 뉴스',
+              value: `선정 뉴스 ${index}/${total}`,
+              inline: false,
+            },
             {
               name: '분야',
               value: Utils.safeTruncateText(this.TOPIC_LABELS[section.topicTag] || this.TOPIC_LABELS.other, this.FIELD_LIMITS.category),
@@ -347,11 +352,6 @@ const TrendService = {
             {
               name: '출처',
               value: Utils.safeTruncateText(`- ${section.paper.title}: ${section.paper.url}`, this.FIELD_LIMITS.source),
-              inline: false,
-            },
-            {
-              name: '인용수',
-              value: String(section.paper.citation_count),
               inline: false,
             },
             {
