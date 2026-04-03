@@ -3,9 +3,9 @@ const TrendService = {
     category: 180,
     core: 700,
     reason: 700,
-    terms: 320,
+    terms: 600,
     question: 120,
-    source: 500,
+    source: 900,
   },
 
   TOPIC_LABELS: {
@@ -325,7 +325,7 @@ const TrendService = {
     return {
       embeds: [
         {
-          title: Utils.safeTruncateText(`이번주 AI 뉴스||${section.generated.title}`, 220),
+          title: Utils.safeTruncateText(`이번주 AI 뉴스 || ${section.generated.title}`, 220),
           color: 15844367,
           fields: [
             {
@@ -345,7 +345,7 @@ const TrendService = {
             },
             {
               name: '용어 빠르게 이해하기',
-              value: Utils.safeTruncateText(section.generated.quick_terms, this.FIELD_LIMITS.terms),
+              value: this.formatLinePreservingField(section.generated.quick_terms, this.FIELD_LIMITS.terms),
               inline: false,
             },
             {
@@ -355,7 +355,7 @@ const TrendService = {
             },
             {
               name: '출처',
-              value: Utils.safeTruncateText(`- ${section.paper.title}: ${section.paper.url}`, this.FIELD_LIMITS.source),
+              value: this.formatLinePreservingField(`- ${section.paper.title}: ${section.paper.url}`, this.FIELD_LIMITS.source),
               inline: false,
             },
             {
@@ -367,5 +367,35 @@ const TrendService = {
         },
       ],
     };
+  },
+
+  formatLinePreservingField(text, limit) {
+    const lines = String(text || '')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (!lines.length) {
+      return '';
+    }
+
+    const accepted = [];
+    let currentLength = 0;
+    for (let i = 0; i < lines.length; i += 1) {
+      const line = lines[i];
+      const normalizedLine = Utils.safeTruncateText(line, Math.min(limit, 300));
+      const candidateLength = currentLength === 0
+        ? normalizedLine.length
+        : currentLength + 1 + normalizedLine.length;
+      if (candidateLength > limit) {
+        break;
+      }
+      accepted.push(normalizedLine);
+      currentLength = candidateLength;
+    }
+
+    if (!accepted.length) {
+      return Utils.safeTruncateText(lines[0], limit);
+    }
+    return accepted.join('\n');
   },
 };
