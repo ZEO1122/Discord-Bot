@@ -9,16 +9,16 @@ const TrendService = {
   },
 
   TOPIC_LABELS: {
-    'foundation-models': 'Foundation Models | 파운데이션 모델',
-    'vision-perception': 'Vision & Perception | 비전 인지',
-    'multimodal-agents': 'Multimodal Agents | 멀티모달 에이전트',
-    'generation-creative': 'Generation & Creative | 생성·크리에이티브',
-    'systems-efficiency': 'Systems & Efficiency | 시스템·효율화',
-    other: 'Other | 기타',
+    'foundation-models': 'foundation models(파운데이션 모델)',
+    'vision-perception': 'vision perception(비전 인지)',
+    'multimodal-agents': 'multimodal agents(멀티모달 에이전트)',
+    'generation-creative': 'generation creative(생성·크리에이티브)',
+    'systems-efficiency': 'systems efficiency(시스템 효율화)',
+    other: 'other(기타)',
   },
 
   CAUTION_MESSAGE:
-    'Caution | 주의: This briefing is generated from recent paper sources and may contain interpretation errors. 최신 논문 source를 바탕으로 요약했으므로 원문을 함께 확인하세요.',
+    '이 브리핑은 최신 논문 source를 바탕으로 생성된 요약입니다. 해석 오류나 누락 가능성이 있으니 원문 논문을 함께 확인하세요.',
 
   runWeeklyTrends() {
     Logger.log('runTrendWeekly:start');
@@ -56,8 +56,11 @@ const TrendService = {
       return { paper, topicTag, generated };
     });
 
-    const payload = this.buildTrendEmbeds(sections);
-    DiscordService.sendWebhook(ConfigService.getTrendWebhookUrl(), payload);
+    sections.forEach((section, index) => {
+      const payload = this.buildTrendPayload(section, index + 1, sections.length);
+      DiscordService.sendWebhook(ConfigService.getTrendWebhookUrl(), payload);
+      Logger.log(`TrendService:posted paper_index=${index + 1}`);
+    });
     Logger.log(`TrendService:posted sections=${sections.length}`);
 
     sections.forEach((section) => {
@@ -158,14 +161,16 @@ const TrendService = {
     return [
       '당신은 AI study club용 weekly AI news editor다.',
       '논문을 source로 유지하되, 제목과 서술은 뉴스형(news-style)으로 작성하라.',
-      '반드시 아래 논문 정보만 근거로 한국어 중심 + 영어 기술어 병기 형식으로 작성하라.',
+      '반드시 아래 논문 정보만 근거로 작성하라.',
+      '기본 문장은 한국어로만 작성하라.',
+      '영어는 기술용어가 꼭 필요할 때만 쓰고 반드시 English(한국어) 형식으로 병기하라.',
       '반드시 JSON으로만 답하라.',
       '필수 키: title, core_explanation, why_it_matters, quick_terms, discussion_prompt',
       '과장된 일반론, 뜬금없는 시사점, 출처에 없는 주장 금지.',
       'title: 뉴스 스타일 제목, 50자 이내',
       'core_explanation: 2~3문장, 350자 이내',
       'why_it_matters: 2~3문장, 350자 이내',
-      'quick_terms: 2~3개 bullet, 220자 이내, 한영 병기',
+      'quick_terms: 2~3개 bullet, 220자 이내, 기술용어만 English(한국어) 형식 사용',
       'discussion_prompt: 1문장, 80자 이내',
       '',
       `Category: ${this.TOPIC_LABELS[topicTag] || this.TOPIC_LABELS.other}`,
@@ -244,50 +249,57 @@ const TrendService = {
     });
   },
 
-  buildTrendEmbeds(sections) {
+  buildTrendPayload(section, index, total) {
     return {
-      content: 'This Week in AI | 이번 주 AI 뉴스',
-      embeds: sections.map((section) => ({
-        title: Utils.safeTruncateText(section.generated.title, 220),
-        color: 15844367,
-        fields: [
-          {
-            name: 'Category | 분야',
-            value: Utils.safeTruncateText(this.TOPIC_LABELS[section.topicTag] || this.TOPIC_LABELS.other, this.FIELD_LIMITS.category),
-            inline: false,
-          },
-          {
-            name: 'Core | 핵심 설명',
-            value: Utils.safeTruncateText(section.generated.core_explanation, this.FIELD_LIMITS.core),
-            inline: false,
-          },
-          {
-            name: 'Why It Matters | 왜 중요한가',
-            value: Utils.safeTruncateText(section.generated.why_it_matters, this.FIELD_LIMITS.reason),
-            inline: false,
-          },
-          {
-            name: 'Quick Terms | 용어 빠르게 이해하기',
-            value: Utils.safeTruncateText(section.generated.quick_terms, this.FIELD_LIMITS.terms),
-            inline: false,
-          },
-          {
-            name: 'Discussion Prompt | 생각해볼 질문',
-            value: Utils.safeTruncateText(section.generated.discussion_prompt, this.FIELD_LIMITS.question),
-            inline: false,
-          },
-          {
-            name: 'Source | 출처',
-            value: Utils.safeTruncateText(`- ${section.paper.title}: ${section.paper.url}`, this.FIELD_LIMITS.source),
-            inline: false,
-          },
-          {
-            name: 'Caution | 주의',
-            value: this.CAUTION_MESSAGE,
-            inline: false,
-          },
-        ],
-      })),
+      content: `이번 주 AI 뉴스 ${index}/${total}`,
+      embeds: [
+        {
+          title: Utils.safeTruncateText(section.generated.title, 220),
+          color: 15844367,
+          fields: [
+            {
+              name: '분야',
+              value: Utils.safeTruncateText(this.TOPIC_LABELS[section.topicTag] || this.TOPIC_LABELS.other, this.FIELD_LIMITS.category),
+              inline: false,
+            },
+            {
+              name: '핵심 설명',
+              value: Utils.safeTruncateText(section.generated.core_explanation, this.FIELD_LIMITS.core),
+              inline: false,
+            },
+            {
+              name: '왜 중요한가',
+              value: Utils.safeTruncateText(section.generated.why_it_matters, this.FIELD_LIMITS.reason),
+              inline: false,
+            },
+            {
+              name: '용어 빠르게 이해하기',
+              value: Utils.safeTruncateText(section.generated.quick_terms, this.FIELD_LIMITS.terms),
+              inline: false,
+            },
+            {
+              name: '생각해볼 질문',
+              value: Utils.safeTruncateText(section.generated.discussion_prompt, this.FIELD_LIMITS.question),
+              inline: false,
+            },
+            {
+              name: '출처',
+              value: Utils.safeTruncateText(`- ${section.paper.title}: ${section.paper.url}`, this.FIELD_LIMITS.source),
+              inline: false,
+            },
+            {
+              name: '인용수',
+              value: String(section.paper.citation_count),
+              inline: false,
+            },
+            {
+              name: '주의',
+              value: this.CAUTION_MESSAGE,
+              inline: false,
+            },
+          ],
+        },
+      ],
     };
   },
 };
