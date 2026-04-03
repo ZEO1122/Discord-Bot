@@ -40,7 +40,7 @@ Google Apps Script
 ### 흐름
 1. `trend_brief_config.json` 읽기
 2. 지난 7일 논문 후보 수집
-3. 연구 참고 가치 기준 점수화
+3. citation_count 기준 정렬
 4. 상위 3편 선택
 5. Google Sheets history 기준 중복 제거
 6. few-shot topic tagging
@@ -74,8 +74,7 @@ Google Apps Script
 ## Trend 선정 원칙
 
 - 반드시 지난 7일 안에 공개된 논문만 후보로 본다.
-- 재현 가능성, 실험 밀도, 연구 적합성, 구현 신호를 더 크게 본다.
-- 커뮤니티 반응은 보조 신호로만 사용한다.
+- 같은 기간 안에서는 citation_count가 높은 논문을 우선 선택한다.
 
 ## 결론
 

@@ -67,16 +67,16 @@ paper_id | title | canonical_url | published_at | citation_count | topic_tag | p
 
 ## 6. trend 세부분야 의미
 
-- `foundation-models`: LLM과 추론
-- `vision-perception`: 이미지·영상 이해
-- `multimodal-agents`: 멀티모달·에이전트
-- `speech-audio`: 음성·오디오 AI
-- `retrieval-search`: 검색·RAG
-- `robotics-embodied`: 로봇·자율행동
-- `generation-creative`: 이미지·영상 생성
-- `data-training`: 데이터·학습 방법
-- `systems-efficiency`: 모델 경량화·서빙
-- `other`: 기타 AI 연구
+- `foundation-models`: Foundation Models(파운데이션 모델)
+- `vision-perception`: Vision Perception(비전 인지)
+- `multimodal-agents`: Multimodal Agents(멀티모달 에이전트)
+- `speech-audio`: Speech and Audio(음성·오디오)
+- `retrieval-search`: Retrieval and Search(검색·리트리벌)
+- `robotics-embodied`: Robotics and Embodied AI(로보틱스·체화 AI)
+- `generation-creative`: Generation and Creative(생성·크리에이티브)
+- `data-training`: Data and Training(데이터·학습)
+- `systems-efficiency`: Systems Efficiency(시스템 효율화)
+- `other`: Other(기타)
 
 ## 7. 수동 검증 순서
 

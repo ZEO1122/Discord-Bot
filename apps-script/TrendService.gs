@@ -9,81 +9,17 @@ const TrendService = {
   },
 
   TOPIC_LABELS: {
-    'foundation-models': 'LLM과 추론',
-    'vision-perception': '이미지·영상 이해',
-    'multimodal-agents': '멀티모달·에이전트',
-    'speech-audio': '음성·오디오 AI',
-    'retrieval-search': '검색·RAG',
-    'robotics-embodied': '로봇·자율행동',
-    'generation-creative': '이미지·영상 생성',
-    'data-training': '데이터·학습 방법',
-    'systems-efficiency': '모델 경량화·서빙',
-    other: '기타 AI 연구',
+    'foundation-models': 'Foundation Models(파운데이션 모델)',
+    'vision-perception': 'Vision Perception(비전 인지)',
+    'multimodal-agents': 'Multimodal Agents(멀티모달 에이전트)',
+    'speech-audio': 'Speech and Audio(음성·오디오)',
+    'retrieval-search': 'Retrieval and Search(검색·리트리벌)',
+    'robotics-embodied': 'Robotics and Embodied AI(로보틱스·체화 AI)',
+    'generation-creative': 'Generation and Creative(생성·크리에이티브)',
+    'data-training': 'Data and Training(데이터·학습)',
+    'systems-efficiency': 'Systems Efficiency(시스템 효율화)',
+    other: 'Other(기타)',
   },
-
-  SELECTION_WEIGHTS: {
-    recency: 10,
-    impact: 15,
-    reproducibility: 20,
-    experimental_depth: 20,
-    research_fit: 20,
-    implementation_signal: 15,
-  },
-
-  RESEARCH_FIT_KEYWORDS: [
-    'llm',
-    'language model',
-    'reasoning',
-    'alignment',
-    'benchmark',
-    'evaluation',
-    'dataset',
-    'generalization',
-    'robustness',
-    'vision',
-    'segmentation',
-    'detection',
-    'multimodal',
-    'vision-language',
-    'agent',
-    'retrieval',
-    'rag',
-    'diffusion',
-    'generation',
-    'quantization',
-    'distillation',
-    'serving',
-    'pretraining',
-    'fine-tuning',
-    'training',
-    'optimization',
-  ],
-
-  EVALUATION_SIGNAL_KEYWORDS: [
-    'benchmark',
-    'evaluation',
-    'ablation',
-    'baseline',
-    'compare',
-    'comparison',
-    'generalization',
-    'robustness',
-    'error analysis',
-    'human evaluation',
-    'leaderboard',
-    'dataset',
-  ],
-
-  IMPLEMENTATION_SIGNAL_KEYWORDS: [
-    'open source',
-    'open-source',
-    'github',
-    'code available',
-    'code release',
-    'released',
-    'reproducible',
-    'checkpoint',
-  ],
 
   CAUTION_MESSAGE:
     '이 브리핑은 최신 논문 source를 바탕으로 생성된 요약입니다. 해석 오류나 누락 가능성이 있으니 원문 논문을 함께 확인하세요.',
@@ -205,156 +141,17 @@ const TrendService = {
   },
 
   rankWeeklyPapers(papers) {
-    const ranked = [];
-    papers.forEach((paper) => {
-      const enriched = this.enrichPaperForSelection(paper);
-      if (enriched.is_retracted) {
-        return;
-      }
-      ranked.push(enriched);
-    });
-    ranked.sort((a, b) => {
-      if (b.selection_score !== a.selection_score) {
-        return b.selection_score - a.selection_score;
-      }
-      if (String(b.published_at) !== String(a.published_at)) {
-        return String(b.published_at).localeCompare(String(a.published_at));
-      }
-      return String(a.title).localeCompare(String(b.title));
-    });
-    return ranked;
-  },
-
-  enrichPaperForSelection(paper) {
-    const enriched = Object.assign({}, paper);
-    const community = this.fetchHuggingFaceMetadata(enriched.arxiv_id);
-    Object.assign(enriched, community);
-    const breakdown = this.buildSelectionBreakdown(enriched);
-    enriched.selection_breakdown = breakdown;
-    enriched.selection_score = this.roundScore(
-      breakdown.recency +
-        breakdown.impact +
-        breakdown.reproducibility +
-        breakdown.experimental_depth +
-        breakdown.research_fit +
-        breakdown.implementation_signal,
-    );
-    return enriched;
-  },
-
-  buildSelectionBreakdown(paper) {
-    return {
-      recency: this.scoreRecency(paper.published_at),
-      impact: this.scoreImpact(paper),
-      reproducibility: this.scoreReproducibility(paper),
-      experimental_depth: this.scoreExperimentalDepth(paper),
-      research_fit: this.scoreResearchFit(paper),
-      implementation_signal: this.scoreImplementationSignal(paper),
-    };
-  },
-
-  scoreRecency(publishedAt) {
-    const date = this.parsePublishedDate(publishedAt);
-    if (!date) {
-      return 0;
-    }
-    const today = new Date();
-    const ageDays = Math.max(Math.floor((today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)), 0);
-    if (ageDays <= 1) {
-      return this.SELECTION_WEIGHTS.recency;
-    }
-    if (ageDays <= 3) {
-      return this.roundScore(this.SELECTION_WEIGHTS.recency * 0.8);
-    }
-    if (ageDays <= 7) {
-      return this.roundScore(this.SELECTION_WEIGHTS.recency * 0.6);
-    }
-    if (ageDays >= 8) {
-      return 0;
-    }
-    return 0;
-  },
-
-  scoreImpact(paper) {
-    const percentileScore = Math.min(8, Utils.toNumber(paper.citation_percentile, 0) * 8);
-    const fwciScore = Math.min(4, (Utils.toNumber(paper.fwci, 0) / 20) * 4);
-    const citationScore = Math.min(3, (Utils.toNumber(paper.citation_count, 0) / 100) * 3);
-    return this.roundScore(percentileScore + fwciScore + citationScore);
-  },
-
-  scoreReproducibility(paper) {
-    if (paper.is_retracted) {
-      return 0;
-    }
-    const text = this.buildPaperText(paper);
-    let score = 0;
-    if (paper.doi) {
-      score += 4;
-    }
-    if (paper.has_fulltext) {
-      score += 5;
-    }
-    if (paper.is_oa) {
-      score += 3;
-    }
-    if ((paper.abstract || '').length >= 400) {
-      score += 3;
-    }
-    if (this.countKeywordMatches(text, this.IMPLEMENTATION_SIGNAL_KEYWORDS) > 0 || Utils.toNumber(paper.hf_github_stars, 0) > 0) {
-      score += 5;
-    }
-    return this.roundScore(Math.min(this.SELECTION_WEIGHTS.reproducibility, score));
-  },
-
-  scoreExperimentalDepth(paper) {
-    const text = this.buildPaperText(paper);
-    const matches = this.countKeywordMatches(text, this.EVALUATION_SIGNAL_KEYWORDS);
-    let score = 4 + Math.min(10, matches * 2);
-    if ((paper.abstract || '').length >= 800) {
-      score += 2;
-    }
-    if (text.includes('ablation')) {
-      score += 2;
-    }
-    if (text.includes('benchmark') || text.includes('dataset')) {
-      score += 2;
-    }
-    return this.roundScore(Math.min(this.SELECTION_WEIGHTS.experimental_depth, score));
-  },
-
-  scoreResearchFit(paper) {
-    const text = this.buildPaperText(paper);
-    const matches = this.countKeywordMatches(text, this.RESEARCH_FIT_KEYWORDS);
-    let score = 4 + Math.min(14, matches * 1.5);
-    if (paper.openalex_topic) {
-      score += 2;
-    }
-    return this.roundScore(Math.min(this.SELECTION_WEIGHTS.research_fit, score));
-  },
-
-  scoreImplementationSignal(paper) {
-    const text = this.buildPaperText(paper);
-    const upvoteScore = Math.min(3, (Utils.toNumber(paper.hf_upvotes, 0) / 150) * 3);
-    const githubScore = Math.min(8, (Utils.toNumber(paper.hf_github_stars, 0) / 30000) * 8);
-    let dailyRankScore = 0;
-    const dailyRank = Utils.toNumber(paper.hf_daily_rank, 0);
-    if (dailyRank === 1) {
-      dailyRankScore = 2;
-    } else if (dailyRank > 1 && dailyRank <= 5) {
-      dailyRankScore = 1.5;
-    } else if (dailyRank > 5 && dailyRank <= 10) {
-      dailyRankScore = 1;
-    }
-    const keywordBonus = this.countKeywordMatches(text, this.IMPLEMENTATION_SIGNAL_KEYWORDS) > 0 ? 2 : 0;
-    return this.roundScore(Math.min(this.SELECTION_WEIGHTS.implementation_signal, upvoteScore + githubScore + dailyRankScore + keywordBonus));
-  },
-
-  buildPaperText(paper) {
-    return `${paper.title || ''} ${paper.abstract || ''}`.toLowerCase();
-  },
-
-  countKeywordMatches(text, keywords) {
-    return keywords.filter((keyword) => text.includes(keyword)).length;
+    return papers
+      .filter((paper) => !paper.is_retracted)
+      .sort((a, b) => {
+        if (Utils.toNumber(b.citation_count, 0) !== Utils.toNumber(a.citation_count, 0)) {
+          return Utils.toNumber(b.citation_count, 0) - Utils.toNumber(a.citation_count, 0);
+        }
+        if (String(b.published_at) !== String(a.published_at)) {
+          return String(b.published_at).localeCompare(String(a.published_at));
+        }
+        return String(a.title).localeCompare(String(b.title));
+      });
   },
 
   fetchHuggingFaceMetadata(arxivId) {
@@ -410,12 +207,7 @@ const TrendService = {
   },
 
   formatSelectionLogLine(paper) {
-    const breakdown = paper.selection_breakdown || {};
-    const breakdownText = Object.keys(breakdown)
-      .sort()
-      .map((key) => `${key}=${breakdown[key]}`)
-      .join(',');
-    return `TrendService:selection score=${paper.selection_score || 0} title=${paper.title} breakdown=${breakdownText}`;
+    return `TrendService:selection citation_count=${Utils.toNumber(paper.citation_count, 0)} title=${paper.title}`;
   },
 
   tagPaperTopic(paper, taxonomy) {
@@ -491,11 +283,11 @@ const TrendService = {
       'quick_terms: 2~3개 bullet, 220자 이내, 어려운 기술용어만 English(한국어) 형식으로 설명',
       'discussion_prompt: 1문장, 100자 이내',
       'discussion_prompt는 아래 관점 중 하나를 골라 구체적으로 작성하라:',
-      '- 후속 실험 설계',
-      '- 평가 방식의 공백',
-      '- 재현에 필요한 조건',
-      '- 데이터 또는 계산 자원 제약',
-      '- 기존 baseline과의 비교 한계',
+      '- 실제 적용 가능성',
+      '- 성능과 비용 사이의 trade-off',
+      '- 데이터 요구사항',
+      '- 평가 방식의 한계',
+      '- 안전성 또는 신뢰성',
       'discussion_prompt에서 너무 일반적인 질문은 금지한다.',
       '예: "이 논문이 실제 적용에 미칠 영향은 무엇일까?" 같은 반복 문장은 쓰지 마라.',
       '논문 제목/초록에 나온 핵심 개념을 직접 반영한 질문으로 작성하라.',
