@@ -34,20 +34,13 @@
   data/
   docs/
     ARCHITECTURE.md
-    CLUB_SERVER_TRANSITION.md
     CONTENT_PIPELINE.md
     DATABASE_SCHEMA.md
-    GAS_FINAL_CHECKLIST.md
-    GAS_IMPORT_CHECKLIST.md
-    GAS_MIGRATION_PLAN.md
     GAS_SETUP_GUIDE.md
     LINUX_OPENCODE_SETUP.md
-    MAINTENANCE_GUIDE.md
-    ONE_PAGE_OPERATIONS.md
     OPERATIONS.md
     PRD.md
     ROADMAP.md
-    SERVER_SETUP_GUIDE.md
   package.json
   package-lock.json
 ```

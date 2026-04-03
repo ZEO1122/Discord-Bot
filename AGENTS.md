@@ -17,14 +17,12 @@ Optimize in this order: accuracy, traceability, operational simplicity.
 Read the relevant docs before implementing:
 - `README.md`
 - `docs/ARCHITECTURE.md`
+- `docs/GAS_SETUP_GUIDE.md`
+- `docs/OPERATIONS.md`
 - `docs/CONTENT_PIPELINE.md`
 - `docs/DATABASE_SCHEMA.md`
-- `docs/OPERATIONS.md`
+- `docs/PRD.md`
 - `docs/ROADMAP.md`
-- `docs/GAS_SETUP_GUIDE.md`
-- `docs/GAS_IMPORT_CHECKLIST.md`
-- `docs/GAS_FINAL_CHECKLIST.md`
-- `docs/MAINTENANCE_GUIDE.md`
 
 For publishing, content pipeline, or operations changes, read the matching doc first.
 

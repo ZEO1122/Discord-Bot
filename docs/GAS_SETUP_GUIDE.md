@@ -1,6 +1,7 @@
 # GAS Setup Guide
 
-## 준비물
+## 1. 준비물
+
 - Google 계정
 - GitHub public 저장소
 - Discord webhook 2개
@@ -9,7 +10,23 @@
 - OpenAI API key
 - Google Sheets 1개
 
-## Script Properties
+## 2. Apps Script에 넣을 파일 순서
+
+1. `appsscript.json`
+2. `ConfigService.gs`
+3. `GitHubService.gs`
+4. `Utils.gs`
+5. `DiscordService.gs`
+6. `HistoryService.gs`
+7. `OpenAIService.gs`
+8. `ConceptService.gs`
+9. `TrendService.gs`
+10. `Code.gs`
+
+## 3. Script Properties
+
+필수 키:
+
 - `DISCORD_WEBHOOK_URL`
 - `TREND_WEBHOOK_URL`
 - `OPENAI_API_KEY`
@@ -30,9 +47,10 @@ TREND_CONFIG_PATH=config/trend_brief_config.json
 TREND_HISTORY_SHEET_NAME=trend_history
 ```
 
-## Google Sheets 준비
+## 4. Google Sheets 준비
 
 탭 이름:
+
 - `trend_history`
 
 헤더:
@@ -41,15 +59,37 @@ TREND_HISTORY_SHEET_NAME=trend_history
 paper_id | title | canonical_url | published_at | citation_count | topic_tag | posted_at | brief_title
 ```
 
-## GitHub raw에서 읽는 파일
+## 5. GitHub raw에서 읽는 파일
+
 - `content/concepts/manifest.json`
 - `content/concepts/**/*.md`
 - `config/trend_brief_config.json`
 
-## 수동 실행
-- `runConceptDaily()`
-- `runTrendWeekly()`
+## 6. 수동 검증 순서
 
-## 트리거
+1. `runConceptDaily()`
+2. concept 채널 확인
+3. Script Properties progress 확인
+4. `runTrendWeekly()`
+5. 공용 trend 채널 확인
+6. Google Sheets `trend_history` 확인
+
+## 7. 최종 체크리스트
+
+- [ ] `DISCORD_WEBHOOK_URL` 입력 완료
+- [ ] `TREND_WEBHOOK_URL` 입력 완료
+- [ ] `OPENAI_API_KEY` 입력 완료
+- [ ] `OPENAI_MODEL` 확인
+- [ ] `GITHUB_RAW_BASE_URL` 입력 완료
+- [ ] `CONCEPT_MANIFEST_PATH` 확인
+- [ ] `TREND_CONFIG_PATH` 확인
+- [ ] `TREND_HISTORY_SHEET_ID` 입력 완료
+- [ ] `TREND_HISTORY_SHEET_NAME=trend_history` 확인
+- [ ] concept 채널 webhook 확인
+- [ ] 공용 trend 채널 webhook 확인
+- [ ] `trend_brief_config.json` 값 확인
+
+## 8. 트리거
+
 - concept: 평일 오전 9시 KST
 - trend: 월요일 오전 9시 KST

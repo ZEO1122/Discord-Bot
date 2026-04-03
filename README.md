@@ -1,8 +1,8 @@
 # AI 학술동아리 Discord 브리핑 자동화 저장소
 
-이 저장소는 Google Apps Script와 Discord Webhook으로 AI 브리핑을 자동 발행하기 위한 프로젝트다.
+이 저장소는 Google Apps Script와 Discord Webhook으로 concept 브리핑과 trend 브리핑을 자동 발행하기 위한 프로젝트다.
 
-현재 운영 기준은 다음과 같다.
+현재 레포의 기준은 다음과 같다.
 
 1. 예약 실행은 Google Apps Script가 담당한다.
 2. concept 브리핑은 GitHub 저장소의 markdown 원본을 읽어 게시한다.
@@ -16,55 +16,67 @@
 3. trend는 최신 논문 기반으로 생성하되, 주의 문구와 출처를 반드시 함께 보낸다.
 4. 운영자는 서버 없이도 브리핑 운영과 유지보수를 할 수 있어야 한다.
 
-## 현재 구조
+## 저장소 구조
 
 ```text
-GitHub Public Repo
-  ├─ content/concepts/*.md
-  ├─ content/concepts/manifest.json
-  └─ config/trend_brief_config.json
+GitHub Repository
+  ├─ apps-script/
+  │   ├─ Code.gs
+  │   ├─ ConceptService.gs
+  │   ├─ TrendService.gs
+  │   └─ supporting services
+  ├─ content/concepts/
+  │   ├─ manifest.json
+  │   └─ *.md
+  ├─ config/
+  │   └─ trend_brief_config.json
+  └─ docs/
 
-Google Apps Script
-  ├─ runConceptDaily()
-  ├─ runTrendWeekly()
-  ├─ GitHub raw fetch
-  ├─ OpenAlex fetch
-  ├─ OpenAI generate
-  ├─ Discord webhook send
+Runtime
+  ├─ Google Apps Script triggers
+  ├─ Discord Webhook
+  ├─ OpenAlex
+  ├─ OpenAI
   ├─ Script Properties
   └─ Google Sheets history
 ```
-
-## 먼저 읽을 문서
-
-1. `README.md`
-2. `docs/ARCHITECTURE.md`
-3. `docs/GAS_SETUP_GUIDE.md`
-4. `docs/GAS_IMPORT_CHECKLIST.md`
-5. `docs/GAS_FINAL_CHECKLIST.md`
-6. `docs/OPERATIONS.md`
-7. `docs/MAINTENANCE_GUIDE.md`
 
 ## 주요 디렉터리
 
 - `apps-script/`
   실제 운영 코드
 - `content/concepts/`
-  concept 브리핑 원본
+  concept 브리핑 원본과 manifest
 - `config/trend_brief_config.json`
-  trend 생성/선정 설정
+  trend 수집/선정/분류 설정
 - `docs/`
-  운영 및 구조 문서
+  구조, 설치, 운영 기준 문서
+
+## 빠른 이해
+
+### Concept 흐름
+1. `content/concepts/manifest.json`에서 다음 항목을 찾는다.
+2. 해당 markdown를 GitHub raw로 읽는다.
+3. GAS가 embed를 만들어 Discord webhook으로 보낸다.
+4. Script Properties에 progress를 기록한다.
+
+### Trend 흐름
+1. `config/trend_brief_config.json`을 읽는다.
+2. OpenAlex에서 최근 논문을 수집한다.
+3. 상위 후보를 고르고 OpenAI로 브리핑을 생성한다.
+4. Discord webhook으로 게시한다.
+5. Google Sheets `trend_history`에 기록한다.
 
 ## 실행 방식
 
 로컬 Python 서버나 Discord bot 런타임은 사용하지 않는다.
 
-운영 흐름:
+운영 순서:
 
-1. GitHub에서 content/config 관리
-2. `clasp push`로 Apps Script 반영
-3. GAS 트리거 또는 수동 실행으로 게시
+1. GitHub에서 content/config 수정
+2. `npx clasp push`
+3. GAS에서 `runConceptDaily()` 또는 `runTrendWeekly()` 실행
+4. Discord 채널과 Apps Script 로그 확인
 
 ## 필수 Script Properties
 
@@ -78,6 +90,36 @@ Google Apps Script
 - `TREND_HISTORY_SHEET_ID`
 - `TREND_HISTORY_SHEET_NAME`
 
+## 로컬 작업 명령
+
+```bash
+npm install
+npx clasp login
+npx clasp status
+npx clasp push
+npx clasp pull
+npx clasp open
+```
+
+## 문서 맵
+
+- `docs/ARCHITECTURE.md`
+  시스템 구조와 데이터 흐름
+- `docs/GAS_SETUP_GUIDE.md`
+  최초 설치, Script Properties, 수동 검증
+- `docs/OPERATIONS.md`
+  운영 기본값, 로그, 재시도, 유지보수
+- `docs/CONTENT_PIPELINE.md`
+  브리핑 작성 기준과 품질 규칙
+- `docs/DATABASE_SCHEMA.md`
+  Script Properties와 Google Sheets 상태 저장 구조
+- `docs/PRD.md`
+  제품 범위와 목표
+- `docs/ROADMAP.md`
+  다음 단계 우선순위
+- `docs/LINUX_OPENCODE_SETUP.md`
+  OpenCode로 이 레포를 다루는 최소 가이드
+
 ## 현재 범위
 
 - concept 브리핑 자동 게시
@@ -87,7 +129,6 @@ Google Apps Script
 ## 제외 범위
 
 - Discord interaction
-- 실시간 Discord 상호작용
 - 퀴즈 제출/채점
 - 리더보드
 - 사용자 통계
