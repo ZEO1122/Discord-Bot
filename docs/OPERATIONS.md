@@ -67,10 +67,19 @@
 2. 필요한 값 점검
    - `lookback_days`
    - `top_papers`
+   - `candidate_pool_size`
    - `search_query`
    - `taxonomy`
 3. `clasp push`
 4. `runTrendWeekly()` 수동 검증
+
+trend 선정은 아래 기준으로 점검한다.
+
+- 후보가 반드시 지난 7일 논문으로만 잡히는지
+- 최근성만 과도하게 높지 않은지
+- 실험/평가가 충분한 논문이 상위에 오는지
+- 코드, 공개 전문, DOI 등 재현 단서가 반영되는지
+- 커뮤니티 반응이 주 점수가 아니라 보조 점수로만 쓰이는지
 
 ## 6. 운영 서버 전환 체크리스트
 

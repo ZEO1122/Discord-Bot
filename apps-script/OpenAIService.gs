@@ -32,7 +32,7 @@ const OpenAIService = {
     const prompt = [
       '당신은 AI 논문 분류기다.',
       '아래 논문 제목과 초록을 읽고 정확히 하나의 라벨만 반환하라.',
-      '라벨 후보: foundation-models, vision-perception, multimodal-agents, speech-audio, retrieval-search, robotics-embodied, generation-creative, data-training, systems-efficiency, other',
+      '라벨 후보: foundation-models(LLM과 추론), vision-perception(이미지·영상 이해), multimodal-agents(멀티모달·에이전트), speech-audio(음성·오디오 AI), retrieval-search(검색·RAG), robotics-embodied(로봇·자율행동), generation-creative(이미지·영상 생성), data-training(데이터·학습 방법), systems-efficiency(모델 경량화·서빙), other(기타 AI 연구)',
       'few-shot 예시:',
       '입력: title=Preference Alignment of Large Language Models / abstract=alignment, post-training, agent behavior, reasoning',
       '출력: foundation-models',

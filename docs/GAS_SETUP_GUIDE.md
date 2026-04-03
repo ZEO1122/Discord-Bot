@@ -65,7 +65,20 @@ paper_id | title | canonical_url | published_at | citation_count | topic_tag | p
 - `content/concepts/**/*.md`
 - `config/trend_brief_config.json`
 
-## 6. 수동 검증 순서
+## 6. trend 세부분야 의미
+
+- `foundation-models`: LLM과 추론
+- `vision-perception`: 이미지·영상 이해
+- `multimodal-agents`: 멀티모달·에이전트
+- `speech-audio`: 음성·오디오 AI
+- `retrieval-search`: 검색·RAG
+- `robotics-embodied`: 로봇·자율행동
+- `generation-creative`: 이미지·영상 생성
+- `data-training`: 데이터·학습 방법
+- `systems-efficiency`: 모델 경량화·서빙
+- `other`: 기타 AI 연구
+
+## 7. 수동 검증 순서
 
 1. `runConceptDaily()`
 2. concept 채널 확인
@@ -74,7 +87,7 @@ paper_id | title | canonical_url | published_at | citation_count | topic_tag | p
 5. 공용 trend 채널 확인
 6. Google Sheets `trend_history` 확인
 
-## 7. 최종 체크리스트
+## 8. 최종 체크리스트
 
 - [ ] `DISCORD_WEBHOOK_URL` 입력 완료
 - [ ] `TREND_WEBHOOK_URL` 입력 완료
@@ -89,7 +102,7 @@ paper_id | title | canonical_url | published_at | citation_count | topic_tag | p
 - [ ] 공용 trend 채널 webhook 확인
 - [ ] `trend_brief_config.json` 값 확인
 
-## 8. 트리거
+## 9. 트리거
 
 - concept: 평일 오전 9시 KST
 - trend: 월요일 오전 9시 KST

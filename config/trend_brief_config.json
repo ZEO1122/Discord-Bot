@@ -3,7 +3,7 @@
   "timezone": "Asia/Seoul",
   "lookback_days": 7,
   "top_papers": 3,
-  "candidate_pool_size": 12,
+  "candidate_pool_size": 24,
   "source_provider": "openalex",
   "search_query": "artificial intelligence OR machine learning OR deep learning",
   "taxonomy": [
