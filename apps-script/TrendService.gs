@@ -1,7 +1,6 @@
 const TrendService = {
   FIELD_LIMITS: {
-    topic: 220,
-    tag: 100,
+    category: 180,
     core: 700,
     reason: 700,
     terms: 320,
@@ -9,8 +8,17 @@ const TrendService = {
     source: 500,
   },
 
+  TOPIC_LABELS: {
+    'foundation-models': 'Foundation Models | 파운데이션 모델',
+    'vision-perception': 'Vision & Perception | 비전 인지',
+    'multimodal-agents': 'Multimodal Agents | 멀티모달 에이전트',
+    'generation-creative': 'Generation & Creative | 생성·크리에이티브',
+    'systems-efficiency': 'Systems & Efficiency | 시스템·효율화',
+    other: 'Other | 기타',
+  },
+
   CAUTION_MESSAGE:
-    '주의: 이 브리핑은 최신 source를 바탕으로 GPT가 요약한 내용입니다. 해석 오류나 누락 가능성이 있으니 원문 출처를 함께 확인하세요.',
+    'Caution | 주의: This briefing is generated from recent paper sources and may contain interpretation errors. 최신 논문 source를 바탕으로 요약했으므로 원문을 함께 확인하세요.',
 
   runWeeklyTrends() {
     Logger.log('runTrendWeekly:start');
@@ -31,14 +39,24 @@ const TrendService = {
     }
 
     const sections = topPapers.map((paper) => {
-      const topicTag = this.tagPaperTopic(paper, config.taxonomy || ['llm', 'detection-segmentation', 'vision-language', 'other']);
+      const topicTag = this.tagPaperTopic(
+        paper,
+        config.taxonomy || [
+          'foundation-models',
+          'vision-perception',
+          'multimodal-agents',
+          'generation-creative',
+          'systems-efficiency',
+          'other',
+        ],
+      );
       const prompt = this.buildPrompt(paper, topicTag);
       const generated = this.normalizeTrendOutput(OpenAIService.generateTrendBrief(prompt));
       Logger.log(`TrendService:paper_generated paper_id=${paper.paper_id} topic=${topicTag} title=${generated.title}`);
       return { paper, topicTag, generated };
     });
 
-    const payload = this.buildTrendEmbed(sections);
+    const payload = this.buildTrendEmbeds(sections);
     DiscordService.sendWebhook(ConfigService.getTrendWebhookUrl(), payload);
     Logger.log(`TrendService:posted sections=${sections.length}`);
 
@@ -54,6 +72,7 @@ const TrendService = {
         brief_title: section.generated.title,
       });
     });
+
     Logger.log('runTrendWeekly:success');
   },
 
@@ -98,37 +117,65 @@ const TrendService = {
   },
 
   tagPaperTopic(paper, taxonomy) {
+    const text = `${paper.title}\n${paper.abstract || ''}`.toLowerCase();
+    const heuristicRules = [
+      {
+        topic: 'multimodal-agents',
+        keywords: ['vision-language-action', 'vision language action', 'multimodal', 'embodied', 'vlm', 'vla', 'agent'],
+      },
+      {
+        topic: 'vision-perception',
+        keywords: ['segmentation', 'detection', 'tracking', 'medical imaging', 'scene understanding', 'panoptic', 'instance segmentation'],
+      },
+      {
+        topic: 'generation-creative',
+        keywords: ['diffusion', 'generation', 'editing', 'image generation', 'video generation', 'avatar', 'creative'],
+      },
+      {
+        topic: 'systems-efficiency',
+        keywords: ['serving', 'latency', 'throughput', 'compression', 'distillation', 'quantization', 'memory', 'efficiency'],
+      },
+      {
+        topic: 'foundation-models',
+        keywords: ['llm', 'language model', 'pretraining', 'post-training', 'alignment', 'instruction tuning', 'reasoning'],
+      },
+    ];
+
+    for (let i = 0; i < heuristicRules.length; i += 1) {
+      const rule = heuristicRules[i];
+      if (rule.keywords.some((keyword) => text.includes(keyword))) {
+        return taxonomy.includes(rule.topic) ? rule.topic : 'other';
+      }
+    }
+
     const inputText = [`title=${paper.title}`, `abstract=${paper.abstract || ''}`].join('\n');
     const response = OpenAIService.classifyPaperTopic(inputText);
     const topic = String(response.topic || 'other').trim();
-    if (taxonomy.includes(topic)) {
-      return topic;
-    }
-    return 'other';
+    return taxonomy.includes(topic) ? topic : 'other';
   },
 
   buildPrompt(paper, topicTag) {
     return [
-      '당신은 AI 학술동아리용 주간 논문 브리핑 에디터다.',
-      '반드시 아래 논문 정보만 근거로 한국어 브리핑을 작성하라.',
+      '당신은 AI study club용 weekly AI news editor다.',
+      '논문을 source로 유지하되, 제목과 서술은 뉴스형(news-style)으로 작성하라.',
+      '반드시 아래 논문 정보만 근거로 한국어 중심 + 영어 기술어 병기 형식으로 작성하라.',
       '반드시 JSON으로만 답하라.',
       '필수 키: title, core_explanation, why_it_matters, quick_terms, discussion_prompt',
-      '과장된 일반론, 뜬금없는 응용 시사점, 출처에 없는 주장, 모호한 미래 예측을 쓰지 마라.',
-      '각 필드는 짧고 읽기 쉽게 작성하라.',
-      'title: 40자 이내',
+      '과장된 일반론, 뜬금없는 시사점, 출처에 없는 주장 금지.',
+      'title: 뉴스 스타일 제목, 50자 이내',
       'core_explanation: 2~3문장, 350자 이내',
       'why_it_matters: 2~3문장, 350자 이내',
-      'quick_terms: 2~3개 bullet, 총 220자 이내',
+      'quick_terms: 2~3개 bullet, 220자 이내, 한영 병기',
       'discussion_prompt: 1문장, 80자 이내',
       '',
-      `분야 태그: ${topicTag}`,
-      `논문 제목: ${paper.title}`,
-      `초록: ${paper.abstract || '초록 없음'}`,
-      `출처: ${paper.url}`,
-      `발행일: ${paper.published_at || 'unknown'}`,
-      `인용수: ${paper.citation_count}`,
+      `Category: ${this.TOPIC_LABELS[topicTag] || this.TOPIC_LABELS.other}`,
+      `Paper title: ${paper.title}`,
+      `Abstract: ${paper.abstract || 'No abstract available'}`,
+      `Source: ${paper.url}`,
+      `Published at: ${paper.published_at || 'unknown'}`,
+      `Citation count: ${paper.citation_count}`,
       '',
-      '{"title":"...","core_explanation":"...","why_it_matters":"...","quick_terms":"- 용어: 설명\\n- 용어: 설명","discussion_prompt":"..."}',
+      '{"title":"...","core_explanation":"...","why_it_matters":"...","quick_terms":"- term: 설명 (English)\\n- term: 설명 (English)","discussion_prompt":"..."}',
     ].join('\n');
   },
 
@@ -161,6 +208,7 @@ const TrendService = {
       quick_terms: ['quick_terms', 'quickTerms', 'terms', '용어 빠르게 이해하기', '핵심 용어'],
       discussion_prompt: ['discussion_prompt', 'discussionPrompt', 'question', 'prompt', '생각해볼 질문', '토론 질문'],
     };
+
     const normalized = {};
     Object.keys(aliasGroups).forEach((target) => {
       const aliases = aliasGroups[target];
@@ -177,10 +225,10 @@ const TrendService = {
     });
 
     if (!normalized.why_it_matters && normalized.core_explanation) {
-      normalized.why_it_matters = '이 논문이 실제 모델 설계와 응용 방향에 어떤 영향을 주는지 추가 확인이 필요합니다.';
+      normalized.why_it_matters = 'This work may matter for real-world AI systems. 이 연구가 실제 AI 시스템 설계와 응용에 어떤 영향을 주는지 추가 확인이 필요합니다.';
     }
     if (!normalized.quick_terms) {
-      normalized.quick_terms = '- 핵심 용어: 원문 출처를 함께 확인하세요.';
+      normalized.quick_terms = '- key term | 핵심 용어: 원문 source를 함께 확인하세요.';
     }
     if (!normalized.discussion_prompt && normalized.title) {
       normalized.discussion_prompt = `${normalized.title}가 실제 적용에 미칠 영향은 무엇일까?`;
@@ -196,31 +244,50 @@ const TrendService = {
     });
   },
 
-  buildTrendEmbed(sections) {
-    const fields = [];
-    sections.forEach((section) => {
-      fields.push({ name: '주제', value: Utils.safeTruncateText(section.generated.title, this.FIELD_LIMITS.topic), inline: false });
-      fields.push({ name: '분야', value: Utils.safeTruncateText(section.topicTag, this.FIELD_LIMITS.tag), inline: false });
-      fields.push({ name: '핵심 설명', value: Utils.safeTruncateText(section.generated.core_explanation, this.FIELD_LIMITS.core), inline: false });
-      fields.push({ name: '왜 중요한가', value: Utils.safeTruncateText(section.generated.why_it_matters, this.FIELD_LIMITS.reason), inline: false });
-      fields.push({ name: '용어 빠르게 이해하기', value: Utils.safeTruncateText(section.generated.quick_terms, this.FIELD_LIMITS.terms), inline: false });
-      fields.push({ name: '생각해볼 질문', value: Utils.safeTruncateText(section.generated.discussion_prompt, this.FIELD_LIMITS.question), inline: false });
-      fields.push({
-        name: '출처',
-        value: Utils.safeTruncateText(`- ${section.paper.title}: ${section.paper.url}`, this.FIELD_LIMITS.source),
-        inline: false,
-      });
-    });
-    fields.push({ name: '주의', value: this.CAUTION_MESSAGE, inline: false });
-
+  buildTrendEmbeds(sections) {
     return {
-      embeds: [
-        {
-          title: '이번 주 인용수 상위 논문 브리핑',
-          color: 15844367,
-          fields,
-        },
-      ],
+      content: 'This Week in AI | 이번 주 AI 뉴스',
+      embeds: sections.map((section) => ({
+        title: Utils.safeTruncateText(section.generated.title, 220),
+        color: 15844367,
+        fields: [
+          {
+            name: 'Category | 분야',
+            value: Utils.safeTruncateText(this.TOPIC_LABELS[section.topicTag] || this.TOPIC_LABELS.other, this.FIELD_LIMITS.category),
+            inline: false,
+          },
+          {
+            name: 'Core | 핵심 설명',
+            value: Utils.safeTruncateText(section.generated.core_explanation, this.FIELD_LIMITS.core),
+            inline: false,
+          },
+          {
+            name: 'Why It Matters | 왜 중요한가',
+            value: Utils.safeTruncateText(section.generated.why_it_matters, this.FIELD_LIMITS.reason),
+            inline: false,
+          },
+          {
+            name: 'Quick Terms | 용어 빠르게 이해하기',
+            value: Utils.safeTruncateText(section.generated.quick_terms, this.FIELD_LIMITS.terms),
+            inline: false,
+          },
+          {
+            name: 'Discussion Prompt | 생각해볼 질문',
+            value: Utils.safeTruncateText(section.generated.discussion_prompt, this.FIELD_LIMITS.question),
+            inline: false,
+          },
+          {
+            name: 'Source | 출처',
+            value: Utils.safeTruncateText(`- ${section.paper.title}: ${section.paper.url}`, this.FIELD_LIMITS.source),
+            inline: false,
+          },
+          {
+            name: 'Caution | 주의',
+            value: this.CAUTION_MESSAGE,
+            inline: false,
+          },
+        ],
+      })),
     };
   },
 };
