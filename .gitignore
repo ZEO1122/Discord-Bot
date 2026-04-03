@@ -9,3 +9,17 @@ submission*.csv
 .DS_Store
 __pycache__/
 *.ipynb_checkpoints/
+
+# ------------------------------------------------------------
+# DACON Physically Existing AI Competition
+# 보수적 준수 기준:
+# - 대회 데이터, 제출물, 예측값, 로그, 실험 산출물은 GitHub 공개 업로드 금지
+# - 대회 기간 중 대회 관련 코드/문서 공개 공유는 DACON 플랫폼을 통해서만 하는 쪽이 안전
+# - 따라서 아래 대회 작업 디렉토리는 기본적으로 전부 ignore
+# ------------------------------------------------------------
+
+# 대회 전체 작업 디렉토리
+Desktop/Physically Existing AI Competition/**
+
+# 예외적으로 로컬 규칙 파일은 남김
+!Desktop/Physically Existing AI Competition/.gitignore

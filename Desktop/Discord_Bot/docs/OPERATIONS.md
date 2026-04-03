@@ -58,17 +58,19 @@ ANTHROPIC_API_KEY=
 
 ### 필수 Secrets
 - `DISCORD_WEBHOOK_URL`
+- `DISCORD_WEBHOOK_MAP_JSON`
 - `OPENAI_API_KEY`
 
 ### 선택 Variables
 - `DEFAULT_TRACK`
-- `DEFAULT_SOURCE_FILE`
+- `TREND_MAX_RESULTS`
 - `LOG_LEVEL`
 
 ### 권장 설정
 - concept workflow는 `workflow_dispatch`와 `schedule` 둘 다 둔다.
-- trend workflow는 source file을 명시 입력으로 받는다.
+- trend workflow는 채널별 관심분야 설정을 읽어 실행 시점 최신 source를 수집한다.
 - 실패 시 Actions logs에서 prompt/source/validation 단계가 구분되어야 한다.
+- trend source ranking은 OpenAlex/Hugging Face enrichment 실패 시에도 fallback 점수로 동작해야 한다.
 
 ## 5. 로그 전략
 
@@ -79,6 +81,7 @@ ANTHROPIC_API_KEY=
 - Discord webhook 게시 성공/실패
 - source 검증 실패
 - GPT 응답 파싱 실패
+- source ranking 결과와 상위 후보 점수
 
 ### 저장 위치
 - GitHub Actions run log
@@ -103,18 +106,27 @@ ANTHROPIC_API_KEY=
 - 필요 시 같은 입력으로 `workflow_dispatch` 수동 재실행
 
 ### GPT 생성 실패
-- source file과 prompt를 로그에서 식별 가능하게 남김
+- track과 prompt를 로그에서 식별 가능하게 남김
 - validation 실패와 API 실패를 구분한다
+
+### 중복 게시 방지
+- `content/trends/history/published_trends.json`에 최근 게시 source를 기록한다.
+- 같은 source URL은 다시 게시하지 않는다.
+- arXiv URL은 버전 suffix를 제거한 canonical URL 기준으로 비교한다.
+- retracted source는 history 기록 전에 제외한다.
 
 ## 7. 백업
 
 ### 최소 백업 대상
 - concept markdown 원본
-- trend source json
+- `content/concepts/manifest.json`
+- `content/concepts/history/concept_progress.json`
+- `config/channel_interest_map.json`
 - `.env.example` (실제 `.env` 제외)
 - prompt 템플릿
 - 운영 문서
 - workflow yaml
+- `content/trends/history/published_trends.json`
 
 ### 주기
 - DB 일일 백업
@@ -126,19 +138,27 @@ ANTHROPIC_API_KEY=
 1. GitHub Actions run 확인
 2. markdown parser/validator 단계 실패 여부 확인
 3. `DISCORD_WEBHOOK_URL` secret 확인
-4. workflow_dispatch로 같은 파일 재실행
+4. `concept_progress.json` 갱신 여부 확인
+5. workflow_dispatch로 같은 파일 재실행
+6. concept 각 섹션이 Discord embed field 제한(1024자)을 넘지 않는지 확인
+7. concept field 수가 25개를 넘지 않는지 확인
+8. concept embed 전체 길이가 6000자를 넘지 않는지 확인
 
 ### 8.2 trend 브리핑이 안 올라옴
-1. source json 형식 확인
+1. source fetch step 실패 여부 확인
 2. GPT API step 실패 여부 확인
 3. validation step 실패 여부 확인
-4. source 없는 trend인지 확인
+4. 수집 source가 비어 있는지 확인
+5. arXiv rate limit(429) 발생 시 잠시 후 재실행 또는 `max_results` 축소
+6. OpenAlex/Hugging Face enrichment가 전부 실패했는지 확인
+7. 로그에 `selection track=... score=...`가 출력됐는지 확인
 
 ### 8.3 게시는 됐는데 내용이 이상함
 1. concept markdown 원본 확인
 2. trend prompt 템플릿 확인
-3. source file 확인
+3. trend source 수집 결과 확인
 4. Actions logs에서 생성 결과 확인
+5. Discord 메시지에 GPT 요약 주의 문구가 포함되어 있는지 확인
 
 ## 9. 보안 운영
 
@@ -151,12 +171,13 @@ ANTHROPIC_API_KEY=
 
 - [ ] GitHub Secrets 설정 완료
 - [ ] concept markdown 포맷 검증 완료
-- [ ] trend source file 검증 완료
+- [ ] trend source fetch 규칙 검증 완료
 - [ ] workflow_dispatch 실행 성공
 - [ ] schedule 설정 확인
 - [ ] 첫 자동 게시 성공
 - [ ] Actions logs 확인
 - [ ] webhook 재생성 절차 확인
+- [ ] concept embed field 제한(1024/25/6000) 준수 확인
 
 ## 11. End-to-End Smoke Path
 
@@ -166,7 +187,8 @@ ANTHROPIC_API_KEY=
 
 - GitHub 저장소 admin 권한
 - Discord webhook 생성 완료
-- concept markdown 또는 trend source file 준비 완료
+- concept markdown 준비 완료
+- trend track 정의 완료
 - GitHub Secrets 등록 완료
 
 ### 11.2 필요한 환경변수
@@ -175,6 +197,7 @@ GitHub Actions 운영 기준 필수 secret/variable을 먼저 채운다.
 
 ```bash
 DISCORD_WEBHOOK_URL
+DISCORD_WEBHOOK_MAP_JSON
 OPENAI_API_KEY
 ```
 
@@ -193,12 +216,14 @@ LOG_LEVEL=INFO
 
 주의:
 - GitHub Actions 자동 발행의 핵심은 `DISCORD_WEBHOOK_URL`이다.
+- 채널별 trend 발행에는 `DISCORD_WEBHOOK_MAP_JSON`이 필요하다.
 - trend workflow에는 `OPENAI_API_KEY`가 필요하다.
 
 설정 누락 시 확인 포인트:
 - `DISCORD_WEBHOOK_URL` 누락 -> 게시 step 즉시 실패
+- `DISCORD_WEBHOOK_MAP_JSON` 누락 -> 채널별 trend 게시 step 실패
 - `OPENAI_API_KEY` 누락 -> trend workflow 생성 step 실패
-- source file 형식 오류 -> validation step 실패
+- source fetch 실패 -> trend workflow 수집 step 실패
 
 ### 11.3 테스트용 데이터 준비
 
@@ -259,12 +284,11 @@ concept 또는 trend 입력이 준비되었는지 확인한다.
 
 ```bash
 ls content/concepts
-ls content/trends/sources
 ```
 
 확인 포인트:
 - concept markdown 파일
-- trend source json 파일
+- trend track 입력값
 
 #### Step 2) concept workflow 실행
 
@@ -319,9 +343,20 @@ concept/trend 브리핑이 실제 목표 채널에 올라왔는지 확인
 #### trend workflow 실패
 - GitHub Actions run log
 - 추가 확인:
+  - `DISCORD_WEBHOOK_MAP_JSON` 설정 여부
   - `OPENAI_API_KEY` 설정 여부
-  - source json 형식 오류
+  - source fetch 단계 실패 여부
   - source 없는 trend 생성 여부
+  - history 파일이 예상대로 갱신되었는지 확인
+
+#### trend workflow가 성공인데 게시가 생략됨
+- 로그에 `publish_status=skipped reason=No fresh trend sources available ...` 가 보이면 정상 동작이다.
+- 같은 source가 이미 최근 게시 history에 있어서 중복 방지로 건너뛴 것이다.
+- 다른 track으로 실행하거나, 나중에 다시 실행해 fresh source를 기다린다.
+
+#### 채널별 게시가 안 됨
+- `config/channel_interest_map.json`의 `enabled`, `channel_id`, `webhook_key`를 확인한다.
+- `DISCORD_WEBHOOK_MAP_JSON`에 같은 `webhook_key`가 있는지 확인한다.
 
 #### Discord에 아무것도 안 올라옴
 - webhook URL이 올바른 채널인지 확인
@@ -337,6 +372,21 @@ python3 scripts/bootstrap_sqlite.py
 python3 scripts/seed_smoke_data.py
 python3 scripts/publish_daily.py --dry-run
 ```
+
+### 11.9 운영 시작 전 최종 체크리스트
+
+아래 항목이 모두 맞으면 자동 스케줄 운영으로 전환해도 된다.
+
+- [ ] `DISCORD_WEBHOOK_URL`, `DISCORD_WEBHOOK_MAP_JSON`, `OPENAI_API_KEY`가 GitHub Secrets에 최신 값으로 저장되어 있다
+- [ ] `config/channel_interest_map.json`에서 실제로 운영할 채널만 `enabled: true`로 설정되어 있다
+- [ ] `DISCORD_WEBHOOK_MAP_JSON`의 key와 `config/channel_interest_map.json`의 `webhook_key`가 정확히 일치한다
+- [ ] `content/concepts/manifest.json`에 게시할 concept markdown 순서가 올바르게 들어 있다
+- [ ] `Post Concept Brief`를 수동 실행했을 때 Discord full embed 게시와 `content/concepts/history/concept_progress.json` 갱신이 모두 성공한다
+- [ ] `Post Trend Brief`를 채널별로 수동 실행했을 때 Discord 게시 또는 `skipped` 결과가 의도대로 나온다
+- [ ] `content/trends/history/published_trends.json`가 게시 후 정상적으로 갱신된다
+- [ ] concept 스케줄은 평일 오전 9시 KST, trend 스케줄은 월요일 오전 9시 KST로 설정되어 있다
+- [ ] trend 브리핑에 GPT 요약 주의 문구가 표시된다
+- [ ] webhook/모델 key는 필요 시 재발급 가능한 상태로 관리되고 있다
 
 ## 12. 롤백 전략
 

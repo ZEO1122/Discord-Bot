@@ -6,8 +6,8 @@
 
 현재 기본 운영 경로는 아래와 같다.
 
-1. 개념 브리핑은 저장소의 markdown 파일에서 읽는다.
-2. 최신 동향 브리핑은 source 목록 + GPT API로 생성한다.
+1. 개념 브리핑은 `manifest + progress` 큐로 순차 게시한다.
+2. 최신 동향 브리핑은 채널별 관심분야 설정을 읽고 실행 시점에 최신 source를 수집해 GPT API로 생성한다.
 3. 자동 발행은 GitHub Actions가 실행한다.
 4. Discord 전송은 webhook으로 처리한다.
 
@@ -23,7 +23,7 @@
 ## 3. 현재 구현 우선 구조
 
 ```text
-[Markdown Brief Source]        [Trend Source List]
+[Markdown Brief Source]        [Live Trend Source Fetch]
            ↓                           ↓
  [Build / Validate Script]   [GPT Generation + Validation]
            ↓                           ↓
@@ -53,9 +53,10 @@
 - 필수 필드 누락 여부를 검사한다.
 - Discord embed payload를 만든다.
 
-#### GitHub Actions Publisher
+#### Concept Queue Publisher
+- `content/concepts/manifest.json`을 읽는다.
+- `content/concepts/history/concept_progress.json`을 읽어 다음 concept를 선택한다.
 - `schedule` 또는 `workflow_dispatch`로 실행된다.
-- concept 파일을 선택해 게시 스크립트를 호출한다.
 
 #### Discord Webhook
 - 실제 Discord 채널 게시를 담당한다.
@@ -68,47 +69,65 @@
 ### 데이터 흐름
 
 ```text
-1. concept markdown 선택
-2. frontmatter / 본문 파싱
-3. 필수 필드 검증
-4. Discord payload 생성
-5. webhook 게시
-6. publish 결과 기록
+1. manifest / progress 로드
+2. 다음 concept markdown 선택
+3. frontmatter / 본문 파싱
+4. 필수 필드 검증
+5. Discord payload 생성
+6. webhook 게시
+7. progress 갱신 및 기록
 ```
 
 ## 5. Week 2 — Trend 브리핑 자동 게시
 
 ### 목표
-- 세부 분야 source 목록을 바탕으로 GPT API로 브리핑을 생성한다.
+- 채널별 관심분야 설정을 읽고, 최신 source를 실행 시점에 수집해 GPT API로 브리핑을 생성한다.
 - 검증을 통과한 결과만 Discord에 게시한다.
 
 ### 핵심 컴포넌트
 
-#### Trend Source List
-- `content/trends/sources/*.json`
-- title, url, published_at, source_type을 포함한다.
+#### Live Trend Source Fetch
+- track에 따라 외부 최신 source를 수집한다.
+- 현재 기본 source는 arXiv 최근 논문이다.
+- `cv`, `multimodal`은 track별 query를 분리해 가져온다.
+- title, url, published_at, source_type과 함께 abstract, authors, arXiv id를 구조화한다.
+- OpenAlex와 Hugging Face Papers 메타데이터를 보강해 source ranking에 사용한다.
+
+#### Channel Interest Map
+- `config/channel_interest_map.json`
+- 채널별 관심분야, webhook key, max topic 수를 관리한다.
+- 설문 결과는 이 파일로 정규화된 뒤 workflow가 읽는다.
 
 #### GPT Generation
-- source 목록을 입력으로 받아 브리핑 초안을 만든다.
+- 수집된 최신 source 목록을 입력으로 받아 브리핑 초안을 만든다.
 - source 없는 trend 생성은 허용하지 않는다.
 
 #### Validation
 - 필수 필드 존재 여부 검사
 - source 존재 여부 검사
 - 금지 규칙 검사
+- 최근 게시된 source와 중복되는지 검사
+- `is_retracted` source 제외
+- ranking metadata 조회 실패 시 fallback 점수로 계속 진행
 
-#### GitHub Actions Publisher
-- validated output만 webhook으로 게시한다.
+#### Weekly Trend Publisher
+- 채널별 관심분야를 순회한다.
+- 각 채널에 관심분야별 section을 묶어 1개 메시지로 게시한다.
+- `channel_id:interest` 기준 history를 갱신한다.
 
 ### 데이터 흐름
 
 ```text
-1. source json 선택
-2. GPT API 호출
-3. 필수 필드 / source 검증
-4. Discord payload 생성
-5. webhook 게시
-6. publish 결과 기록
+1. channel_interest_map 로드
+2. 채널별 관심분야 선택
+3. 관심분야별 최신 source 수집
+4. OpenAlex/Hugging Face 메타데이터 보강
+5. `channel_id:interest` 기준 중복 제거 및 ranking
+6. GPT API 호출
+7. 필수 필드 / source 검증
+8. 채널별 묶음 메시지 생성
+9. webhook 게시
+10. trend history 갱신
 ```
 
 ## 6. Week 3 — 퀴즈와 기록 전략 재설계
@@ -140,7 +159,7 @@
 
 ### Script 계층
 - markdown 파싱
-- source 로딩
+- source 수집
 - GPT 생성 호출
 - payload 생성
 - 게시 호출
@@ -152,7 +171,6 @@
 
 ### 저장 계층
 - markdown 원본
-- source json
 - 선택적 로컬 SQLite
 - GitHub Actions logs
 
@@ -187,7 +205,7 @@
 - GitHub Actions logs 확인
 
 ### 10.2 trend 게시 실패
-- source json 유효성 확인
+- source fetch 성공 여부 확인
 - GPT API 응답 구조 확인
 - source 없는 출력인지 확인
 

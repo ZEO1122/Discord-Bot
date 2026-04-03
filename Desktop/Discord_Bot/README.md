@@ -12,23 +12,25 @@
 
 1. 학술동아리 멤버가 매일 짧고 신뢰 가능한 AI 브리핑을 받는다.
 2. 안정적인 딥러닝 개념은 미리 작성한 `.md` 파일에서 게시한다.
-3. 최신 동향 브리핑은 출처를 입력으로 넣고 GPT API로 생성해 게시한다.
+3. 최신 동향 브리핑은 월요일 오전 9시에 채널별 관심분야를 읽고 최신 논문 소스를 수집해 GPT API로 생성/게시한다.
 4. 게시 이력은 GitHub Actions 로그와 Discord 메시지 결과로 추적한다.
+5. trend 브리핑은 최근 게시 source를 history 파일에 기록해 중복 게시를 피한다.
+6. concept 브리핑은 `manifest + progress` 큐로 평일 오전 9시에 1개씩 게시한다.
 
 ## 현재 프로젝트 해석
 
 이 저장소는 더 이상 "상시 Discord 봇 서비스"가 아니라, 아래 경로를 기본으로 하는 **콘텐츠 발행 자동화 저장소**로 본다.
 
 ```text
-Markdown Brief Source
-        ↓
-Build / Validate Script
-        ↓
-GitHub Actions
-        ↓
-Discord Webhook
-        ↓
-Publish Logs / Action Logs
+Markdown Brief Source                    Live Trend Fetch
+        ↓                                      ↓
+Build / Validate Script              GPT Summarize / Validate
+        ↓                                      ↓
+                  GitHub Actions
+                        ↓
+                 Discord Webhook
+                        ↓
+             Publish Logs / Action Logs
 ```
 
 ## 이 저장소에 들어 있는 것
@@ -92,19 +94,21 @@ Publish Logs / Action Logs
 2. `content/concepts/`용 markdown 포맷 확정
 3. GitHub Secrets 등록
 4. concept posting workflow부터 구현
-5. trend posting workflow에 GPT 생성 연결
+5. trend posting workflow에 최신 source 수집과 GPT 생성 연결
+6. 채널별 관심분야 설정 파일 준비
 
 ## 콘텐츠 운영 원칙 요약
 
 - `discussion_prompt`와 `graded_quiz`를 분리한다.
 - 정답 정보(`answer_key`)는 공개 Discord 메시지에 포함하지 않는다.
 - 출처는 문자열이 아니라 구조화 객체로 저장한다.
+- trend 브리핑은 **실행 시점 최신 source를 수집한 뒤** 게시한다.
 - trend 브리핑은 **출처 없이 자동 게시하지 않는다.**
-- concept 브리핑은 저장소의 `.md` 원본을 진실 소스로 본다.
+- concept 브리핑은 저장소의 `.md` 본문 섹션을 **Discord full embed field**로 정리해 전송한다.
 
 ## concept markdown 포맷
 
-추천 형식은 `frontmatter + 본문 섹션`이다.
+추천 형식은 `frontmatter + 본문 섹션`이다. 현재 concept 게시물은 아래 섹션을 기준으로 full embed field를 만든다.
 
 ```md
 ---
@@ -120,14 +124,38 @@ sources:
     source_type: paper
 ---
 
-## 무슨 내용인가
+## 오늘의 개념
+...
+
+## 핵심 요약
 ...
 
 ## 왜 중요한가
 ...
 
-## 쉬운 용어
+## 실무 포인트
+...
+
+## 예시
+...
+
+## 용어 빠르게 이해하기
 - Attention: ...
+
+## 자주 하는 실수
+...
+
+## 셀프 체크
+...
+
+## 토론 거리
+...
+
+## source
+- Attention Is All You Need / https://arxiv.org/abs/1706.03762
+
+## 주의
+- 이 문서는 AI로 생성·편집된 브리핑이어서 할루시네이션이 포함되어 있을 수 있다.
 ```
 
 필수 필드:
@@ -136,26 +164,33 @@ sources:
 - `mode`
 - `title`
 - `one_line`
-- `sources`
-- 본문 `무슨 내용인가`
+- 본문 `오늘의 개념` 또는 `핵심 요약`
 - 본문 `왜 중요한가`
+- 본문 `source`
 
 ## GitHub Actions 워크플로우
 
 추가된 워크플로우 초안:
 
 - `.github/workflows/post-concept.yml`
-  - markdown concept 브리핑 게시
+  - manifest/progress 기반 concept 큐 게시 (`.md` 섹션을 full embed field로 전송)
 - `.github/workflows/post-trend.yml`
-  - source 목록 + GPT API 기반 trend 브리핑 게시
+  - 채널별 관심분야 + 최신 source 수집 + GPT API 기반 weekly trend 게시
+
+trend 브리핑에는 아래 주의 문구를 항상 포함한다.
+
+```text
+주의: 이 브리핑은 최신 source를 바탕으로 GPT가 요약한 내용입니다. 해석 오류나 누락 가능성이 있으니 원문 출처를 함께 확인하세요.
+```
 
 필수 GitHub Secrets:
 - `DISCORD_WEBHOOK_URL`
+- `DISCORD_WEBHOOK_MAP_JSON`
 - `OPENAI_API_KEY`
 
 선택 GitHub Variables/Secrets:
 - `DEFAULT_TRACK`
-- `DEFAULT_SOURCE_FILE`
+- `TREND_MAX_RESULTS`
 
 ## 로컬 smoke path
 
@@ -178,10 +213,15 @@ PYTHONPATH=src python -m bot.app
 개념 브리핑 markdown 50개 생성을 위한 프롬프트 템플릿은 아래 파일에 둔다.
 
 - `content/concepts/CONCEPT_BATCH_PROMPT.md`
+- `content/concepts/manifest.json`
+- `content/concepts/history/concept_progress.json`
+- `config/channel_interest_map.json`
 
 ## 현재 구현 상태 해석
 
 - `src/bot/*` 는 실험용 slash command 경로다.
 - `src/services/publish_service.py` 의 webhook 게시 경로는 GitHub Actions 자동화에서도 재사용 가능하다.
 - `SQLite`는 로컬 개발/검증용이다.
+- trend source는 저장소 파일이 아니라 런타임에 수집한다.
+- trend 중복 방지는 `content/trends/history/published_trends.json` 으로 관리한다.
 - GitHub Actions 런너는 기본적으로 휘발성이므로, 자동 발행 운영에서는 DB보다 **Actions logs + Discord 결과**를 1차 추적 수단으로 본다.
