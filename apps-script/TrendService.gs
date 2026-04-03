@@ -51,7 +51,7 @@ const TrendService = {
         ],
       );
       const prompt = this.buildPrompt(paper, topicTag);
-      const generated = this.normalizeTrendOutput(OpenAIService.generateTrendBrief(prompt));
+      const generated = this.normalizeTrendOutput(OpenAIService.generateTrendBrief(prompt), paper, topicTag);
       Logger.log(`TrendService:paper_generated paper_id=${paper.paper_id} topic=${topicTag} title=${generated.title}`);
       return { paper, topicTag, generated };
     });
@@ -186,10 +186,10 @@ const TrendService = {
     ].join('\n');
   },
 
-  normalizeTrendOutput(response) {
+  normalizeTrendOutput(response, paper, topicTag) {
     const rawText = this.extractOutputText(response);
     const parsed = JSON.parse(rawText);
-    const normalized = this.normalizeGeneratedFields(parsed);
+    const normalized = this.normalizeGeneratedFields(parsed, paper, topicTag);
     this.validateGeneratedFields(normalized);
     return normalized;
   },
@@ -207,7 +207,7 @@ const TrendService = {
     throw new Error('OpenAI response did not contain output_text');
   },
 
-  normalizeGeneratedFields(data) {
+  normalizeGeneratedFields(data, paper, topicTag) {
     const aliasGroups = {
       title: ['title', '제목'],
       core_explanation: ['core_explanation', 'coreExplanation', 'what_happened', 'summary', '핵심 설명', '핵심 요약'],
@@ -235,12 +235,62 @@ const TrendService = {
       normalized.why_it_matters = 'This work may matter for real-world AI systems. 이 연구가 실제 AI 시스템 설계와 응용에 어떤 영향을 주는지 추가 확인이 필요합니다.';
     }
     if (!normalized.quick_terms) {
-      normalized.quick_terms = '- 기술 용어는 원문 논문을 함께 확인하세요.';
+      normalized.quick_terms = this.buildQuickTermsFallback(paper, topicTag);
     }
     if (!normalized.discussion_prompt && normalized.title) {
       normalized.discussion_prompt = `${normalized.title}가 실제 적용에 미칠 영향은 무엇일까?`;
     }
     return normalized;
+  },
+
+  buildQuickTermsFallback(paper, topicTag) {
+    const text = `${paper.title}\n${paper.abstract || ''}`.toLowerCase();
+    const fallbackMap = {
+      'foundation-models': [
+        'alignment(정렬): 모델 응답을 사람 의도와 기준에 맞추는 과정',
+        'post-training(사후 학습): 사전학습 뒤 실제 사용 목적에 맞게 추가로 학습하는 단계',
+        'reasoning(추론): 여러 단계를 거쳐 답을 도출하는 능력',
+      ],
+      'vision-perception': [
+        'segmentation(분할): 이미지에서 물체나 영역의 경계를 픽셀 단위로 나누는 작업',
+        'detection(검출): 이미지 안에서 물체가 어디 있는지 찾아내는 작업',
+        'panoptic(파놉틱): 검출과 분할을 함께 다루는 통합 시각 이해 설정',
+      ],
+      'multimodal-agents': [
+        'vision-language-action(비전-언어-행동): 시각·언어 입력을 받아 행동까지 결정하는 모델 구조',
+        'embodied agent(체화 에이전트): 실제 환경에서 지각하고 행동하는 에이전트',
+        'multimodal reasoning(멀티모달 추론): 이미지·텍스트 등 여러 형식을 함께 보고 판단하는 능력',
+      ],
+      'generation-creative': [
+        'diffusion(확산 모델): 점진적으로 노이즈를 제거하며 이미지를 생성하는 방식',
+        'editing(편집): 기존 이미지나 영상을 조건에 맞게 바꾸는 작업',
+        'avatar(아바타): 사람이나 캐릭터를 디지털 형태로 재현한 대상',
+      ],
+      'systems-efficiency': [
+        'quantization(양자화): 모델 수치 표현을 더 작은 비트로 줄여 효율을 높이는 기법',
+        'distillation(지식 증류): 큰 모델의 지식을 작은 모델로 옮기는 학습 방법',
+        'throughput(처리량): 일정 시간 동안 시스템이 처리할 수 있는 작업량',
+      ],
+      other: [
+        'benchmark(벤치마크): 모델 성능을 비교하기 위한 평가 기준',
+        'pipeline(파이프라인): 여러 처리 단계를 연결한 작업 흐름',
+        'modality(모달리티): 텍스트·이미지·음성처럼 입력 데이터의 형식',
+      ],
+    };
+
+    let terms = fallbackMap[topicTag] || fallbackMap.other;
+
+    if (text.includes('retrieval')) {
+      terms = ['retrieval(검색): 필요한 정보를 외부 저장소에서 찾아오는 과정', ...terms.slice(0, 2)];
+    }
+    if (text.includes('agent')) {
+      terms = ['agent(에이전트): 목표를 위해 판단하고 행동하는 시스템', ...terms.slice(0, 2)];
+    }
+    if (text.includes('token')) {
+      terms = ['token(토큰): 모델이 입력을 잘게 나눠 처리하는 최소 단위', ...terms.slice(0, 2)];
+    }
+
+    return terms.slice(0, 3).map((term) => `- ${term}`).join('\n');
   },
 
   validateGeneratedFields(data) {
