@@ -59,7 +59,7 @@ const Utils = {
     if (limit <= 1) {
       return value.slice(0, limit);
     }
-    return `${value.slice(0, limit - 3).trim()}...`;
+    return value.slice(0, limit).trim();
   },
 
   safeTruncateText(text, limit) {
@@ -75,7 +75,7 @@ const Utils = {
     if (cut < Math.floor(limit * 0.6)) {
       return this.truncateText(value, limit);
     }
-    return this.truncateText(searchWindow.slice(0, cut + 1).trim(), limit);
+    return searchWindow.slice(0, cut + 1).trim();
   },
 
   rebuildOpenAlexAbstract(invertedIndex) {
