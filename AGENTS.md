@@ -20,7 +20,6 @@ Read the relevant docs before implementing:
 - `README.md`
 - `docs/PRD.md`
 - `docs/ARCHITECTURE.md`
-- `docs/DISCORD_BOT_SPEC.md`
 - `docs/CONTENT_PIPELINE.md`
 - `docs/DATABASE_SCHEMA.md`
 - `docs/OPERATIONS.md`
@@ -38,11 +37,12 @@ For DB, grading, publishing, scheduling, or workflow changes, read the matching 
 - Keep public feedback aggregated; detailed grading belongs in ephemeral responses or DMs.
 
 ## Preferred Stack
-Use Python 3.11+, `discord.py`, SQLAlchemy + Alembic, SQLite for local dev, PostgreSQL for production, and Linux deployment with `systemd`/cron.
-All secrets must come from environment variables.
+Use Google Apps Script for scheduled execution, Discord Webhook for delivery, GitHub public repo for content/config source, and Google Sheets/Script Properties for lightweight state.
+Keep the legacy Python scaffold only for local experiments or migration reference.
 
 ## Target Layout
-Follow the implemented `src/bot`, `src/services`, `src/repositories`, `src/models`, `src/core`, and `scripts/` layout from `README.md` and keep Discord interaction, business logic, data access, and content generation separate.
+Follow the implemented `apps-script`, `content`, `config`, and `docs` layout from `README.md`.
+Treat `src/` and `scripts/` as legacy/reference code unless the user explicitly asks you to work on them.
 
 ## Build, Lint, Test Commands
 Use the commands below for the current scaffold unless explicit tooling config changes them.
@@ -69,6 +69,7 @@ uv pip install -r requirements-dev.txt
 
 ### Run The App
 ```bash
+# Legacy/local reference paths only
 PYTHONPATH=src python -m bot.app
 PYTHONPATH=src python scripts/publish_daily.py
 PYTHONPATH=src python scripts/bootstrap_sqlite.py
@@ -138,10 +139,9 @@ pytest -q
 - Prefer domain terms such as `content`, `quiz`, `attempt`, `publish_log`, and `user_stats`.
 
 ### Design
-- Keep Discord UI handlers thin; move logic into services.
-- Encapsulate DB access in repository/service layers.
-- Separate grading, publishing, retrieval, and rendering concerns.
-- Make retry behavior and duplicate-submission policy explicit.
+- Keep GAS entrypoints thin; move logic into service-style files.
+- Treat GitHub raw fetch, OpenAI calls, Discord posting, and history storage as separate concerns.
+- Make retry behavior and duplicate-post policy explicit.
 - Prefer pure functions for normalization and scoring rules.
 
 ### Error Handling And Security
@@ -162,7 +162,6 @@ pytest -q
 ## Documentation Sync Rules
 Update the matching docs when these areas change:
 - DB tables or fields -> `docs/DATABASE_SCHEMA.md`
-- Commands, buttons, modals, or interaction flows -> `docs/DISCORD_BOT_SPEC.md`
 - Architecture or service boundaries -> `docs/ARCHITECTURE.md`
 - Deployment or runtime operations -> `docs/OPERATIONS.md`
 - Scope or MVP definition -> `docs/PRD.md` or `docs/ROADMAP.md`

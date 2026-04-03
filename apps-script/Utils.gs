@@ -1,24 +1,5 @@
 const Utils = {
-  ARXIV_API_URL: 'https://export.arxiv.org/api/query',
-  ARXIV_RSS_URL: 'https://rss.arxiv.org/rss',
-
-  TRACK_QUERY_MAP: {
-    llm: '(cat:cs.CL OR cat:cs.AI) AND (all:llm OR all:instruction OR all:alignment OR all:agent OR all:reasoning)',
-    'detection-segmentation': 'cat:cs.CV AND (all:detection OR all:segmentation OR all:instance OR all:panoptic)',
-    'vision-language': '(cat:cs.CV OR cat:cs.CL OR cat:cs.AI) AND (all:vision-language OR all:image-text OR all:captioning OR all:multimodal OR all:vlm)',
-  },
-
-  RSS_CATEGORY_MAP: {
-    llm: ['cs.CL', 'cs.AI'],
-    'detection-segmentation': ['cs.CV'],
-    'vision-language': ['cs.CV', 'cs.CL', 'cs.AI'],
-  },
-
-  RSS_KEYWORDS_MAP: {
-    llm: ['llm', 'language model', 'alignment', 'agent', 'reasoning', 'instruction'],
-    'detection-segmentation': ['detection', 'segmentation', 'instance', 'panoptic', 'mask'],
-    'vision-language': ['vision-language', 'image-text', 'multimodal', 'caption', 'vlm'],
-  },
+  OPENALEX_API_URL: 'https://api.openalex.org/works',
 
   nowIso() {
     return new Date().toISOString();
@@ -54,16 +35,20 @@ const Utils = {
     return `${parts[0]}/abs/${arxivId}`;
   },
 
-  buildArxivUrl(track, maxResults) {
-    const query = this.TRACK_QUERY_MAP[track] || `all:${track}`;
+  buildOpenAlexUrl(config) {
+    const toDate = new Date();
+    const fromDate = new Date(toDate.getTime() - Number(config.lookback_days || 7) * 24 * 60 * 60 * 1000);
+    const filters = [
+      `from_publication_date:${this.formatUtcDate(fromDate)}`,
+      `to_publication_date:${this.formatUtcDate(toDate)}`,
+    ].join(',');
     const params = [
-      `search_query=${encodeURIComponent(query)}`,
-      'sortBy=submittedDate',
-      'sortOrder=descending',
-      'start=0',
-      `max_results=${maxResults}`,
+      `search=${encodeURIComponent(config.search_query || 'artificial intelligence')}`,
+      `filter=${encodeURIComponent(filters)}`,
+      'sort=cited_by_count:desc',
+      `per-page=${Math.max(Number(config.top_papers || 3) * 3, 10)}`,
     ].join('&');
-    return `${this.ARXIV_API_URL}?${params}`;
+    return `${this.OPENALEX_API_URL}?${params}`;
   },
 
   truncateText(text, limit) {
@@ -91,6 +76,19 @@ const Utils = {
       return this.truncateText(value, limit);
     }
     return this.truncateText(searchWindow.slice(0, cut + 1).trim(), limit);
+  },
+
+  rebuildOpenAlexAbstract(invertedIndex) {
+    if (!invertedIndex) {
+      return '';
+    }
+    const tokens = [];
+    Object.keys(invertedIndex).forEach((word) => {
+      invertedIndex[word].forEach((position) => {
+        tokens[position] = word;
+      });
+    });
+    return tokens.filter(Boolean).join(' ');
   },
 
   parseMarkdownSections(body) {

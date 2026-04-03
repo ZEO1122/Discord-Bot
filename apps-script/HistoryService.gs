@@ -27,38 +27,36 @@ const HistoryService = {
 
   appendTrendHistoryRow(row) {
     this.getTrendSheet().appendRow([
-      row.channel_key,
-      row.channel_id,
-      row.interest,
-      row.source_url,
-      row.source_title,
+      row.paper_id,
+      row.title,
+      row.canonical_url,
       row.published_at,
+      row.citation_count,
+      row.topic_tag,
       row.posted_at,
       row.brief_title,
     ]);
   },
 
-  getTrendHistory(channelId, interest) {
+  getTrendHistory() {
     const values = this.getTrendSheet().getDataRange().getValues();
     if (values.length <= 1) {
       return [];
     }
     const rows = values.slice(1);
-    return rows
-      .filter((row) => String(row[1]) === String(channelId) && String(row[2]) === String(interest))
-      .map((row) => ({
-        channel_key: row[0],
-        channel_id: row[1],
-        interest: row[2],
-        source_url: row[3],
-        source_title: row[4],
-        published_at: row[5],
-        posted_at: row[6],
-        brief_title: row[7],
-      }));
+    return rows.map((row) => ({
+      paper_id: row[0],
+      title: row[1],
+      canonical_url: row[2],
+      published_at: row[3],
+      citation_count: row[4],
+      topic_tag: row[5],
+      posted_at: row[6],
+      brief_title: row[7],
+    }));
   },
 
-  hasSeenSource(channelId, interest, sourceUrl) {
-    return this.getTrendHistory(channelId, interest).some((row) => row.source_url === sourceUrl);
+  hasSeenPaper(canonicalUrl) {
+    return this.getTrendHistory().some((row) => row.canonical_url === canonicalUrl);
   }
 };

@@ -10,7 +10,7 @@
 GitHub Public Repo
   ├─ content/concepts/*.md
   ├─ content/concepts/manifest.json
-  └─ config/channel_interest_map.json
+  └─ config/trend_brief_config.json
 
 Google Apps Script
   ├─ runConceptDaily()
@@ -64,6 +64,6 @@ Google Apps Script
 - Script Properties progress 증가
 
 ### trend
-- 채널별 관심분야 브리핑 게시
+- 최근 7일 고인용 논문 상위 3편 게시
 - Google Sheets history 기록
 - fresh source 없으면 skip

@@ -64,33 +64,20 @@ const ConfigService = {
     return this.getScriptProperty('CONCEPT_MANIFEST_PATH') || 'content/concepts/manifest.json';
   },
 
-  getChannelMapPath() {
-    return this.getScriptProperty('CHANNEL_MAP_PATH') || 'config/channel_interest_map.json';
+  getTrendConfigPath() {
+    return this.getScriptProperty('TREND_CONFIG_PATH') || 'config/trend_brief_config.json';
   },
 
   getConceptWebhookUrl() {
     return this.getScriptProperty('DISCORD_WEBHOOK_URL');
   },
 
-  getTrendWebhookMap() {
-    return this.getJsonFromProperty('DISCORD_WEBHOOK_MAP_JSON');
-  },
-
-  getTrendWebhookUrl(webhookKey) {
-    const webhookMap = this.getTrendWebhookMap();
-    if (webhookMap[webhookKey]) {
-      return webhookMap[webhookKey];
+  getTrendWebhookUrl() {
+    const webhookUrl = this.getScriptProperty('TREND_WEBHOOK_URL');
+    if (!webhookUrl) {
+      throw new Error('Missing Script Property: TREND_WEBHOOK_URL');
     }
-
-    const normalizedTarget = String(webhookKey).trim().toLowerCase();
-    const match = Object.keys(webhookMap).find(
-      (key) => String(key).trim().toLowerCase() === normalizedTarget,
-    );
-    if (match) {
-      return webhookMap[match];
-    }
-
-    throw new Error(`Missing webhook mapping for ${webhookKey}. Available keys: ${Object.keys(webhookMap).join(', ')}`);
+    return webhookUrl;
   },
 
   getOpenAiKey() {

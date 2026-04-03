@@ -15,8 +15,9 @@
     Utils.gs
     ConceptService.gs
     TrendService.gs
+    .clasp.json.example
   config/
-    channel_interest_map.json
+    trend_brief_config.json
   README.md
   content/
     concepts/
@@ -35,82 +36,18 @@
   requirements-dev.txt
   data/
   src/
-    bot/
-      app.py
-      cogs/
-        admin.py
-        briefing.py
-        quiz.py
-        stats.py
-      views/
-        quiz.py
-    core/
-      config.py
-      db.py
-    models/
-      attempt.py
-      base.py
-      briefing.py
-      publish_log.py
-      quiz.py
-      user.py
-    repositories/
-      attempt_repository.py
-      briefing_repository.py
-      publish_log_repository.py
-      quiz_repository.py
-      user_repository.py
-    services/
-      attempt_recording_service.py
-      grading_service.py
-      private_feedback_renderer.py
-      publish_service.py
-      stats_query_service.py
-      submission_handler.py
+    ...
   scripts/
-    bootstrap_sqlite.py
-    fetch_trend_sources.py
-    publish_daily.py
-    post_concept_brief.py
-    post_concept_queue.py
-    post_trend_brief.py
-    post_weekly_trends.py
-    seed_smoke_data.py
+    ...
   tests/
-    bot/
-      test_admin_publish.py
-      test_quiz_flow.py
-      test_stats_me.py
-    conftest.py
-    services/
-      test_fetch_trend_sources.py
-      test_post_concept_brief.py
-      test_post_concept_queue.py
-      test_post_weekly_trends.py
-      test_publish_service.py
-      test_stats_query_service.py
-      test_submission_handler.py
+    ...
   .opencode/
-    commands/
-      build-feature.md
-      make-migration.md
-      plan-feature.md
-      review-changes.md
-    skills/
-      discord-bot/
-        SKILL.md
-      content-pipeline/
-        SKILL.md
-      quiz-grading/
-        SKILL.md
-      linux-ops/
-        SKILL.md
+    ...
   docs/
     ARCHITECTURE.md
     CLUB_SERVER_TRANSITION.md
     CONTENT_PIPELINE.md
     DATABASE_SCHEMA.md
-    DISCORD_BOT_SPEC.md
     GAS_FINAL_CHECKLIST.md
     GAS_IMPORT_CHECKLIST.md
     GAS_MIGRATION_PLAN.md
