@@ -47,6 +47,10 @@ discussion_prompt: "학습 전에 먼저 순전파를 이해해야 역전파와 
 ## 토론 거리
 - 학습 전에 먼저 순전파를 이해해야 역전파와 손실 계산도 자연스럽게 연결되는 이유는 무엇일까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: Michael Nielsen / [Neural Networks and Deep Learning / 2장](https://neuralnetworksanddeeplearning.com/chap2.html)
+- 설명글: Dive into Deep Learning / [Multilayer Perceptrons](https://d2l.ai/chapter_multilayer-perceptrons/mlp.html)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - Aston Zhang, Zachary C. Lipton, Mu Li, Alexander J. Smola / Dive into Deep Learning

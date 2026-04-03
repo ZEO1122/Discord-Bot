@@ -47,6 +47,10 @@ discussion_prompt: "합성곱 전에 가장자리에 여유 공간을 두는 단
 ## 토론 거리
 - 합성곱 전에 가장자리에 여유 공간을 두는 단순한 조치가 왜 중요한 역할을 할까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: Vincent Dumoulin, Francesco Visin / [A Guide to Convolution Arithmetic for Deep Learning](https://arxiv.org/abs/1603.07285)
+- 설명글: Stanford / [CS231n Notes: Convolutional Neural Networks](https://cs231n.github.io/convolutional-networks/)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - Stanford / CS231n Convolutional Neural Networks Notes

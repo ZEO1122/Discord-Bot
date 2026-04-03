@@ -3,7 +3,6 @@
 ```text
 .
   AGENTS.md
-  .env.example
   apps-script/
     appsscript.json
     Code.gs
@@ -32,17 +31,7 @@
     trends/
       history/
         published_trends.json
-  requirements.txt
-  requirements-dev.txt
   data/
-  src/
-    ...
-  scripts/
-    ...
-  tests/
-    ...
-  .opencode/
-    ...
   docs/
     ARCHITECTURE.md
     CLUB_SERVER_TRANSITION.md
@@ -52,7 +41,6 @@
     GAS_IMPORT_CHECKLIST.md
     GAS_MIGRATION_PLAN.md
     GAS_SETUP_GUIDE.md
-    LEADERBOARD_STRATEGY.md
     LINUX_OPENCODE_SETUP.md
     MAINTENANCE_GUIDE.md
     ONE_PAGE_OPERATIONS.md
@@ -60,4 +48,6 @@
     PRD.md
     ROADMAP.md
     SERVER_SETUP_GUIDE.md
+  package.json
+  package-lock.json
 ```

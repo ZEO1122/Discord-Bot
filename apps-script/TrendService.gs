@@ -9,13 +9,44 @@ const TrendService = {
   },
 
   TOPIC_LABELS: {
-    'foundation-models': '파운데이션 모델',
-    'vision-perception': '비전 인지',
-    'multimodal-agents': '멀티모달 에이전트',
-    'generation-creative': '생성·크리에이티브',
-    'systems-efficiency': '시스템 효율화',
-    other: '기타',
+    'foundation-models': 'Foundation Models(파운데이션 모델)',
+    'vision-perception': 'Vision Perception(비전 인지)',
+    'multimodal-agents': 'Multimodal Agents(멀티모달 에이전트)',
+    'speech-audio': 'Speech and Audio(음성·오디오)',
+    'retrieval-search': 'Retrieval and Search(검색·리트리벌)',
+    'robotics-embodied': 'Robotics and Embodied AI(로보틱스·체화 AI)',
+    'generation-creative': 'Generation and Creative(생성·크리에이티브)',
+    'data-training': 'Data and Training(데이터·학습)',
+    'systems-efficiency': 'Systems Efficiency(시스템 효율화)',
+    other: 'Other(기타)',
   },
+
+  SELECTION_WEIGHTS: {
+    recency: 30,
+    impact: 20,
+    velocity: 10,
+    reliability: 10,
+    ai_relevance: 15,
+    community: 15,
+  },
+
+  AI_RELEVANCE_KEYWORDS: [
+    'llm',
+    'language model',
+    'reasoning',
+    'alignment',
+    'vision',
+    'segmentation',
+    'detection',
+    'multimodal',
+    'vision-language',
+    'agent',
+    'diffusion',
+    'generation',
+    'quantization',
+    'distillation',
+    'serving',
+  ],
 
   CAUTION_MESSAGE:
     '이 브리핑은 최신 논문 source를 바탕으로 생성된 요약입니다. 해석 오류나 누락 가능성이 있으니 원문 논문을 함께 확인하세요.',
@@ -45,7 +76,11 @@ const TrendService = {
           'foundation-models',
           'vision-perception',
           'multimodal-agents',
+          'speech-audio',
+          'retrieval-search',
+          'robotics-embodied',
           'generation-creative',
+          'data-training',
           'systems-efficiency',
           'other',
         ],
@@ -96,45 +131,248 @@ const TrendService = {
         paper_id: item.id || item.doi || item.ids?.openalex || item.primary_location?.landing_page_url || item.title,
         title: item.title || '',
         abstract: Utils.rebuildOpenAlexAbstract(item.abstract_inverted_index),
-        url: item.primary_location?.landing_page_url || item.ids?.openalex || '',
+        url: item.primary_location?.landing_page_url || item.best_oa_location?.landing_page_url || item.ids?.openalex || '',
         published_at: item.publication_date || '',
-        citation_count: Number(item.cited_by_count || 0),
+        citation_count: Utils.toNumber(item.cited_by_count, 0),
+        fwci: Utils.toNumber(item.fwci, 0),
+        citation_percentile: Utils.toNumber(item.citation_normalized_percentile?.value, 0),
+        is_retracted: Boolean(item.is_retracted),
+        has_fulltext: Boolean(item.open_access?.any_repository_has_fulltext),
+        is_oa: Boolean(item.open_access?.is_oa),
+        doi: item.ids?.doi || item.doi || '',
+        openalex_topic: item.primary_topic?.display_name || '',
+        arxiv_id: Utils.extractArxivId(item.primary_location?.landing_page_url || item.ids?.doi || item.doi || ''),
       }))
       .filter((item) => item.title && item.url)
-      .sort((a, b) => b.citation_count - a.citation_count);
+      .sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)));
   },
 
   selectWeeklyPapers(papers, topN) {
-    const selected = [];
+    const ranked = this.rankWeeklyPapers(papers);
+    const unseen = [];
     const seen = [];
-    for (let i = 0; i < papers.length; i += 1) {
-      const paper = papers[i];
+    ranked.forEach((paper) => {
       if (HistoryService.hasSeenPaper(Utils.normalizeArxivUrl(paper.url))) {
         seen.push(paper);
-        continue;
+        return;
       }
-      selected.push(paper);
-      if (selected.length >= topN) {
-        break;
-      }
-    }
+      unseen.push(paper);
+    });
+
+    const selected = unseen.slice(0, topN);
     if (selected.length < topN) {
-      for (let i = 0; i < seen.length; i += 1) {
-        selected.push(seen[i]);
-        if (selected.length >= topN) {
-          break;
-        }
-      }
+      seen.slice(0, topN - selected.length).forEach((paper) => selected.push(paper));
     }
+    selected.forEach((paper) => Logger.log(this.formatSelectionLogLine(paper)));
     return selected;
+  },
+
+  rankWeeklyPapers(papers) {
+    const ranked = [];
+    papers.forEach((paper) => {
+      const enriched = this.enrichPaperForSelection(paper);
+      if (enriched.is_retracted) {
+        return;
+      }
+      ranked.push(enriched);
+    });
+    ranked.sort((a, b) => {
+      if (b.selection_score !== a.selection_score) {
+        return b.selection_score - a.selection_score;
+      }
+      if (String(b.published_at) !== String(a.published_at)) {
+        return String(b.published_at).localeCompare(String(a.published_at));
+      }
+      return String(a.title).localeCompare(String(b.title));
+    });
+    return ranked;
+  },
+
+  enrichPaperForSelection(paper) {
+    const enriched = Object.assign({}, paper);
+    const community = this.fetchHuggingFaceMetadata(enriched.arxiv_id);
+    Object.assign(enriched, community);
+    const breakdown = this.buildSelectionBreakdown(enriched);
+    enriched.selection_breakdown = breakdown;
+    enriched.selection_score = this.roundScore(
+      breakdown.recency +
+        breakdown.impact +
+        breakdown.velocity +
+        breakdown.reliability +
+        breakdown.ai_relevance +
+        breakdown.community,
+    );
+    return enriched;
+  },
+
+  buildSelectionBreakdown(paper) {
+    return {
+      recency: this.scoreRecency(paper.published_at),
+      impact: this.scoreImpact(paper),
+      velocity: this.scoreCitationVelocity(paper),
+      reliability: this.scoreReliability(paper),
+      ai_relevance: this.scoreAiRelevance(paper),
+      community: this.scoreCommunitySignal(paper),
+    };
+  },
+
+  scoreRecency(publishedAt) {
+    const date = this.parsePublishedDate(publishedAt);
+    if (!date) {
+      return 0;
+    }
+    const today = new Date();
+    const ageDays = Math.max(Math.floor((today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)), 0);
+    if (ageDays <= 7) {
+      return this.SELECTION_WEIGHTS.recency;
+    }
+    if (ageDays >= 45) {
+      return 0;
+    }
+    return this.roundScore((this.SELECTION_WEIGHTS.recency * (45 - ageDays)) / 38);
+  },
+
+  scoreImpact(paper) {
+    const percentileScore = Math.min(12, Utils.toNumber(paper.citation_percentile, 0) * 12);
+    const fwciScore = Math.min(5, (Utils.toNumber(paper.fwci, 0) / 20) * 5);
+    const citationScore = Math.min(3, (Utils.toNumber(paper.citation_count, 0) / 100) * 3);
+    return this.roundScore(percentileScore + fwciScore + citationScore);
+  },
+
+  scoreCitationVelocity(paper) {
+    const date = this.parsePublishedDate(paper.published_at);
+    if (!date) {
+      return 0;
+    }
+    const ageDays = Math.max(Math.floor((Date.now() - date.getTime()) / (24 * 60 * 60 * 1000)), 0);
+    const monthsSincePublish = Math.max(ageDays / 30, 1);
+    const citationsPerMonth = Utils.toNumber(paper.citation_count, 0) / monthsSincePublish;
+    return this.roundScore(Math.min(this.SELECTION_WEIGHTS.velocity, citationsPerMonth));
+  },
+
+  scoreReliability(paper) {
+    if (paper.is_retracted) {
+      return 0;
+    }
+    let score = 4;
+    if (paper.doi) {
+      score += 2;
+    }
+    if (paper.has_fulltext) {
+      score += 2;
+    }
+    if (paper.is_oa) {
+      score += 1;
+    }
+    if (paper.openalex_topic) {
+      score += 1;
+    }
+    return this.roundScore(Math.min(this.SELECTION_WEIGHTS.reliability, score));
+  },
+
+  scoreAiRelevance(paper) {
+    const text = `${paper.title || ''} ${paper.abstract || ''}`.toLowerCase();
+    const matches = this.AI_RELEVANCE_KEYWORDS.filter((keyword) => text.includes(keyword)).length;
+    if (!matches) {
+      return 4;
+    }
+    return this.roundScore(Math.min(this.SELECTION_WEIGHTS.ai_relevance, 4 + (11 * matches) / this.AI_RELEVANCE_KEYWORDS.length));
+  },
+
+  scoreCommunitySignal(paper) {
+    const upvoteScore = Math.min(5, (Utils.toNumber(paper.hf_upvotes, 0) / 150) * 5);
+    const githubScore = Math.min(7, (Utils.toNumber(paper.hf_github_stars, 0) / 50000) * 7);
+    let dailyRankScore = 0;
+    const dailyRank = Utils.toNumber(paper.hf_daily_rank, 0);
+    if (dailyRank === 1) {
+      dailyRankScore = 3;
+    } else if (dailyRank > 1 && dailyRank <= 5) {
+      dailyRankScore = 2;
+    } else if (dailyRank > 5 && dailyRank <= 10) {
+      dailyRankScore = 1;
+    }
+    return this.roundScore(upvoteScore + githubScore + dailyRankScore);
+  },
+
+  fetchHuggingFaceMetadata(arxivId) {
+    if (!arxivId) {
+      return { hf_upvotes: 0, hf_github_stars: 0, hf_daily_rank: 0 };
+    }
+
+    const cache = CacheService.getScriptCache();
+    const cacheKey = `hf-paper:${arxivId}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    try {
+      const response = UrlFetchApp.fetch(`https://huggingface.co/papers/${encodeURIComponent(arxivId)}`, {
+        muteHttpExceptions: true,
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+      });
+      if (response.getResponseCode() !== 200) {
+        return { hf_upvotes: 0, hf_github_stars: 0, hf_daily_rank: 0 };
+      }
+
+      const html = response.getContentText();
+      const metadata = {
+        hf_github_stars: this.extractHtmlNumber(html, /githubStars&quot;:(\d+)/i),
+        hf_daily_rank: this.extractHtmlNumber(html, /dailyPaperRank&quot;:(\d+)/i),
+        hf_upvotes: this.extractHtmlNumber(html, /Upvote[^0-9]{0,20}(\d+)/i),
+      };
+      cache.put(cacheKey, JSON.stringify(metadata), 6 * 60 * 60);
+      return metadata;
+    } catch (error) {
+      Logger.log(`TrendService:hf_fetch_failed arxiv_id=${arxivId} error=${error}`);
+      return { hf_upvotes: 0, hf_github_stars: 0, hf_daily_rank: 0 };
+    }
+  },
+
+  extractHtmlNumber(text, regex) {
+    const match = String(text || '').match(regex);
+    return match && match[1] ? Utils.toNumber(match[1], 0) : 0;
+  },
+
+  parsePublishedDate(value) {
+    if (!value) {
+      return null;
+    }
+    const date = new Date(String(value));
+    return Number.isNaN(date.getTime()) ? null : date;
+  },
+
+  roundScore(value) {
+    return Math.round(Utils.toNumber(value, 0) * 100) / 100;
+  },
+
+  formatSelectionLogLine(paper) {
+    const breakdown = paper.selection_breakdown || {};
+    const breakdownText = Object.keys(breakdown)
+      .sort()
+      .map((key) => `${key}=${breakdown[key]}`)
+      .join(',');
+    return `TrendService:selection score=${paper.selection_score || 0} title=${paper.title} breakdown=${breakdownText}`;
   },
 
   tagPaperTopic(paper, taxonomy) {
     const text = `${paper.title}\n${paper.abstract || ''}`.toLowerCase();
     const heuristicRules = [
       {
+        topic: 'robotics-embodied',
+        keywords: ['robot', 'robotics', 'manipulation', 'locomotion', 'navigation', 'policy learning', 'sim2real'],
+      },
+      {
         topic: 'multimodal-agents',
         keywords: ['vision-language-action', 'vision language action', 'multimodal', 'embodied', 'vlm', 'vla', 'agent'],
+      },
+      {
+        topic: 'speech-audio',
+        keywords: ['speech', 'audio', 'voice', 'asr', 'tts', 'speaker', 'sound event', 'speech recognition'],
+      },
+      {
+        topic: 'retrieval-search',
+        keywords: ['retrieval', 'rag', 'search', 'rerank', 'reranker', 'dense retrieval', 'knowledge base', 'indexing'],
       },
       {
         topic: 'vision-perception',
@@ -143,6 +381,10 @@ const TrendService = {
       {
         topic: 'generation-creative',
         keywords: ['diffusion', 'generation', 'editing', 'image generation', 'video generation', 'avatar', 'creative'],
+      },
+      {
+        topic: 'data-training',
+        keywords: ['dataset', 'data curation', 'synthetic data', 'preference data', 'curriculum', 'data mixture', 'annotation'],
       },
       {
         topic: 'systems-efficiency',
@@ -281,10 +523,30 @@ const TrendService = {
         'embodied agent(체화 에이전트): 실제 환경에서 지각하고 행동하는 에이전트',
         'multimodal reasoning(멀티모달 추론): 이미지·텍스트 등 여러 형식을 함께 보고 판단하는 능력',
       ],
+      'speech-audio': [
+        'automatic speech recognition(음성 인식): 사람 음성을 텍스트로 바꾸는 작업',
+        'text-to-speech(음성 합성): 텍스트를 자연스러운 음성으로 생성하는 기술',
+        'speaker representation(화자 표현): 화자의 특성을 벡터 형태로 담아내는 방식',
+      ],
+      'retrieval-search': [
+        'retrieval(검색): 필요한 정보를 외부 저장소에서 찾아오는 과정',
+        'reranking(재정렬): 검색된 후보를 더 정확한 기준으로 다시 순서화하는 단계',
+        'indexing(색인화): 빠른 검색을 위해 문서를 검색 가능한 구조로 저장하는 작업',
+      ],
+      'robotics-embodied': [
+        'manipulation(조작): 로봇이 물체를 잡고 옮기고 다루는 능력',
+        'navigation(이동 계획): 환경 안에서 목적지까지 경로를 정하고 움직이는 과정',
+        'sim2real(시뮬레이션-현실 전이): 가상 환경에서 학습한 정책을 실제 환경에 적용하는 문제',
+      ],
       'generation-creative': [
         'diffusion(확산 모델): 점진적으로 노이즈를 제거하며 이미지를 생성하는 방식',
         'editing(편집): 기존 이미지나 영상을 조건에 맞게 바꾸는 작업',
         'avatar(아바타): 사람이나 캐릭터를 디지털 형태로 재현한 대상',
+      ],
+      'data-training': [
+        'dataset curation(데이터 큐레이션): 학습 목적에 맞게 데이터를 선별하고 정리하는 과정',
+        'synthetic data(합성 데이터): 실제 수집 대신 생성 방식으로 만든 학습용 데이터',
+        'curriculum learning(커리큘럼 학습): 쉬운 예시부터 어려운 예시로 점차 학습하는 전략',
       ],
       'systems-efficiency': [
         'quantization(양자화): 모델 수치 표현을 더 작은 비트로 줄여 효율을 높이는 기법',

@@ -47,6 +47,10 @@ discussion_prompt: "모델 구조가 좋아도 학습률 설정이 잘못되면 
 ## 토론 거리
 - 모델 구조가 좋아도 학습률 설정이 잘못되면 학습이 무너질 수 있는 이유는 무엇일까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Leslie Smith / [Cyclical Learning Rates for Training Neural Networks](https://arxiv.org/abs/1506.01186)
+- 설명글: Andrej Karpathy / [A Recipe for Training Neural Networks](https://karpathy.github.io/2019/04/25/recipe/)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - Léon Bottou, Frank E. Curtis, Jorge Nocedal / Optimization Methods for Large-Scale Machine Learning / 2018

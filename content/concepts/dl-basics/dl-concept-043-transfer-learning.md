@@ -47,6 +47,10 @@ discussion_prompt: "한 문제에서 익힌 지식이 다른 문제에도 도움
 ## 토론 거리
 - 한 문제에서 익힌 지식이 다른 문제에도 도움이 되는 조건은 무엇일까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: Sebastian Ruder / [Transfer Learning](https://www.ruder.io/transfer-learning/)
+- 설명글: Keras / [Transfer learning & fine-tuning](https://keras.io/guides/transfer_learning/)
+
 ## source
 - Sinno Jialin Pan, Qiang Yang / A Survey on Transfer Learning / 2010
 - Jason Yosinski et al. / How Transferable Are Features in Deep Neural Networks? / 2014

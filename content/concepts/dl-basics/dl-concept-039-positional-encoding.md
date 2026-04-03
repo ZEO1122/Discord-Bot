@@ -47,6 +47,10 @@ discussion_prompt: "셀프 어텐션이 순서에 민감하지 않다면 위치 
 ## 토론 거리
 - 셀프 어텐션이 순서에 민감하지 않다면 위치 정보를 어떤 식으로 보완해야 할까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: Jay Alammar / [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/)
+- 설명글: Harvard NLP / [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
+
 ## source
 - Ashish Vaswani et al. / Attention Is All You Need / 2017
 - Aston Zhang, Zachary C. Lipton, Mu Li, Alexander J. Smola / Dive into Deep Learning

@@ -47,6 +47,10 @@ discussion_prompt: "같은 입력을 받아도 가중치와 편향이 다르면 
 ## 토론 거리
 - 같은 입력을 받아도 가중치와 편향이 다르면 전혀 다른 판단이 나오는 이유는 무엇일까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: Stanford / [CS231n Notes: Neural Networks Part 1](https://cs231n.github.io/neural-networks-1/)
+- 설명글: Michael Nielsen / [Neural Networks and Deep Learning / 1장](https://neuralnetworksanddeeplearning.com/chap1.html)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - Christopher M. Bishop / Pattern Recognition and Machine Learning / 2006

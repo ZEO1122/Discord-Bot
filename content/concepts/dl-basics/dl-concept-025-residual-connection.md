@@ -47,6 +47,10 @@ discussion_prompt: "깊이를 늘리면 표현력이 커질 수 있는데도 실
 ## 토론 거리
 - 깊이를 늘리면 표현력이 커질 수 있는데도 실제 학습은 오히려 어려워지는 이유를 잔차 연결이 어떻게 완화할까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Kaiming He et al. / [Deep Residual Learning for Image Recognition](https://openaccess.thecvf.com/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html)
+- 설명글: Dive into Deep Learning / [Residual Networks](https://d2l.ai/chapter_convolutional-modern/resnet.html)
+
 ## source
 - Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun / Deep Residual Learning for Image Recognition / 2016
 - Aston Zhang, Zachary C. Lipton, Mu Li, Alexander J. Smola / Dive into Deep Learning

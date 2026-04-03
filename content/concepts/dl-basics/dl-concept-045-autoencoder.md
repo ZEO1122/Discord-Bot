@@ -47,6 +47,10 @@ discussion_prompt: "입력을 그대로 출력하게 하는 과제가 단순해 
 ## 토론 거리
 - 입력을 그대로 출력하게 하는 과제가 단순해 보여도 왜 의미 있는 표현 학습이 가능할까?
 
+## 같이 보면 좋은 논문·글
+- 설명글: François Chollet / [Building Autoencoders in Keras](https://blog.keras.io/building-autoencoders-in-keras.html)
+- 설명글: Goodfellow, Bengio, Courville / [Deep Learning / Autoencoders](https://www.deeplearningbook.org/contents/autoencoders.html)
+
 ## source
 - Geoffrey E. Hinton, Ruslan R. Salakhutdinov / Reducing the Dimensionality of Data with Neural Networks / 2006
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016

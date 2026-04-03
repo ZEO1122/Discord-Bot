@@ -1,179 +1,92 @@
 # AGENTS.md
 
 ## Purpose
-This repo started as a planning/bootstrap repo for an AI study club Discord learning bot.
-It now includes early runnable scaffolding alongside the product, architecture, schema, and ops docs.
-Keep changes minimal, traceable, and aligned with the docs.
+This repo is a Discord briefing automation repository for an AI study club.
+It uses Google Apps Script for scheduling and Discord Webhook for delivery.
 
 ## Current State
-- Main contents are `README.md`, `FILE_TREE.md`, `docs/*.md`, `src/`, and `scripts/`.
-- `requirements.txt` and `requirements-dev.txt` exist for the initial Python scaffold.
-- The checked-in Python tree currently lives under `src/bot`, `src/services`, `src/repositories`, `src/models`, and `src/core`.
+- Main contents are `README.md`, `FILE_TREE.md`, `docs/*.md`, `apps-script/`, `content/`, and `config/`.
+- The checked-in runtime implementation lives in `apps-script/`.
 - `FILE_TREE.md` should be kept in sync with the implemented structure.
 - Ignore `.DS_Store` and `._*` files.
 
 ## Product Priorities
-Optimize in this order: accuracy, learning experience, traceability, operational simplicity. This is a learning service, not just a notification bot.
+Optimize in this order: accuracy, traceability, operational simplicity.
 
 ## Read Before Larger Changes
 Read the relevant docs before implementing:
 - `README.md`
-- `docs/PRD.md`
 - `docs/ARCHITECTURE.md`
 - `docs/CONTENT_PIPELINE.md`
 - `docs/DATABASE_SCHEMA.md`
 - `docs/OPERATIONS.md`
 - `docs/ROADMAP.md`
-- `docs/LINUX_OPENCODE_SETUP.md`
+- `docs/GAS_SETUP_GUIDE.md`
+- `docs/GAS_IMPORT_CHECKLIST.md`
+- `docs/GAS_FINAL_CHECKLIST.md`
+- `docs/MAINTENANCE_GUIDE.md`
 
-For DB, grading, publishing, scheduling, or workflow changes, read the matching doc first.
+For publishing, content pipeline, or operations changes, read the matching doc first.
 
 ## Non-Negotiable Domain Rules
-- Keep `discussion_prompt` separate from graded quiz data.
-- Never expose `answer_key`, `accepted_keywords`, grading logic, or unrevealed explanations in public Discord messages.
 - Store source metadata structurally, not as one display string.
-- Preserve internal ID to Discord ID mappings.
-- Treat trend/research briefs without sources as blocked or admin-review only.
-- Keep public feedback aggregated; detailed grading belongs in ephemeral responses or DMs.
+- Keep concept progress and trend history traceable.
+- Do not log webhook URLs, API keys, or other secrets.
+- Do not auto-publish a trend briefing that has no sources.
 
 ## Preferred Stack
 Use Google Apps Script for scheduled execution, Discord Webhook for delivery, GitHub public repo for content/config source, and Google Sheets/Script Properties for lightweight state.
-Keep the legacy Python scaffold only for local experiments or migration reference.
 
 ## Target Layout
 Follow the implemented `apps-script`, `content`, `config`, and `docs` layout from `README.md`.
-Treat `src/` and `scripts/` as legacy/reference code unless the user explicitly asks you to work on them.
+Keep GAS entrypoints, external fetches, payload construction, and history storage logically separate.
 
-## Build, Lint, Test Commands
-Use the commands below for the current scaffold unless explicit tooling config changes them.
+## Commands
 
-### Environment Setup
+### Apps Script
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -U pip
-```
-
-### Dependency Install
-If using `requirements.txt`:
-```bash
-python -m pip install -r requirements.txt
-python -m pip install -r requirements-dev.txt
-```
-If using `uv` instead:
-```bash
-uv venv
-uv pip install -r requirements.txt
-uv pip install -r requirements-dev.txt
-```
-
-### Run The App
-```bash
-# Legacy/local reference paths only
-PYTHONPATH=src python -m bot.app
-PYTHONPATH=src python scripts/publish_daily.py
-PYTHONPATH=src python scripts/bootstrap_sqlite.py
-```
-
-### Lint, Format, Types
-```bash
-ruff check .
-ruff format .
-mypy src scripts
-```
-
-### Full Test Suite
-```bash
-pytest
-```
-
-### Single Test Commands
-Use one of these exact forms:
-```bash
-pytest tests/path/test_file.py
-pytest tests/path/test_file.py::test_function_name
-pytest tests/path/test_file.py::TestClass::test_method_name
-pytest -k "keyword" tests/path/test_file.py
-```
-
-### Focused Test Runs
-```bash
-pytest tests/services
-pytest tests/db
-pytest tests/bot
-pytest --maxfail=1 -x
-pytest -q
+npm install
+npx clasp login
+npx clasp status
+npx clasp push
+npx clasp pull
+npx clasp open
 ```
 
 ## Workflow
-- Plan first for new features, schema changes, grading changes, pipeline changes, or deployment changes; direct implementation is fine for small commands, copy tweaks, tests, logging improvements, and simple refactors.
-- Update the relevant docs whenever behavior, schema, architecture, or operations change, and keep changes incremental.
+- Plan first for content pipeline, configuration, or operations changes.
+- Update the relevant docs whenever behavior, architecture, or operations change.
 
 ## Code Style Guidelines
-
-### Imports
-- Group imports as standard library, third-party, then local.
-- Prefer absolute imports from top-level packages.
-- Avoid wildcard imports.
-- Keep imports side-effect free where practical.
-
-### Formatting
-- Follow PEP 8 and default `ruff format` behavior.
-- Use 4 spaces for indentation.
-- Prefer an 88-character line length.
-- Keep functions small enough that control flow is easy to scan.
-- Add comments only for non-obvious decisions.
-
-### Types
-- Use type hints by default for new code.
-- Annotate public functions, methods, and module-level constants.
-- Prefer explicit domain models over loose `dict[str, Any]` when shape is known.
-- Use `TypedDict`, `dataclass`, or Pydantic models for structured payloads when helpful.
-- Keep Discord-facing payloads and DB models explicitly typed.
 
 ### Naming
 - Use English for code identifiers, module names, and filenames.
 - Use Korean for most user-facing strings.
-- Use `snake_case` for functions, variables, and modules.
-- Use `PascalCase` for classes and `UPPER_SNAKE_CASE` for constants.
-- Prefer domain terms such as `content`, `quiz`, `attempt`, `publish_log`, and `user_stats`.
+- Use descriptive service names such as `ConceptService`, `TrendService`, and `HistoryService`.
 
 ### Design
-- Keep GAS entrypoints thin; move logic into service-style files.
-- Treat GitHub raw fetch, OpenAI calls, Discord posting, and history storage as separate concerns.
-- Make retry behavior and duplicate-post policy explicit.
-- Prefer pure functions for normalization and scoring rules.
+- Keep GAS entrypoints thin.
+- Separate GitHub raw fetch, OpenAI calls, Discord posting, and history storage concerns.
+- Make duplicate-post policy explicit.
 
 ### Error Handling And Security
-- Fail loudly for invariant violations; fail gracefully for user-facing operational issues.
+- Fail loudly for invariant violations.
 - Never swallow exceptions silently.
-- Log enough context to debug: action, content ID, quiz ID, user ID, Discord message ID, and exception details.
-- Do not log tokens, webhook URLs, answer keys, or sensitive grading details.
-- Make writes affecting grading and attempt history as atomic as practical.
-- Secrets must come from environment variables only.
-- Never hardcode bot tokens, webhook URLs, or API keys.
-- Never leak answer data into public embeds, command output, logs, fixtures, or docs.
+- Log enough context to debug publish failures without logging secrets.
+- Never hardcode webhook URLs or API keys.
 
 ## Testing Expectations
-- Add or update tests for grading, duplicate handling, stats aggregation, and repository/service logic.
-- Prefer service/repository tests over brittle Discord UI mocks, and add a regression test first for bugs when practical.
-- Keep fixtures free of real secrets and answer leaks; if no test harness exists yet, say so clearly in the final note.
+- Prefer deterministic helpers and narrow service-level checks when editing Apps Script logic.
+- Keep operational behavior easy to validate through manual GAS runs and logs.
 
 ## Documentation Sync Rules
 Update the matching docs when these areas change:
-- DB tables or fields -> `docs/DATABASE_SCHEMA.md`
+- Concept/trend pipeline rules -> `docs/CONTENT_PIPELINE.md`
+- State storage or history columns -> `docs/DATABASE_SCHEMA.md`
 - Architecture or service boundaries -> `docs/ARCHITECTURE.md`
 - Deployment or runtime operations -> `docs/OPERATIONS.md`
 - Scope or MVP definition -> `docs/PRD.md` or `docs/ROADMAP.md`
 
-## Cursor And Copilot Rules
-At analysis time, no repository-level agent rule files were present:
-- No `.cursorrules`
-- No `.cursor/rules/`
-- No `.github/copilot-instructions.md`
-
-If any of those files are added later, treat them as first-class instructions and merge them into future edits of this file.
-
 ## Practical Reminders
-- Start from the docs, be explicit about data-model and ops impact, and prefer incremental scaffolding over giant one-shot implementations.
-- When introducing tooling, add the config files and update this `AGENTS.md` with the exact commands.
+- Start from the docs and be explicit about ops impact.
+- Prefer incremental, traceable changes over speculative scaffolding.

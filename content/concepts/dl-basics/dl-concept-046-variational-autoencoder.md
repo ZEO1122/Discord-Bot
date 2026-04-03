@@ -47,6 +47,10 @@ discussion_prompt: "잠재표현을 점 하나가 아니라 분포로 다루면 
 ## 토론 거리
 - 잠재표현을 점 하나가 아니라 분포로 다루면 생성 모델로서 어떤 이점이 생길까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Diederik Kingma, Max Welling / [Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114)
+- 설명글: Lilian Weng / [From Autoencoder to Beta-VAE](https://lilianweng.github.io/posts/2018-08-12-vae/)
+
 ## source
 - Diederik P. Kingma, Max Welling / Auto-Encoding Variational Bayes / 2014
 - Carl Doersch / Tutorial on Variational Autoencoders / 2016

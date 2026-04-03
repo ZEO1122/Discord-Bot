@@ -47,6 +47,10 @@ discussion_prompt: "Adam이 널리 쓰이는데도 모든 문제에서 자동으
 ## 토론 거리
 - Adam이 널리 쓰이는데도 모든 문제에서 자동으로 최선의 선택이 아닌 이유는 무엇일까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Diederik Kingma, Jimmy Ba / [Adam: A Method for Stochastic Optimization](https://arxiv.org/abs/1412.6980)
+- 설명글: Sebastian Ruder / [An overview of gradient descent optimization algorithms](https://www.ruder.io/optimizing-gradient-descent/)
+
 ## source
 - Diederik P. Kingma, Jimmy Ba / Adam: A Method for Stochastic Optimization / 2015
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016

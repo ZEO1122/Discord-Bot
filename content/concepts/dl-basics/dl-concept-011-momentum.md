@@ -47,6 +47,10 @@ discussion_prompt: "현재 기울기만 보는 것보다 과거의 이동 방향
 ## 토론 거리
 - 현재 기울기만 보는 것보다 과거의 이동 방향을 함께 보는 것이 왜 학습에 도움이 될까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Ilya Sutskever, James Martens, George Dahl, Geoffrey Hinton / [On the importance of initialization and momentum in deep learning](https://proceedings.mlr.press/v28/sutskever13.html)
+- 설명글: Sebastian Ruder / [An overview of gradient descent optimization algorithms](https://www.ruder.io/optimizing-gradient-descent/)
+
 ## source
 - Boris T. Polyak / Some Methods of Speeding up the Convergence of Iteration Methods / 1964
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016

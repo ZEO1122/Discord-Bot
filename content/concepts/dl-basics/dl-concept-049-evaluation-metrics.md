@@ -47,6 +47,10 @@ discussion_prompt: "손실이 아니라 평가 지표를 따로 챙겨야 하는
 ## 토론 거리
 - 손실이 아니라 평가 지표를 따로 챙겨야 하는 이유는 무엇일까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Takaya Saito, Marc Rehmsmeier / [The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118432)
+- 설명글: Google / [Machine Learning Crash Course: Classification metrics](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - scikit-learn / Model Evaluation: Quantifying the Quality of Predictions

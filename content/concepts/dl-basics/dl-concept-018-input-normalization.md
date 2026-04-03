@@ -47,6 +47,10 @@ discussion_prompt: "입력값의 단위를 맞추는 단순한 전처리가 왜 
 ## 토론 거리
 - 입력값의 단위를 맞추는 단순한 전처리가 왜 학습 결과에 큰 차이를 만들 수 있을까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Yann LeCun, Léon Bottou, Genevieve Orr, Klaus-Robert Müller / [Efficient BackProp](https://link.springer.com/chapter/10.1007/978-3-642-35289-8_3)
+- 설명글: Stanford / [CS231n Notes: Neural Networks Part 2](https://cs231n.github.io/neural-networks-2/)
+
 ## source
 - Yann LeCun, Léon Bottou, Genevieve B. Orr, Klaus-Robert Müller / Efficient BackProp / 1998
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016

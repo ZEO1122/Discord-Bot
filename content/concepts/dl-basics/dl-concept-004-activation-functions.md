@@ -47,6 +47,10 @@ discussion_prompt: "신경망에서 활성화 함수가 없다면 층을 여러 
 ## 토론 거리
 - 신경망에서 활성화 함수가 없다면 층을 여러 개 쌓는 의미가 왜 크게 줄어들까?
 
+## 같이 보면 좋은 논문·글
+- 논문: Xavier Glorot, Antoine Bordes, Yoshua Bengio / [Deep Sparse Rectifier Neural Networks](https://proceedings.mlr.press/v15/glorot11a.html)
+- 설명글: Stanford / [CS231n Notes: Neural Networks Part 1](https://cs231n.github.io/neural-networks-1/)
+
 ## source
 - Ian Goodfellow, Yoshua Bengio, Aaron Courville / Deep Learning / 2016
 - Vinod Nair, Geoffrey E. Hinton / Rectified Linear Units Improve Restricted Boltzmann Machines / 2010
